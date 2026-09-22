@@ -22,6 +22,10 @@ extends Resource
 ## Munição guardada, fora do tambor. -1 = infinita (a arma que o personagem sempre tem).
 @export var reserve_ammo: int = -1
 
+@export_group("Som")
+@export var shot_sound: AudioStream
+@export var reload_sound: AudioStream
+
 @export_group("Sensação")
 ## Força do coice (1 = revólver).
 @export_range(0.2, 3.0, 0.05) var recoil: float = 1.0

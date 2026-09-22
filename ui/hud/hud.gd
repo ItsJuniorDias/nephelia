@@ -138,6 +138,8 @@ func _on_fired(result: ShotResult) -> void:
 	if result.victim != null and result.damage > 0.0:
 		_hit_marker_timer = HIT_MARKER_TIME
 		hit_marker.visible = true
+		# "Tic" de acerto: o jogador sabe que pegou mesmo sem olhar a mira.
+		Sounds.play_2d(self, Sounds.HIT_CONFIRM, -6.0)
 
 
 func _on_health_changed(health: float, max_health: float) -> void:

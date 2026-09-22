@@ -21,6 +21,9 @@ extends Node3D
 ## Tiro que acerta o cenário (sorteia um).
 @export var world_hit_sounds: Array[AudioStream] = []
 
+## Tiro se ouve longe (a arena inteira): distância em que o volume começa a cair.
+const SHOT_UNIT_SIZE: float = 18.0
+
 var _tracer_mesh := BoxMesh.new()
 var _spark_mesh := QuadMesh.new()
 
@@ -51,11 +54,13 @@ func _on_shot_resolved(result: ShotResult) -> void:
 	# Espingarda: um rastro para cada chumbo (é o que mostra o leque do tiro).
 	for point: Vector3 in result.pellet_points:
 		_spawn_tracer(from, point)
+	# Cada arma tem o seu tiro gravado; o `shot_sound` daqui é só a reserva.
 	var data: WeaponData = result.weapon.data if result.weapon != null else null
 	if data != null:
-		_play_at(shot_sound, result.origin, data.shot_volume_db, data.shot_pitch)
+		var stream: AudioStream = data.shot_sound if data.shot_sound != null else shot_sound
+		_play_at(stream, result.origin, data.shot_volume_db, data.shot_pitch, SHOT_UNIT_SIZE)
 	else:
-		_play_at(shot_sound, result.origin, 0.0)
+		_play_at(shot_sound, result.origin, 0.0, 1.0, SHOT_UNIT_SIZE)
 	if not result.hit:
 		return
 	# Faíscas no próprio corpo apareceriam coladas na câmera de quem levou o tiro: pula.
@@ -131,13 +136,16 @@ func _spawn_sparks(at: Vector3, normal: Vector3) -> void:
 	sparks.emitting = true
 
 
-func _play_at(stream: AudioStream, at: Vector3, volume_db: float, pitch: float = 1.0) -> void:
+func _play_at(stream: AudioStream, at: Vector3, volume_db: float, pitch: float = 1.0,
+		unit_size: float = 10.0) -> void:
 	if stream == null:
 		return
 	var player := AudioStreamPlayer3D.new()
 	player.stream = stream
+	player.bus = Sounds.SFX_BUS
+	player.unit_size = unit_size
 	player.volume_db = volume_db
-	player.pitch_scale = pitch * randf_range(0.93, 1.07)
+	player.pitch_scale = pitch * randf_range(0.95, 1.05)
 	add_child(player)
 	player.global_position = at
 	player.finished.connect(player.queue_free)

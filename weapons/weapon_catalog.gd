@@ -66,7 +66,7 @@ static func _build() -> void:
 		"left_hand": [Vector3(0.014, 0.155, -0.07), Vector3(0.7, 0.5, -0.5), Vector3(0, 0.2, -1)],
 		"mount_at": Vector3(-0.04, 1.24, 0.09), "aim": Vector3(-1.0, 192.0, 0.0),
 		# Recarga: gira de lado para mostrar a janela de carga e a alavanca.
-		"recoil": 1.4, "shot_pitch": 0.82, "shot_volume_db": 2.0, "flash_scale": 1.3,
+		"recoil": 1.4, "shot_volume_db": 1.0, "flash_scale": 1.3,
 		"reload_motion": Vector3(-14.0, 38.0, 0.04),
 	})
 	# Espingarda: dois canos de chumbo grosso. De perto derruba de um tiro; de longe não faz nada.
@@ -80,7 +80,7 @@ static func _build() -> void:
 		"left_hand": [Vector3(0.0, -0.01, -0.07), Vector3(0.7, 0.5, -0.5), Vector3(0, 0.2, -1)],
 		"mount_at": Vector3(-0.04, 1.26, 0.09), "aim": Vector3(-1.0, 192.0, 0.0),
 		# Recarga: "quebra" a arma, com o cano para baixo, para trocar os cartuchos.
-		"recoil": 1.8, "shot_pitch": 0.68, "shot_volume_db": 4.0, "flash_scale": 1.9,
+		"recoil": 1.8, "shot_volume_db": 2.0, "flash_scale": 1.9,
 		"reload_motion": Vector3(-36.0, 8.0, 0.06),
 	})
 
@@ -94,6 +94,9 @@ static func _make(spec: Dictionary) -> WeaponData:
 			data.set(key, spec[key])
 	data.resource_name = data.weapon_name
 	data.mesh = load("res://assets/models/weapons/%s.res" % spec["mesh"])
+	# Tiros gravados de armas da época (Free Firearm Sound Library) e recargas (OpenGameArt).
+	data.shot_sound = load("res://assets/audio/sfx/firearms/%s_shot.wav" % data.id)
+	data.reload_sound = load("res://assets/audio/sfx/opengameart/%s_reload.wav" % data.id)
 	data.in_hand = Transform3D(HAND_BASIS, spec["hand_offset"])
 	# Arma longa: apoiada na frente do peito (espaço do esqueleto, o personagem olha para +Z),
 	# apontada para onde "aim" manda, com o ponto da mão direita em "mount_at". As duas mãos

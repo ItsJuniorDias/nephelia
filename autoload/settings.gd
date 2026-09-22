@@ -6,7 +6,7 @@ extends Object
 ## (`-s <script>`) o nome de um autoload não é reconhecido pelo compilador, mas um `class_name`
 ## é. Quem usa cada valor:
 ##   sensibilidade e tamanho dos botões -> player/human_controller.gd e ui/touch_controls
-##   volume -> barra principal de áudio, aqui mesmo
+##   volume e volume da música -> canais de áudio "Master" e "Music", aqui mesmo
 ##   dificuldade -> levels/arena_setup.gd, ao abrir a arena
 
 const FILE := "user://settings.cfg"
@@ -22,6 +22,8 @@ static var look_sensitivity: float = 1.0
 static var button_scale: float = 1.0
 ## Volume geral, de 0 a 1.
 static var volume: float = 0.8
+## Volume da música (em cima do geral), de 0 a 1.
+static var music_volume: float = 0.6
 static var difficulty: StringName = &"medium"
 ## Sobe a cada mudança: quem precisa reagir (os botões de toque) compara com a versão que já aplicou.
 static var version: int = 0
@@ -38,6 +40,7 @@ static func load_settings() -> void:
 		look_sensitivity = clampf(file.get_value("controls", "look_sensitivity", look_sensitivity), 0.3, 3.0)
 		button_scale = clampf(file.get_value("controls", "button_scale", button_scale), 0.7, 1.6)
 		volume = clampf(file.get_value("audio", "volume", volume), 0.0, 1.0)
+		music_volume = clampf(file.get_value("audio", "music_volume", music_volume), 0.0, 1.0)
 		var saved := StringName(file.get_value("game", "difficulty", difficulty))
 		difficulty = saved if saved in DIFFICULTIES else difficulty
 	_apply_volume()
@@ -49,6 +52,7 @@ static func save_settings() -> void:
 	file.set_value("controls", "look_sensitivity", look_sensitivity)
 	file.set_value("controls", "button_scale", button_scale)
 	file.set_value("audio", "volume", volume)
+	file.set_value("audio", "music_volume", music_volume)
 	file.set_value("game", "difficulty", String(difficulty))
 	file.save(FILE)
 
@@ -62,6 +66,9 @@ static func set_option(option: StringName, value: Variant) -> void:
 			button_scale = clampf(value, 0.7, 1.6)
 		&"volume":
 			volume = clampf(value, 0.0, 1.0)
+			_apply_volume()
+		&"music_volume":
+			music_volume = clampf(value, 0.0, 1.0)
 			_apply_volume()
 		&"difficulty":
 			difficulty = value if value in DIFFICULTIES else difficulty
@@ -85,9 +92,13 @@ static func difficulty_resource() -> BotDifficulty:
 
 
 static func _apply_volume() -> void:
-	var master: int = AudioServer.get_bus_index(&"Master")
-	if master < 0:
+	_set_bus_volume(&"Master", volume)
+	_set_bus_volume(&"Music", music_volume)
+
+
+static func _set_bus_volume(bus_name: StringName, value: float) -> void:
+	var bus: int = AudioServer.get_bus_index(bus_name)
+	if bus < 0:
 		return
-	# Volume 0 desliga de vez (em decibéis, 0 seria "volume cheio").
-	AudioServer.set_bus_mute(master, volume <= 0.001)
-	AudioServer.set_bus_volume_db(master, linear_to_db(maxf(volume, 0.001)))
+	AudioServer.set_bus_mute(bus, value <= 0.001)
+	AudioServer.set_bus_volume_db(bus, linear_to_db(maxf(value, 0.001)))

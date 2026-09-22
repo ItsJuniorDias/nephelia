@@ -61,6 +61,7 @@ func _build_options() -> Control:
 	_slider_row(rows, "Sensitivity", "SENSIBILIDADE", 0.3, 3.0, 0.05)
 	_slider_row(rows, "Buttons", "TAMANHO DOS BOTÕES", 0.7, 1.6, 0.05)
 	_slider_row(rows, "Volume", "VOLUME", 0.0, 1.0, 0.05)
+	_slider_row(rows, "Music", "MÚSICA", 0.0, 1.0, 0.05)
 
 	var back := _button("BackButton", "VOLTAR")
 	rows.add_child(back)

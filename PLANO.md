@@ -106,10 +106,15 @@ aéreos, a 60 FPS no iPhone.
   tamanho dos botões, volume)
 - Pronto quando: tudo é legível e alcançável com os dedões num iPhone
 
-### 10. Áudio
-- Tiros, passos, impactos, trilhos, poderes, vento, interface e música (se aprovada)
-- Trocar o tiro provisório (`assets/audio/sfx/nephelia/revolver_shot_placeholder.wav`, sintetizado)
-  por um som de verdade (ex.: Sonniss GDC, depois de aprovado o download)
+### 10. Áudio: [x] feito
+- Canais Música / Efeitos / Interface (limitador no geral) e volume da música nas opções
+- Tiros gravados de armas da época (Free Firearm Sound Library, CC0: revólver S&W 642, Winchester
+  1894, Winchester Model 12) e recarga de cada arma; o tiro provisório sintetizado saiu
+- Passos conforme o chão (pedra ou grama, pelo mapa dos pisos), pulo, aterrissagem, dano, morte,
+  trilho (engate e chiado que sobe com a velocidade), vento que aumenta com a velocidade
+- Interface: clique nos botões, "tic" de acerto, aviso de abate, sino de fim de partida
+- Música: Maple Leaf Rag (domínio público): banda de 1906 no menu, piano na partida
+- A Sonniss (7,5 GB) não foi necessária
 
 ### 11. Desempenho e ajuste no iPhone
 - 6 personagens em tela a 60 FPS estáveis; ajustar sombras, LOD, texturas
@@ -155,7 +160,7 @@ aéreos, a 60 FPS no iPhone.
 ---
 
 ## Decisões pendentes (do usuário)
-- Baixar também: Sonniss GDC 2026 (7,5 GB) e músicas do Kevin MacLeod (CC-BY). (Fontes já baixadas.)
+- (Áudio resolvido com sons CC0 e música em domínio público; Sonniss e Kevin MacLeod não foram necessários.)
 - Nome definitivo do jogo
 - Modelo de negócio
 - Hospedagem do servidor online (Marco 3)

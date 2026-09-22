@@ -73,6 +73,7 @@ func _on_kill_happened(killer: Character, victim: Character) -> void:
 		elimination_label.text = "ELIMINATED %s" % victim.display_name
 		elimination_label.visible = true
 		_elimination_timer = ELIMINATION_MESSAGE_TIME
+		Sounds.play_2d(self, Sounds.KILL_CONFIRM, -3.0)
 
 
 func _add_feed_line(text: String) -> void:

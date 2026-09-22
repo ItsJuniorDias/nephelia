@@ -26,6 +26,24 @@ ficam fora do projeto, em `~/Downloads/nephelia_assets/`.
 | Interface Sounds | Kenney | CC0 1.0 | https://kenney.nl/assets/interface-sounds |
 | Prototype Textures | Kenney | CC0 1.0 | https://kenney.nl/assets/prototype-textures |
 
+## Sons de armas, recargas e vento
+
+| Asset | Autor | Licença | Link |
+|---|---|---|---|
+| The Free Firearm Sound Library (usados: Smith & Wesson 642, Winchester Model 1894 e Winchester Model 12) | Ben Jaszczak, Brian Nelson, Kevin Heras, Matthew Nanney | CC0 1.0 | https://opengameart.org/content/the-free-firearm-sound-library |
+| Gun reload sounds | SpringySpringo | CC0 1.0 | https://opengameart.org/content/gun-reload-sounds |
+| wind whoosh loop | SketchMan3 | CC0 1.0 | https://opengameart.org/content/wind-whoosh-loop |
+| Gunshot Sounds (baixado como reserva; não usado) | OpenGameArt | CC0 1.0 | https://opengameart.org/content/gunshot-sounds |
+
+Os tiros foram recortados, convertidos para mono e normalizados por `tools/prepare_sounds.py`.
+
+## Música
+
+| Asset | Autor | Licença | Link |
+|---|---|---|---|
+| Maple Leaf Rag (Scott Joplin, 1899), gravação de 1906 (menu) | United States Marine Band | Domínio público (obra do governo dos EUA, publicada antes de 1926) | https://commons.wikimedia.org/wiki/File:1906_-_Scott_Joplin's_Maple_Leaf_Rag_(1899)_played_by_the_United_States_Marine_Band.ogg |
+| Maple Leaf Rag (Scott Joplin, 1899), piano (partida) | Zachary Brewster-Geisz | Domínio público (doado pelo autor) | https://archive.org/details/MapleLeafRag |
+
 ## Interface
 
 | Asset | Autor | Licença | Link |
@@ -47,6 +65,6 @@ As licenças vêm junto em `assets/fonts/*-OFL.txt`, como a OFL exige.
 
 | Asset | Observação |
 |---|---|
-| `assets/audio/sfx/nephelia/revolver_shot_placeholder.wav` | Tiro provisório sintetizado por código (sem material de terceiros) |
+| `assets/audio/sfx/nephelia/rail_slide_loop.wav` | Chiado da roldana no trilho, sintetizado por `tools/prepare_sounds.py` (sem material de terceiros) |
 
 CC0 não exige crédito, mas agradecemos aos autores nos créditos do jogo.

@@ -521,7 +521,8 @@ radius = 0.15
 height = 4.5
 radius = 0.15
 
-[node name="SkyPlazaGeometry" type="Node3D" unique_id=1982400916]
+[node name="SkyPlazaGeometry" type="Node3D" unique_id=1982400916 groups=["floor_surfaces"]]
+metadata/floor_surfaces = [["marble", Vector3(0, 0.01, 0), Vector2(20, 20)], ["asphalt", Vector3(0, 0.01, -16), Vector2(14, 12)], ["sidewalk", Vector3(-8.5, 0.01, -16), Vector2(3, 12)], ["sidewalk", Vector3(8.5, 0.01, -16), Vector2(3, 12)], ["asphalt", Vector3(0, 0.01, 16), Vector2(14, 12)], ["sidewalk", Vector3(-8.5, 0.01, 16), Vector2(3, 12)], ["sidewalk", Vector3(8.5, 0.01, 16), Vector2(3, 12)], ["asphalt", Vector3(-16, 0.01, 0), Vector2(12, 14)], ["sidewalk", Vector3(-16, 0.01, -8.5), Vector2(12, 3)], ["sidewalk", Vector3(-16, 0.01, 8.5), Vector2(12, 3)], ["asphalt", Vector3(16, 0.01, 0), Vector2(12, 14)], ["sidewalk", Vector3(16, 0.01, -8.5), Vector2(12, 3)], ["sidewalk", Vector3(16, 0.01, 8.5), Vector2(12, 3)], ["sidewalk", Vector3(-46.5, 1.01, 0), Vector2(3, 32)], ["asphalt", Vector3(-41.5, 1.01, 0), Vector2(7, 32)], ["grass", Vector3(-34, 1.01, 0), Vector2(8, 32)], ["sidewalk", Vector3(-34, 1.015, 0), Vector2(8, 3)], ["sidewalk", Vector3(46.5, -0.99, 0), Vector2(3, 32)], ["marble", Vector3(37.5, -0.99, 0), Vector2(15, 32)]]
 
 [node name="PlazaBlock" type="CSGCombiner3D" parent="." unique_id=471433437]
 use_collision = true

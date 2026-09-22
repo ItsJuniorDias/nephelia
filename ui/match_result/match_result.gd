@@ -14,6 +14,7 @@ var deathmatch: Deathmatch
 func _ready() -> void:
 	visible = false
 	play_again_button.pressed.connect(_on_play_again_pressed)
+	Sounds.wire_buttons(self)
 
 
 ## Chamado pelo HumanController quando a partida já existe na cena.
@@ -41,6 +42,8 @@ func _on_match_finished(ranking: Array[Dictionary]) -> void:
 	ranking_label.text = "\n".join(lines)
 	show()
 	play_again_button.grab_focus()
+	# Sino de fim de partida (a tela roda com o jogo pausado; o som também).
+	Sounds.play_2d(self, Sounds.MATCH_END, -2.0)
 
 
 func _on_play_again_pressed() -> void:

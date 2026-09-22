@@ -126,6 +126,10 @@ func _ready() -> void:
 		model.mount.watch(weapon)
 	if controller != null:
 		controller.setup(self)
+	# Sons do personagem (passos, pulo, dano, trilho...), criados em código como a arma.
+	var sounds := CharacterAudio.new()
+	add_child(sounds)
+	sounds.setup(self)
 
 
 func _physics_process(delta: float) -> void:

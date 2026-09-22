@@ -24,6 +24,7 @@ func _ready() -> void:
 	options_button.pressed.connect(options_menu.open)
 	menu_button.pressed.connect(_on_main_menu)
 	options_menu.closed.connect(func() -> void: resume_button.grab_focus())
+	Sounds.wire_buttons(screen)
 
 
 # A ação "pause" vem da tecla (Esc), do controle e do botão de pausa na tela. Como o botão de

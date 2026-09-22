@@ -34,6 +34,7 @@ var _glow: MeshInstance3D
 
 func _ready() -> void:
 	add_to_group(GROUP)
+	_sound.bus = Sounds.SFX_BUS
 	# Cada item começa num ponto diferente do giro (não ficam todos sincronizados).
 	_time = fmod(absf(global_position.x * 1.3 + global_position.z * 0.7), TAU)
 	_visual = PickupVisuals.build(kind)

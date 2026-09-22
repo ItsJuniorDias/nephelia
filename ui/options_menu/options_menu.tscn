@@ -68,7 +68,7 @@ texture_margin_right = 120.0
 texture_margin_bottom = 30.0
 modulate_color = Color(1, 0.95, 0.8, 1)
 
-[node name="OptionsMenu" type="Control" unique_id=2132303469]
+[node name="OptionsMenu" type="Control" unique_id=1370626794]
 visible = false
 layout_mode = 3
 anchors_preset = 0
@@ -76,13 +76,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource("1_utl02")
 
-[node name="Dim" type="ColorRect" parent="." unique_id=213283484]
+[node name="Dim" type="ColorRect" parent="." unique_id=1907368412]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 color = Color(0.02, 0.03, 0.05, 0.92)
 
-[node name="Panel" type="PanelContainer" parent="." unique_id=2127876765]
+[node name="Panel" type="PanelContainer" parent="." unique_id=1160171397]
 custom_minimum_size = Vector2(620, 0)
 layout_mode = 0
 anchor_left = 0.5
@@ -93,27 +93,27 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_wakw5")
 
-[node name="Rows" type="VBoxContainer" parent="Panel" unique_id=1900354770]
+[node name="Rows" type="VBoxContainer" parent="Panel" unique_id=1016111264]
 layout_mode = 2
 theme_override_constants/separation = 18
 
-[node name="Title" type="Label" parent="Panel/Rows" unique_id=1331674193]
+[node name="Title" type="Label" parent="Panel/Rows" unique_id=858934434]
 layout_mode = 2
 theme_type_variation = &"Subtitle"
 theme_override_colors/font_color = Color(0.85, 0.7, 0.38, 1)
 text = "OPÇÕES"
 horizontal_alignment = 1
 
-[node name="Sensitivity" type="HBoxContainer" parent="Panel/Rows" unique_id=499024401]
+[node name="Sensitivity" type="HBoxContainer" parent="Panel/Rows" unique_id=650184790]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="Label" type="Label" parent="Panel/Rows/Sensitivity" unique_id=2015032602]
+[node name="Label" type="Label" parent="Panel/Rows/Sensitivity" unique_id=2138041354]
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 text = "SENSIBILIDADE"
 
-[node name="Slider" type="HSlider" parent="Panel/Rows/Sensitivity" unique_id=1674232938]
+[node name="Slider" type="HSlider" parent="Panel/Rows/Sensitivity" unique_id=1692732908]
 custom_minimum_size = Vector2(240, 36)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -123,22 +123,22 @@ max_value = 3.0
 step = 0.05
 value = 0.3
 
-[node name="Value" type="Label" parent="Panel/Rows/Sensitivity" unique_id=1930784527]
+[node name="Value" type="Label" parent="Panel/Rows/Sensitivity" unique_id=586602308]
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
 text = "100%"
 horizontal_alignment = 2
 
-[node name="Buttons" type="HBoxContainer" parent="Panel/Rows" unique_id=465334802]
+[node name="Buttons" type="HBoxContainer" parent="Panel/Rows" unique_id=1625540616]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="Label" type="Label" parent="Panel/Rows/Buttons" unique_id=1796923396]
+[node name="Label" type="Label" parent="Panel/Rows/Buttons" unique_id=1485177439]
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 text = "TAMANHO DOS BOTÕES"
 
-[node name="Slider" type="HSlider" parent="Panel/Rows/Buttons" unique_id=580055165]
+[node name="Slider" type="HSlider" parent="Panel/Rows/Buttons" unique_id=915724369]
 custom_minimum_size = Vector2(240, 36)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -148,22 +148,22 @@ max_value = 1.6
 step = 0.05
 value = 0.7
 
-[node name="Value" type="Label" parent="Panel/Rows/Buttons" unique_id=692776050]
+[node name="Value" type="Label" parent="Panel/Rows/Buttons" unique_id=649663332]
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
 text = "100%"
 horizontal_alignment = 2
 
-[node name="Volume" type="HBoxContainer" parent="Panel/Rows" unique_id=1976697217]
+[node name="Volume" type="HBoxContainer" parent="Panel/Rows" unique_id=1890755248]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="Label" type="Label" parent="Panel/Rows/Volume" unique_id=1734274796]
+[node name="Label" type="Label" parent="Panel/Rows/Volume" unique_id=405973331]
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 text = "VOLUME"
 
-[node name="Slider" type="HSlider" parent="Panel/Rows/Volume" unique_id=1611158925]
+[node name="Slider" type="HSlider" parent="Panel/Rows/Volume" unique_id=1779790985]
 custom_minimum_size = Vector2(240, 36)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -171,13 +171,36 @@ size_flags_vertical = 4
 max_value = 1.0
 step = 0.05
 
-[node name="Value" type="Label" parent="Panel/Rows/Volume" unique_id=679748844]
+[node name="Value" type="Label" parent="Panel/Rows/Volume" unique_id=969216795]
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
 text = "100%"
 horizontal_alignment = 2
 
-[node name="BackButton" type="Button" parent="Panel/Rows" unique_id=917568770]
+[node name="Music" type="HBoxContainer" parent="Panel/Rows" unique_id=510361972]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Label" type="Label" parent="Panel/Rows/Music" unique_id=1583239406]
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+text = "MÚSICA"
+
+[node name="Slider" type="HSlider" parent="Panel/Rows/Music" unique_id=50616318]
+custom_minimum_size = Vector2(240, 36)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+max_value = 1.0
+step = 0.05
+
+[node name="Value" type="Label" parent="Panel/Rows/Music" unique_id=736293449]
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+text = "100%"
+horizontal_alignment = 2
+
+[node name="BackButton" type="Button" parent="Panel/Rows" unique_id=1162788931]
 custom_minimum_size = Vector2(0, 78)
 layout_mode = 2
 theme_type_variation = &"TitleButton"

@@ -66,6 +66,7 @@ var skeleton: Skeleton3D
 
 func _ready() -> void:
 	_rest_position = position
+	audio.bus = Sounds.SFX_BUS
 	_build_body()
 	_build_gun()
 	_prepare_meshes()
@@ -254,7 +255,9 @@ func _on_fired(_result: ShotResult) -> void:
 
 func _on_reload_started() -> void:
 	_tree.set(&"parameters/reload/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
-	_play(reload_start_sound)
+	# O som de recarga de cada arma (a reserva é o clique do Kenney).
+	var data: WeaponData = weapon.data if weapon != null else null
+	_play(data.reload_sound if data != null and data.reload_sound != null else reload_start_sound)
 
 
 func _play(stream: AudioStream) -> void:

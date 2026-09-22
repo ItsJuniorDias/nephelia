@@ -40,6 +40,8 @@ var _items: Node3D
 var _shape_cache: Dictionary = {}
 var _materials: Dictionary = {}
 var _lamp_globes: Array[Vector3] = []
+## Pisos para o som dos passos: [tipo, centro, tamanho] (ver levels/floor_surfaces.gd).
+var _surfaces: Array = []
 
 
 func _initialize() -> void:
@@ -70,6 +72,8 @@ func _run() -> void:
 	_build_items()
 	_build_clouds()
 
+	_geometry.set_meta(FloorSurfaces.META, _surfaces)
+	_geometry.add_to_group(FloorSurfaces.GROUP, true)
 	_save(_geometry, OUT_DIR + "skyplaza_geometry.tscn")
 	_save(_decor, OUT_DIR + "skyplaza_decor.tscn")
 	_save(_rails, OUT_DIR + "skyplaza_rails.tscn")
@@ -384,6 +388,8 @@ func _building(parent: Node3D, building_name: String, at: Vector3, rotation_y: f
 
 # Piso plano (só visual, 1 cm acima da plataforma): textura em coordenadas do mundo, sem emendas.
 func _floor(parent: Node3D, material_key: String, center: Vector3, size: Vector2) -> void:
+	# Lista dos pisos, para o som dos passos (ver levels/floor_surfaces.gd).
+	_surfaces.append([material_key, center + Vector3.UP * 0.01, size])
 	var plane := PlaneMesh.new()
 	plane.size = size
 	var instance := MeshInstance3D.new()

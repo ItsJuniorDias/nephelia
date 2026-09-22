@@ -26,6 +26,9 @@ func _ready() -> void:
 	quit_button.visible = not OS.has_feature("mobile")
 	_refresh_difficulty()
 	play_button.grab_focus()
+	# Ragtime de 1906 (banda dos Fuzileiros dos EUA, domínio público) e clique nos botões.
+	Sounds.music(self, Sounds.MUSIC_MENU, -6.0)
+	Sounds.wire_buttons(self)
 
 
 ## Começa a partida na arena (também usado pelos testes).
