@@ -93,6 +93,14 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   extraídas do UAL para `assets/animations/quaternius_ual/character_animations.res` com
   `tools/extract_bot_animations.gd`. O modelo olha para +Z: dentro do Character ele é girado 180°.
   AnimationNodeTransition começa SEM estado: sempre pedir "alive" ao montar.
+- Arena Sky Plaza (`levels/skyplaza/`): gerada por `tools/build_skyplaza.gd` (mapa em código) em
+  `skyplaza_geometry.tscn` (tudo com colisão; grupo `navigation_geometry`) e `skyplaza_decor.tscn`
+  (só visual); `skyplaza.tscn` junta sistemas, personagens e 8 pontos de nascimento. Ao mudar o
+  mapa: rodar o build e depois `tools/bake_navmesh.gd -- <cena> <navmesh.tres>`. Colisões são formas
+  simples (caixa/cilindro/convexa), não a malha. Nada pode ter degrau: pisos ficam 1 cm acima do
+  chão sem colisão; pontes têm patamares planos na altura de cada ilha.
+- Peças usadas: `assets/models/city/downtown/` e `assets/models/nature/stylized/` (texturas
+  limitadas a 1024 px no .import). Prédio grande (45 mil triângulos) ficou de fora por desempenho.
 - Exportação: excluir `tests/*`, `tools/*` e `assets/animations/quaternius_ual/*.glb` (7,6 MB, só
   serve para extrair animações).
 - Arma em 1ª pessoa: materiais com `use_z_clip_scale` (não atravessa paredes),
@@ -100,8 +108,8 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   `vertex_color_use_as_albedo` (os FBX do pacote Wild West Guns têm cores de vértice azuladas).
 - Capturas de tela para conferir visual: usar `--write-movie <pasta>/f.png --fixed-fps 60` com um
   script `-s`; `get_viewport().get_texture().get_image()` devolve o quadro ANTERIOR.
-- Testes: `Godot --headless --path . -s res://tests/test_controls.gd` e `... -s res://tests/test_bots.gd`
-  (saída 0 = tudo passou). Rodar os dois depois de qualquer mudança. Ao criar presets de exportação, excluir `tests/*`.
+- Testes: `Godot --headless --path . -s res://tests/<suíte>.gd` para `test_controls`, `test_bots` e
+  `test_arena` (saída 0 = tudo passou). Rodar as três depois de qualquer mudança. Ao criar presets de exportação, excluir `tests/*`.
   No headless a janela é 64x64 (viewport 1152x1152): eventos simulados precisam ser convertidos com
   `root.get_final_transform()` (o teste já faz isso). Corpo com `process_mode` desligado sai da
   física (`disable_mode = REMOVE`): nos testes, usar `DISABLE_MODE_KEEP_ACTIVE` para o tiro acertar.
@@ -142,4 +150,6 @@ Atualizar esta seção ao fim de cada sessão.
   - Tarefa 4 (partida todos contra todos) feita: 37 testes passando.
   - Tarefa 5 (bots) feita: 37 testes de controles + 8 de bots passando. Arena com 3 bots
     (Hazel, Otis, Mabel) + jogador. Bots usam o corpo base da Quaternius (sem roupa: decisão pendente).
-  - Próximo: Tarefa 6 do `PLANO.md` (arena v1 com a arte da cidade).
+  - Tarefa 6 (arena Sky Plaza) feita: 3 ilhas + 2 pontes, 37 + 8 + 4 testes passando.
+    Pendente: tornar a arena a cena principal (com o Godot fechado).
+  - Próximo: Tarefa 7 do `PLANO.md` (trilhos aéreos).

@@ -1,0 +1,126 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://match/match_referee.gd" id="1_referee"]
+[ext_resource type="PackedScene" path="res://player/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://bots/bot.tscn" id="3_bot"]
+[ext_resource type="Script" path="res://match/deathmatch.gd" id="4_deathmatch"]
+[ext_resource type="Script" path="res://weapons/shot_effects.gd" id="5_effects"]
+[ext_resource type="Texture2D" path="res://assets/vfx/kenney/spark_01.png" id="6_spark"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/nephelia/revolver_shot_placeholder.wav" id="7_shot"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/kenney/impactGeneric_light_000.ogg" id="8_body_hit"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/kenney/impactMetal_light_000.ogg" id="9_hit_metal"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/kenney/impactWood_light_000.ogg" id="10_hit_wood"]
+[ext_resource type="PackedScene" path="res://levels/skyplaza/skyplaza_geometry.tscn" id="11_geometry"]
+[ext_resource type="PackedScene" path="res://levels/skyplaza/skyplaza_decor.tscn" id="12_decor"]
+[ext_resource type="NavigationMesh" path="res://levels/skyplaza/skyplaza_navmesh.tres" id="13_navmesh"]
+[ext_resource type="Script" path="res://levels/arena_navigation.gd" id="14_navigation"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_day"]
+sky_top_color = Color(0.2, 0.45, 0.85, 1)
+sky_horizon_color = Color(0.66, 0.79, 0.93, 1)
+ground_bottom_color = Color(0.47, 0.6, 0.8, 1)
+ground_horizon_color = Color(0.66, 0.79, 0.93, 1)
+sun_angle_max = 30.0
+sun_curve = 0.15
+
+[sub_resource type="Sky" id="Sky_day"]
+sky_material = SubResource("ProceduralSkyMaterial_day")
+
+[sub_resource type="Environment" id="Environment_day"]
+background_mode = 2
+sky = SubResource("Sky_day")
+ambient_light_source = 3
+reflected_light_source = 2
+tonemap_mode = 3
+fog_enabled = true
+fog_mode = 1
+fog_light_color = Color(0.74, 0.84, 0.95, 1)
+fog_sun_scatter = 0.15
+fog_density = 0.35
+fog_sky_affect = 0.0
+fog_depth_begin = 80.0
+fog_depth_end = 450.0
+
+[node name="SkyPlaza" type="Node3D"]
+
+[node name="MatchReferee" type="Node" parent="."]
+script = ExtResource("1_referee")
+
+[node name="Deathmatch" type="Node" parent="." groups=["game_mode"]]
+script = ExtResource("4_deathmatch")
+
+[node name="ShotEffects" type="Node3D" parent="."]
+script = ExtResource("5_effects")
+spark_texture = ExtResource("6_spark")
+shot_sound = ExtResource("7_shot")
+body_hit_sound = ExtResource("8_body_hit")
+world_hit_sounds = Array[AudioStream]([ExtResource("9_hit_metal"), ExtResource("10_hit_wood")])
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_day")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.8660254, -0.3830222, 0.3213938, 0, 0.6427876, 0.7660444, -0.5, -0.6634139, 0.5566704, 0, 30, 0)
+light_color = Color(1, 0.95, 0.86, 1)
+shadow_enabled = true
+directional_shadow_mode = 1
+directional_shadow_max_distance = 70.0
+
+[node name="Geometry" parent="." groups=["navigation_geometry"] instance=ExtResource("11_geometry")]
+
+[node name="Decor" parent="." instance=ExtResource("12_decor")]
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
+navigation_mesh = ExtResource("13_navmesh")
+script = ExtResource("14_navigation")
+
+[node name="SpawnPoints" type="Node3D" parent="."]
+
+[node name="SpawnPlazaSouth" type="Marker3D" parent="SpawnPoints" groups=["spawn_points"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 16)
+
+[node name="SpawnPlazaNorth" type="Marker3D" parent="SpawnPoints" groups=["spawn_points"]]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0.1, -16)
+
+[node name="SpawnPlazaSouthEast" type="Marker3D" parent="SpawnPoints" groups=["spawn_points"]]
+transform = Transform3D(0.6459, 0, 0.7634, 0, 1, 0, -0.7634, 0, 0.6459, 13, 0.1, 11)
+
+[node name="SpawnPlazaNorthWest" type="Marker3D" parent="SpawnPoints" groups=["spawn_points"]]
+transform = Transform3D(-0.6459, 0, -0.7634, 0, 1, 0, 0.7634, 0, -0.6459, -13, 0.1, -11)
+
+[node name="SpawnWestSouth" type="Marker3D" parent="SpawnPoints" groups=["spawn_points"]]
+transform = Transform3D(0.3846, 0, -0.9231, 0, 1, 0, 0.9231, 0, 0.3846, -42, 1.1, 5)
+
+[node name="SpawnWestNorth" type="Marker3D" parent="SpawnPoints" groups=["spawn_points"]]
+transform = Transform3D(-0.669, 0, -0.7433, 0, 1, 0, 0.7433, 0, -0.669, -40, 1.1, -9)
+
+[node name="SpawnEastSouth" type="Marker3D" parent="SpawnPoints" groups=["spawn_points"]]
+transform = Transform3D(0.2425, 0, 0.9701, 0, 1, 0, -0.9701, 0, 0.2425, 32, -0.9, 8)
+
+[node name="SpawnEastNorth" type="Marker3D" parent="SpawnPoints" groups=["spawn_points"]]
+transform = Transform3D(-0.2425, 0, 0.9701, 0, 1, 0, -0.9701, 0, -0.2425, 32, -0.9, -8)
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 16)
+
+[node name="Hazel" parent="." instance=ExtResource("3_bot")]
+transform = Transform3D(0.3846, 0, -0.9231, 0, 1, 0, 0.9231, 0, 0.3846, -42, 1.1, 5)
+display_name = "Hazel"
+body_color = Color(0.76, 0.38, 0.24, 1)
+
+[node name="Otis" parent="." instance=ExtResource("3_bot")]
+transform = Transform3D(-0.2425, 0, 0.9701, 0, 1, 0, -0.9701, 0, -0.2425, 32, -0.9, -8)
+display_name = "Otis"
+body_color = Color(0.22, 0.55, 0.6, 1)
+
+[node name="BotController" parent="Otis"]
+random_seed = 2
+
+[node name="Mabel" parent="." instance=ExtResource("3_bot")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0.1, -16)
+display_name = "Mabel"
+body_color = Color(0.85, 0.68, 0.2, 1)
+
+[node name="BotController" parent="Mabel"]
+random_seed = 3
+

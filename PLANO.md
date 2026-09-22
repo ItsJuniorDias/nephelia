@@ -15,6 +15,7 @@ poderes. O visual é uma cidade flutuante do começo do século XX. Ordem dos mo
 - [x] Curadoria de assets gratuitos + download dos 12 pacotes (ver `CREDITS.md`)
 
 ## Tarefa 0: Arrumação
+- [ ] Trocar a cena principal para `res://levels/skyplaza/skyplaza.tscn` (precisa do Godot fechado)
 - [x] Primeiro commit (`02aaa5a`)
 - [ ] Push para o GitHub: criar o repositório privado `nephelia` na conta ItsJuniorDias (remoto SSH já configurado)
 - [x] Confirmar que o jogo abre no iPhone 15
@@ -54,7 +55,7 @@ aéreos, a 60 FPS no iPhone.
 - Dificuldades: fácil, médio, difícil
 - Pronto quando: você contra 3 bots é divertido, e os bots não travam nem atravessam paredes
 
-### 6. Arena v1 (arte)
+### 6. Arena v1 (arte): [x] feito (Sky Plaza; lightmap e cena principal: ver pendências)
 - 3 ilhas ligadas: cidade (Downtown City MegaKit) sobre rochas e vegetação (Stylized Nature MegaKit)
 - Layout pensado para combate: coberturas, linhas de visão, pontos de respawn e de itens
 - Paleta Nephelia (dourado, creme, azul-céu), colisões, iluminação com LightmapGI, texturas reduzidas
@@ -85,6 +86,8 @@ aéreos, a 60 FPS no iPhone.
 ### 11. Desempenho e ajuste no iPhone
 - 6 personagens em tela a 60 FPS estáveis; ajustar sombras, LOD, texturas
 - 4 a 6 personagens com 16,5 mil triângulos e árvore de animação cada: medir no iPhone
+- LightmapGI da Sky Plaza: o cálculo só roda pelo botão "Bake Lightmaps" no editor (o usuário
+  clica, ou o Claude orienta); hoje a arena usa sol dinâmico com sombras
 - Pré-aquecer shaders dos efeitos (rastro, faíscas, clarão) ao carregar a arena: o primeiro tiro
   hoje compila shaders e dá um engasgo
 - Ajustar sensibilidade e tamanho dos botões com toques reais
