@@ -1,0 +1,41 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://rails/skyline_rail.gd" id="1_l7lbf"]
+
+[sub_resource type="Curve3D" id="Curve3D_llmih"]
+_data = {
+"points": PackedVector3Array(-1.6, -0.2, 1.2, 1.6, 0.2, -1.2, -35, 7.5, -7, -4.2000003, -0.4, 2, 4.2000003, 0.4, -2, -27, 8.5, -13, -5.4, -0.3, 1, 5.4, 0.3, -1, -14, 9.5, -17, -5.6, 0, 0, 5.6, 0, 0, 0, 10, -18, -5.2000003, 0.3, -1, 5.2000003, -0.3, 1, 14, 9.5, -17, -4.2000003, 0.5, -1.8000001, 4.2000003, -0.5, 1.8000001, 26, 8.5, -13, -1.8000001, 0.3, -1, 1.8000001, -0.3, 1, 35, 7, -8),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0)
+}
+point_count = 7
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vcihg"]
+albedo_color = Color(0.85, 0.66, 0.3, 1)
+metallic = 0.75
+roughness = 0.35
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4r3pu"]
+albedo_color = Color(0.2, 0.19, 0.2, 1)
+metallic = 0.5
+roughness = 0.6
+
+[sub_resource type="Curve3D" id="Curve3D_voabf"]
+_data = {
+"points": PackedVector3Array(-1.6, -0.2, -1.2, 1.6, 0.2, 1.2, -35, 7.5, 7, -4.2000003, -0.4, -2, 4.2000003, 0.4, 2, -27, 8.5, 13, -5.4, -0.3, -1, 5.4, 0.3, 1, -14, 9.5, 17, -5.6, 0, 0, 5.6, 0, 0, 0, 10, 18, -5.2000003, 0.3, 1, 5.2000003, -0.3, -1, 14, 9.5, 17, -4.2000003, 0.5, 1.8000001, 4.2000003, -0.5, -1.8000001, 26, 8.5, 13, -1.8000001, 0.3, 1, 1.8000001, -0.3, -1, 35, 7, 8),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0)
+}
+point_count = 7
+
+[node name="SkyPlazaRails" type="Node3D" unique_id=460803845]
+
+[node name="RailNorth" type="Path3D" parent="." unique_id=419766617]
+curve = SubResource("Curve3D_llmih")
+script = ExtResource("1_l7lbf")
+tube_material = SubResource("StandardMaterial3D_vcihg")
+pylon_material = SubResource("StandardMaterial3D_4r3pu")
+
+[node name="RailSouth" type="Path3D" parent="." unique_id=1536258242]
+curve = SubResource("Curve3D_voabf")
+script = ExtResource("1_l7lbf")
+tube_material = SubResource("StandardMaterial3D_vcihg")
+pylon_material = SubResource("StandardMaterial3D_4r3pu")

@@ -4,9 +4,10 @@ extends Node3D
 ## Library). Só visual: o Character conta o que está acontecendo e o modelo anima.
 ##
 ## Árvore de animação (montada por código em _build_tree):
-##   pernas: parado / andar / correr conforme a velocidade
+##   pernas: parado / andar / correr conforme a velocidade; no ar (pulo, trilho), pose de pulo
 ##   tronco e braços: pose de mirar a pistola, inclinada conforme o olhar (cima/baixo)
 ##   por cima: tiro e "levou tiro" (só no tronco); morte troca tudo pela queda.
+## Pendurado no trilho, o RailGripModifier levanta o braço esquerdo até o trilho.
 
 const ANIMATIONS: AnimationLibrary = preload("res://assets/animations/quaternius_ual/character_animations.res")
 ## Deste osso para cima o corpo segue a pose de mira (as pernas continuam andando).
@@ -19,6 +20,9 @@ const AIM_PITCH_RANGE: float = deg_to_rad(60.0)
 const HIT_FLASH_ENERGY: float = 1.6
 const PROTECTION_COLOR := Color(0.55, 0.8, 1.0)
 const PROTECTION_ENERGY: float = 0.45
+## Rapidez (por segundo) das trocas de pose: pernas de pulo e braço no trilho.
+const AIR_BLEND_SPEED: float = 6.0
+const GRIP_BLEND_SPEED: float = 8.0
 
 ## Cor de identificação do personagem (tinge a roupa).
 @export var tint: Color = Color.WHITE:
@@ -32,6 +36,10 @@ var _body_materials: Array[BaseMaterial3D] = []
 var _meshes: Array[GeometryInstance3D] = []
 var _flash_energy: float = 0.0
 var _protected: bool = false
+var _airborne: bool = false
+var _hanging: bool = false
+var _air_amount: float = 0.0
+var _grip: RailGripModifier
 
 @onready var skeleton: Skeleton3D = $Model/Armature/Skeleton3D
 @onready var gun: Node3D = $Model/Armature/Skeleton3D/RightHand/Gun
@@ -41,9 +49,15 @@ func _ready() -> void:
 	_prepare_materials()
 	_apply_tint()
 	_build_tree()
+	_grip = RailGripModifier.new()
+	_grip.name = "RailGrip"
+	_grip.influence = 0.0
+	_grip.active = false
+	skeleton.add_child(_grip)
 
 
 func _process(delta: float) -> void:
+	_update_pose_blends(delta)
 	if _flash_energy <= 0.0 and not _protected:
 		return
 	_flash_energy = maxf(_flash_energy - delta * 8.0, 0.0)
@@ -58,10 +72,22 @@ func _process(delta: float) -> void:
 			material.emission_energy_multiplier = 0.0
 
 
-## Atualiza pernas e mira. `speed` em m/s (horizontal); `aim_pitch` em radianos (+ = cima).
-func update_motion(speed: float, aim_pitch: float) -> void:
+## Atualiza pernas e mira. `speed` em m/s (horizontal); `aim_pitch` em radianos (+ = cima);
+## `airborne` = fora do chão (pernas na pose de pulo).
+func update_motion(speed: float, aim_pitch: float, airborne: bool = false) -> void:
+	_airborne = airborne
 	_tree.set(&"parameters/locomotion/blend_position", speed)
 	_tree.set(&"parameters/aim/blend_position", clampf(aim_pitch / AIM_PITCH_RANGE, -1.0, 1.0))
+
+
+## Pendurado num trilho: mão esquerda no trilho e pernas soltas no ar.
+func set_hanging(hanging: bool, grip_height: float = 2.0) -> void:
+	_hanging = hanging
+	_grip.grip_height = grip_height
+
+
+func is_hanging_pose() -> bool:
+	return _grip != null and _grip.influence > 0.0
 
 
 func play_shoot() -> void:
@@ -119,6 +145,18 @@ func _prepare_materials() -> void:
 			_body_materials.append(material)
 
 
+# Troca suave das poses de "no ar" (pernas) e "pendurado" (braço esquerdo no trilho).
+func _update_pose_blends(delta: float) -> void:
+	var air_goal: float = 1.0 if _airborne or _hanging else 0.0
+	if _air_amount != air_goal:
+		_air_amount = move_toward(_air_amount, air_goal, delta * AIR_BLEND_SPEED)
+		_tree.set(&"parameters/air/blend_amount", _air_amount)
+	var grip_goal: float = 1.0 if _hanging else 0.0
+	if _grip.influence != grip_goal:
+		_grip.influence = move_toward(_grip.influence, grip_goal, delta * GRIP_BLEND_SPEED)
+		_grip.active = _grip.influence > 0.0
+
+
 func _apply_tint() -> void:
 	# Mistura com branco: tinge a roupa sem esconder a textura.
 	var color: Color = Color.WHITE.lerp(tint, 0.6)
@@ -158,6 +196,8 @@ func _build_tree() -> void:
 
 	var blend_tree := AnimationNodeBlendTree.new()
 	blend_tree.add_node(&"locomotion", locomotion)
+	blend_tree.add_node(&"air_clip", _clip(&"Jump"))
+	blend_tree.add_node(&"air", AnimationNodeBlend2.new())
 	blend_tree.add_node(&"aim", aim)
 	blend_tree.add_node(&"upper", upper)
 	blend_tree.add_node(&"shoot_clip", _clip(&"Pistol_Shoot"))
@@ -166,7 +206,9 @@ func _build_tree() -> void:
 	blend_tree.add_node(&"hit", hit)
 	blend_tree.add_node(&"death_clip", _clip(&"Death01"))
 	blend_tree.add_node(&"life", life)
-	blend_tree.connect_node(&"upper", 0, &"locomotion")
+	blend_tree.connect_node(&"air", 0, &"locomotion")
+	blend_tree.connect_node(&"air", 1, &"air_clip")
+	blend_tree.connect_node(&"upper", 0, &"air")
 	blend_tree.connect_node(&"upper", 1, &"aim")
 	blend_tree.connect_node(&"shoot", 0, &"upper")
 	blend_tree.connect_node(&"shoot", 1, &"shoot_clip")

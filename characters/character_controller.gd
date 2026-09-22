@@ -6,6 +6,9 @@ extends Node
 ## um controlador de rede. O personagem procura o controlador entre os seus filhos.
 
 var character: Character
+## Em que cone (a partir do olhar) este controlador procura trilhos para engatar. O humano
+## precisa olhar para o trilho; o bot "sabe onde eles estão" e usa 360°.
+var rail_hook_cone: float = deg_to_rad(30.0)
 ## Comando reaproveitado a cada passo (evita criar um objeto novo 60 vezes por segundo).
 var command: CharacterCommand = CharacterCommand.new()
 

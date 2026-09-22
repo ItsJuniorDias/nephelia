@@ -35,6 +35,10 @@ func _run() -> void:
 	await _test_connected_and_spawns()
 	await _test_walk_across_bridge()
 	await _test_railing_holds()
+	await _test_hook_and_ride_rail()
+	await _test_hook_hidden_without_rail()
+	await _test_death_on_rail()
+	await _test_bot_rides_rail()
 	await _test_bots_play_the_arena()
 
 	await _physics(70)
@@ -142,3 +146,123 @@ func _test_bots_play_the_arena() -> void:
 	_referee.character_damaged.disconnect(on_damaged)
 	_check("A4 bots fight across the arena for 30 s without falling off", falls[0] == 0 and bot_damage[0] > 100.0,
 			"falls=%d bot_damage=%.0f" % [falls[0], bot_damage[0]])
+
+
+# ---------------------------------------------------------------- trilhos aéreos
+
+func _look_at_point(target: Vector3) -> void:
+	var to: Vector3 = target - _player.head.global_position
+	_player.apply_look(atan2(-to.x, -to.z), atan2(to.y, Vector2(to.x, to.z).length()))
+
+
+func _press(action: StringName, frames: int = 2) -> void:
+	await physics_frame
+	Input.action_press(action)
+	await _physics(frames)
+	Input.action_release(action)
+
+
+func _test_hook_and_ride_rail() -> void:
+	var rail: SkylineRail = _level.get_node("Rails/RailSouth")
+	var touch: TouchControls = _player.get_node("HumanController/TouchControls")
+	var hud: Hud = _player.get_node("HumanController/Hud")
+	touch.force_visible = true
+	_place(_player, Vector3(0, 0.05, 15), Vector3(10, 0, 15))
+	await _physics(10)
+	_look_at_point(rail.point_at(rail.closest_offset(Vector3(0, 10, 18))))
+	await _physics(3)
+	var hint_shown: bool = hud.rail_hint.visible and (touch.get_node("Root/HookButton") as Control).visible
+	await _press(&"use_rail")
+	await _physics(_seconds(0.6))
+	var hanging: bool = _player.is_on_rail and absf(_player.global_position.y - (rail.point_at(rail.closest_offset(_player.global_position)).y - Character.RAIL_HANG)) < 0.1
+	# O corpo (visto pelos outros) fica na pose de pendurado, com a mão no trilho.
+	var grip_pose: bool = _player.model.is_hanging_pose()
+	var start_offset: float = rail.closest_offset(_player.global_position)
+	await _physics(_seconds(1.0))
+	var travelled: float = absf(rail.closest_offset(_player.global_position) - start_offset)
+	# Atirar pendurado funciona.
+	var ammo_before: int = _player.weapon.ammo
+	await _press(&"fire")
+	var fired: bool = _player.weapon.ammo == ammo_before - 1
+	_check("R1 HOOK shows near a rail, hooks the player and hangs him below it", hint_shown and hanging and grip_pose,
+			"hint=%s hanging=%s grip_pose=%s pos=%s" % [hint_shown, hanging, grip_pose, _player.global_position])
+	_check("R2 rides along the rail (> 8 m/s) and can shoot while hanging", travelled > 8.0 and fired,
+			"travelled=%.1f m/s fired=%s" % [travelled, fired])
+	# Deixa ir até o fim (sobre a ilha leste): sai freado e cai em pé na ilha.
+	for i in _seconds(6.0):
+		await physics_frame
+		if not _player.is_on_rail and _player.is_grounded():
+			break
+	await _physics(20)
+	var at: Vector3 = _player.global_position
+	_check("R3 reaching the end of the rail drops the player safely on the island", not _player.is_on_rail
+			and _player.is_alive and _player.is_on_floor() and at.x > 28.0 and at.y > -1.5
+			and not _player.model.is_hanging_pose(),
+			"pos=%s alive=%s on_rail=%s grip_pose=%s" % [at, _player.is_alive, _player.is_on_rail, _player.model.is_hanging_pose()])
+
+
+func _test_hook_hidden_without_rail() -> void:
+	var touch: TouchControls = _player.get_node("HumanController/TouchControls")
+	var hud: Hud = _player.get_node("HumanController/Hud")
+	_place(_player, Vector3(0, 0.05, 4), Vector3(0, 0, 0))
+	_player.apply_look(0.0, deg_to_rad(-30.0))
+	await _physics(3)
+	await process_frame
+	await process_frame
+	var hidden: bool = not hud.rail_hint.visible and not (touch.get_node("Root/HookButton") as Control).visible
+	await _press(&"use_rail")
+	await _physics(5)
+	_check("R4 no rail in reach: HOOK hidden and pressing it does nothing", hidden and not _player.is_on_rail,
+			"hidden=%s on_rail=%s" % [hidden, _player.is_on_rail])
+
+
+func _test_death_on_rail() -> void:
+	var rail: SkylineRail = _level.get_node("Rails/RailNorth")
+	_place(_player, Vector3(0, 0.05, -15), Vector3(10, 0, -15))
+	await _physics(10)
+	_look_at_point(rail.point_at(rail.closest_offset(Vector3(0, 10, -18))))
+	await _press(&"use_rail")
+	await _physics(_seconds(0.8))
+	var was_on_rail: bool = _player.is_on_rail
+	await physics_frame
+	_referee.apply_damage(_player, 999.0, null)
+	await physics_frame
+	var detached: bool = not _player.is_on_rail and not _player.is_alive
+	_referee.respawn_now(_player)
+	_player.end_spawn_protection()
+	await _physics(5)
+	_check("R5 dying while hanging drops the rail", was_on_rail and detached and _player.is_alive and not _player.is_on_rail,
+			"was_on_rail=%s detached=%s" % [was_on_rail, detached])
+
+
+func _test_bot_rides_rail() -> void:
+	# Bot no jardim com destino longe, no pátio leste: deve pegar o trilho e atravessar.
+	var bot: Character = _bots[0]
+	var brain := bot.controller as BotController
+	bot.process_mode = Node.PROCESS_MODE_INHERIT
+	brain.passive = true
+	_place(_player, Vector3(0, 0.05, 0), Vector3(0, 0, -10))
+	# Escuta os sinais e dá o destino antes de soltar o bot (ele pode engatar já no 1º quadro).
+	var rode: Array[bool] = [false]
+	var dropped_at: Array[Vector3] = [Vector3.INF]
+	var on_attached := func(_rail: SkylineRail) -> void: rode[0] = true
+	var on_detached := func() -> void: dropped_at[0] = bot.global_position
+	bot.rail_attached.connect(on_attached)
+	bot.rail_detached.connect(on_detached)
+	_place(bot, Vector3(-37, 1.05, 5), Vector3(0, 1, 5))
+	brain.go_to(Vector3(36, -1, 4))
+	var arrived_east: bool = false
+	for i in _seconds(14.0):
+		await physics_frame
+		if rode[0] and not bot.is_on_rail and bot.is_grounded() and bot.global_position.x > 26.0:
+			arrived_east = true
+			break
+	bot.rail_attached.disconnect(on_attached)
+	bot.rail_detached.disconnect(on_detached)
+	brain.passive = false
+	bot.process_mode = Node.PROCESS_MODE_DISABLED
+	# Pousa no chão do pátio (y = -1), não em cima de um muro (y = 0), onde ficaria preso.
+	_check("R6 a bot with a far goal takes the rail across the arena", rode[0] and arrived_east and bot.is_alive
+			and bot.global_position.y < -0.5,
+			"rode=%s dropped_at=%s arrived_east=%s pos=%s alive=%s" % [rode[0], dropped_at[0], arrived_east,
+			bot.global_position, bot.is_alive])

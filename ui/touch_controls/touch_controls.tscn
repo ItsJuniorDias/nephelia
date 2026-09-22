@@ -86,3 +86,23 @@ script = ExtResource("3_button")
 action = &"reload"
 label = "R"
 radius = 36.0
+
+[node name="HookButton" type="Control" parent="Root"]
+visible = false
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -196.0
+offset_top = -432.0
+offset_right = -108.0
+offset_bottom = -344.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+script = ExtResource("3_button")
+action = &"use_rail"
+label = "HOOK"
+radius = 44.0

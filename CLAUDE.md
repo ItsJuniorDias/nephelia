@@ -99,6 +99,17 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   mapa: rodar o build e depois `tools/bake_navmesh.gd -- <cena> <navmesh.tres>`. Colisões são formas
   simples (caixa/cilindro/convexa), não a malha. Nada pode ter degrau: pisos ficam 1 cm acima do
   chão sem colisão; pontes têm patamares planos na altura de cada ilha.
+- Trilhos aéreos: `rails/skyline_rail.gd` (SkylineRail, um Path3D; grupo `skyline_rails`; tubo CSG e
+  postes montados ao carregar). Os da Sky Plaza saem do `tools/build_skyplaza.gd` em
+  `skyplaza_rails.tscn`; as pontas ficam ~7 m para dentro da borda das ilhas. O Character engata
+  (`find_hookable_rail` no cone do controlador: humano 30°, bot 360°; alcance 10 m a partir do olho),
+  é puxado até ficar `RAIL_HANG` = 2 m abaixo do trilho (`is_rail_pulling`) e desliza; comando
+  `use_rail` (tecla E / controle Y / botão HOOK, que só aparece com trilho ao alcance). Depois de soltar,
+  usar `is_grounded()` (o `is_on_floor()` fica velho por um quadro). Pose de pendurado:
+  `characters/rail_grip_modifier.gd` (SkeletonModifier3D que ergue o braço esquerdo) + pernas na
+  animação "Jump" (também usada ao pular/cair). Bots: pegam o trilho se o destino está a mais de
+  22 m; não se guiam no ar; só soltam se o pouso previsto (com a freada no ar) é navmesh ligada ao
+  destino (topo de muro tem navmesh "ilhada"); ao pousar pedem caminho novo.
 - Peças usadas: `assets/models/city/downtown/` e `assets/models/nature/stylized/` (texturas
   limitadas a 1024 px no .import). Prédio grande (45 mil triângulos) ficou de fora por desempenho.
 - Exportação: excluir `tests/*`, `tools/*` e `assets/animations/quaternius_ual/*.glb` (7,6 MB, só
@@ -151,5 +162,7 @@ Atualizar esta seção ao fim de cada sessão.
   - Tarefa 5 (bots) feita: 37 testes de controles + 8 de bots passando. Arena com 3 bots
     (Hazel, Otis, Mabel) + jogador. Bots usam o corpo base da Quaternius (sem roupa: decisão pendente).
   - Tarefa 6 (arena Sky Plaza) feita: 3 ilhas + 2 pontes, 37 + 8 + 4 testes passando.
-    Pendente: tornar a arena a cena principal (com o Godot fechado).
-  - Próximo: Tarefa 7 do `PLANO.md` (trilhos aéreos).
+  - Tarefa 7 (trilhos aéreos) feita: 37 + 8 + 10 testes passando. A Sky Plaza virou a cena
+    principal e o Input Map ganhou `use_rail`, mudados com o editor aberto: reabrir o Godot.
+    Texturas usadas em 3D passaram sozinhas para compressão de GPU (ETC2/ASTC) com mipmaps.
+  - Próximo: Tarefa 8 do `PLANO.md` (poderes e itens).

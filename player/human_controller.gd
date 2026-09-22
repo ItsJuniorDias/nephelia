@@ -77,6 +77,11 @@ func _unhandled_input(event: InputEvent) -> void:
 func _process(delta: float) -> void:
 	if character == null:
 		return
+	# HOOK só aparece quando dá para engatar (ou para soltar, se já estiver pendurado).
+	var can_hook: bool = character.is_alive and not character.is_on_rail \
+			and not character.find_hookable_rail(rail_hook_cone).is_empty()
+	touch_controls.set_action_visible(&"use_rail", character.is_on_rail or can_hook)
+	hud.set_rail_hint(can_hook)
 	# Analógico direito: gira a uma velocidade fixa por segundo (por isso * delta).
 	var look: Vector2 = Input.get_vector("look_left", "look_right", "look_up", "look_down")
 	if look != Vector2.ZERO:
@@ -89,6 +94,7 @@ func get_command(_delta: float) -> CharacterCommand:
 	command.jump = Input.is_action_pressed("jump") or Input.is_action_just_pressed("jump")
 	command.fire = Input.is_action_pressed("fire") or Input.is_action_just_pressed("fire")
 	command.reload = Input.is_action_just_pressed("reload")
+	command.use_rail = Input.is_action_pressed("use_rail") or Input.is_action_just_pressed("use_rail")
 	command.aim_assist = aim_assist_enabled and (TouchControls.is_touch_mode() or _using_gamepad)
 	command.yaw = character.yaw
 	command.pitch = character.pitch

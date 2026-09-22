@@ -29,6 +29,7 @@ var _respawn_countdown: float = 0.0
 @onready var ammo_label: Label = $Root/AmmoLabel
 @onready var health_label: Label = $Root/HealthLabel
 @onready var protection_label: Label = $Root/ProtectionLabel
+@onready var rail_hint: Label = $Root/RailHint
 @onready var hit_marker: Control = $Root/HitMarker
 @onready var damage_vignette: TextureRect = $Root/DamageVignette
 @onready var damage_directions: Control = $Root/DamageDirections
@@ -83,6 +84,11 @@ func _process(delta: float) -> void:
 	if death_panel.visible:
 		_respawn_countdown = maxf(_respawn_countdown - delta, 0.0)
 		death_label.text = "%s\n\nRespawn in %d" % [_death_title, ceili(_respawn_countdown)]
+
+
+## Mostra "HOOK" embaixo da mira quando há um trilho ao alcance.
+func set_rail_hint(shown: bool) -> void:
+	rail_hint.visible = shown
 
 
 ## Ângulos (graus) de onde vieram os tiros recentes: 0 = frente, positivo = direita.

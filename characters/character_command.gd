@@ -20,6 +20,8 @@ var fire: bool = false
 var reload: bool = false
 ## Pede ajuda de mira (toque e controle; no mouse fica desligada).
 var aim_assist: bool = false
+## Engatar/soltar do trilho aéreo está apertado neste passo.
+var use_rail: bool = false
 
 
 ## Limpa os botões e o movimento (o olhar é sempre preenchido pelo controlador).
@@ -29,3 +31,4 @@ func reset() -> void:
 	fire = false
 	reload = false
 	aim_assist = false
+	use_rail = false

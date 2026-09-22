@@ -98,6 +98,20 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
+## Mostra ou esconde o botão de uma ação (ex.: HOOK só aparece perto de um trilho).
+## Esconder solta o botão, se estiver apertado.
+func set_action_visible(action: StringName, shown: bool) -> void:
+	for button: TouchActionButton in _buttons:
+		if button.action != action or button.visible == shown:
+			continue
+		button.visible = shown
+		if not shown:
+			button.release()
+			for finger: int in _finger_owners.keys():
+				if _finger_owners[finger] == button:
+					_finger_owners.erase(finger)
+
+
 ## Solta todos os dedos e todas as ações apertadas pelos controles de toque.
 func release_all() -> void:
 	_finger_owners.clear()

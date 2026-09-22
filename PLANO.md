@@ -15,7 +15,7 @@ poderes. O visual é uma cidade flutuante do começo do século XX. Ordem dos mo
 - [x] Curadoria de assets gratuitos + download dos 12 pacotes (ver `CREDITS.md`)
 
 ## Tarefa 0: Arrumação
-- [ ] Trocar a cena principal para `res://levels/skyplaza/skyplaza.tscn` (precisa do Godot fechado)
+- [x] Trocar a cena principal para `res://levels/skyplaza/skyplaza.tscn` (feito na tarefa 7; reabrir o Godot)
 - [x] Primeiro commit (`02aaa5a`)
 - [ ] Push para o GitHub: criar o repositório privado `nephelia` na conta ItsJuniorDias (remoto SSH já configurado)
 - [x] Confirmar que o jogo abre no iPhone 15
@@ -55,16 +55,21 @@ aéreos, a 60 FPS no iPhone.
 - Dificuldades: fácil, médio, difícil
 - Pronto quando: você contra 3 bots é divertido, e os bots não travam nem atravessam paredes
 
-### 6. Arena v1 (arte): [x] feito (Sky Plaza; lightmap e cena principal: ver pendências)
+### 6. Arena v1 (arte): [x] feito (Sky Plaza; lightmap: ver tarefa 11)
 - 3 ilhas ligadas: cidade (Downtown City MegaKit) sobre rochas e vegetação (Stylized Nature MegaKit)
 - Layout pensado para combate: coberturas, linhas de visão, pontos de respawn e de itens
 - Paleta Nephelia (dourado, creme, azul-céu), colisões, iluminação com LightmapGI, texturas reduzidas
 - Pronto quando: a arena fica bonita, os bots navegam nela e o FPS se mantém no iPhone
 
-### 7. Trilhos aéreos
+### 7. Trilhos aéreos: [x] feito
 - Engatar e desengatar (botão contextual), velocidade, pular do trilho, atirar pendurado
 - Bots também usam os trilhos
 - Pronto quando: os trilhos viram parte da estratégia da partida
+- Feito: 2 trilhos (norte e sul) do jardim ao pátio passando sobre a praça; botão HOOK (tecla E,
+  controle Y) aparece perto de um trilho; pendurado dá para acelerar/frear, pular, soltar e atirar;
+  no fim o personagem cai freado dentro da ilha. Corpo na pose de pendurado (mão esquerda no
+  trilho, pernas no ar). Bots pegam o trilho quando o destino é longe e só soltam onde o pouso é
+  chão ligado ao destino. Pendente: testar no iPhone se o HOOK é fácil de alcançar.
 
 ### 8. Poderes e itens
 - 1 ou 2 poderes com barra de energia (ex.: descarga elétrica, empurrão)

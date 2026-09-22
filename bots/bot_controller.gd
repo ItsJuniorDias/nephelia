@@ -23,6 +23,10 @@ const STUCK_MIN_DISTANCE: float = 0.3
 const EDGE_PROBE: float = 1.2
 ## Tentativas de sortear um destino alcançável antes de desistir.
 const ROAM_PICK_ATTEMPTS: int = 8
+## Só pega trilho para destinos a pelo menos esta distância.
+const RAIL_MIN_TRIP: float = 22.0
+## Depois de soltar de um trilho, espera este tempo antes de pegar outro.
+const RAIL_COOLDOWN: float = 6.0
 
 @export var difficulty: BotDifficulty
 ## Só passeia e nunca ataca (testes e, no futuro, tutorial).
@@ -48,6 +52,9 @@ var _strafe_side: float = 1.0
 var _strafe_timer: float = 0.0
 var _stuck_timer: float = 0.0
 var _stuck_check_position: Vector3 = Vector3.ZERO
+var _rail_cooldown: float = 0.0
+var _rail_goal_distance: float = INF
+var _was_grounded: bool = true
 
 
 func setup(for_character: Character) -> void:
@@ -59,6 +66,9 @@ func setup(for_character: Character) -> void:
 	_agent = character.get_node("NavigationAgent3D")
 	character.respawned.connect(_on_respawned)
 	character.hit_received.connect(_on_hit_received)
+	character.rail_attached.connect(func(_rail: SkylineRail) -> void: _rail_goal_distance = INF)
+	character.rail_detached.connect(func() -> void: _rail_cooldown = RAIL_COOLDOWN)
+	rail_hook_cone = PI
 	_stuck_check_position = character.global_position
 	roam_goal = character.global_position
 
@@ -95,6 +105,13 @@ func get_command(delta: float) -> CharacterCommand:
 		_perceive()
 	_update_aim_noise(delta)
 
+	_rail_cooldown = maxf(_rail_cooldown - delta, 0.0)
+	# Pousou depois de estar no ar (fim do trilho, queda): o caminho calculado lá de cima pode
+	# começar em outra ilha. Pede um caminho novo a partir de onde está agora.
+	var grounded: bool = character.is_on_floor()
+	if grounded and not _was_grounded:
+		_agent.target_position = roam_goal
+	_was_grounded = grounded
 	match state:
 		State.ATTACK:
 			_attack(delta)
@@ -102,6 +119,11 @@ func get_command(delta: float) -> CharacterCommand:
 			_chase(delta)
 		_:
 			_roam(delta)
+	if character.is_on_rail:
+		_steer_on_rail(delta)
+	elif not character.is_grounded():
+		# No ar (soltou do trilho): não se guia; cai onde _safe_to_drop previu.
+		command.move = Vector2.ZERO
 
 	# Fora de combate, aproveita para encher o tambor.
 	var weapon: Weapon = character.weapon
@@ -220,6 +242,11 @@ func _chase(delta: float) -> void:
 
 
 func _roam(delta: float) -> void:
+	if character.is_on_rail:
+		return
+	if _should_take_rail():
+		command.use_rail = true
+		return
 	if _arrived() or _is_stuck(delta):
 		pick_roam_goal()
 	_follow_path(delta)
@@ -235,6 +262,9 @@ func _back_to_roam() -> void:
 # ---------------------------------------------------------------- movimento
 
 func _follow_path(delta: float) -> void:
+	# Pendurado no trilho quem manda é _steer_on_rail (e o caminho só é calculado no chão).
+	if character.is_on_rail:
+		return
 	var to_next: Vector3 = _steering_point() - character.global_position
 	to_next.y = 0.0
 	command.pitch = move_toward(character.pitch, 0.0, delta)
@@ -294,6 +324,81 @@ func _is_stuck(delta: float) -> bool:
 	var moved: float = character.global_position.distance_to(_stuck_check_position)
 	_stuck_check_position = character.global_position
 	return moved < STUCK_MIN_DISTANCE
+
+
+# ---------------------------------------------------------------- trilhos
+
+# Pega o trilho se o destino é longe e há um trilho ao alcance indo mais ou menos para lá
+# (no sentido para onde o bot está virado, que é o sentido em que ele vai deslizar).
+func _should_take_rail() -> bool:
+	if _rail_cooldown > 0.0:
+		return false
+	var to_goal: Vector3 = roam_goal - character.global_position
+	to_goal.y = 0.0
+	if to_goal.length() < RAIL_MIN_TRIP:
+		return false
+	var hook: Dictionary = character.find_hookable_rail(rail_hook_cone)
+	if hook.is_empty():
+		return false
+	var tangent: Vector3 = (hook["rail"] as SkylineRail).tangent_at(hook["offset"])
+	tangent.y = 0.0
+	var forward: Vector3 = -character.global_basis.z
+	var travel: Vector3 = tangent.normalized() * signf(tangent.dot(forward))
+	return travel.dot(to_goal.normalized()) > 0.6
+
+
+# Pendurado: acelera, olha para onde vai (se não estiver mirando) e solta perto do destino,
+# ou quando começa a se afastar dele, mas só se houver chão embaixo.
+func _steer_on_rail(delta: float) -> void:
+	command.move = Vector2(0.0, -1.0)
+	# Sendo puxado até o trilho: pode se afastar um pouco do destino, ainda não é hora de soltar.
+	if character.is_rail_pulling:
+		return
+	if state != State.ATTACK and character.velocity.length() > 0.5:
+		var travel: Vector3 = character.velocity
+		command.yaw = rotate_toward(character.yaw, atan2(-travel.x, -travel.z),
+				deg_to_rad(difficulty.turn_speed_degrees) * delta)
+	var to_goal: Vector3 = roam_goal - character.global_position
+	to_goal.y = 0.0
+	var distance: float = to_goal.length()
+	var getting_farther: bool = distance > _rail_goal_distance + 0.05
+	_rail_goal_distance = minf(_rail_goal_distance, distance)
+	if (distance < 8.0 or getting_farther) and _safe_to_drop():
+		command.use_rail = true
+
+
+# Solta só se o ponto onde vai CAIR (seguindo a velocidade atual) tem chão da arena.
+func _safe_to_drop() -> bool:
+	var from: Vector3 = character.global_position
+	var below: Dictionary = _ray_down(from, 15.0)
+	if below.is_empty():
+		return false
+	var height: float = from.y - (below["position"] as Vector3).y
+	var fall_time: float = sqrt(2.0 * maxf(height, 0.0) / 9.8)
+	# Sem se guiar no ar, o deslize para os lados vai freando (air_acceleration) até parar.
+	var flat := Vector3(character.velocity.x, 0.0, character.velocity.z)
+	var speed: float = flat.length()
+	var braking: float = maxf(character.air_acceleration, 0.01)
+	var t: float = minf(fall_time, speed / braking)
+	var landing: Vector3 = from + flat.normalized() * (speed * t - 0.5 * braking * t * t)
+	var ground: Dictionary = _ray_down(landing + Vector3.UP * 3.0, 20.0)
+	if ground.is_empty():
+		return false
+	# E o chão de pouso precisa ser andável (navmesh), não um telhado ou a borda da ilha...
+	var map: RID = _navigation_map()
+	var point: Vector3 = ground["position"]
+	var closest: Vector3 = NavigationServer3D.map_get_closest_point(map, point)
+	if closest.distance_to(point) >= 1.0:
+		return false
+	# ...e ligado por terra ao destino (o topo de um muro também tem navmesh, mas é uma "ilha").
+	var path: PackedVector3Array = NavigationServer3D.map_get_path(map, closest, roam_goal, true)
+	return not path.is_empty() and path[path.size() - 1].distance_to(roam_goal) < ARRIVE_DISTANCE
+
+
+func _ray_down(from: Vector3, length: float) -> Dictionary:
+	var query := PhysicsRayQueryParameters3D.create(from, from + Vector3.DOWN * length)
+	query.exclude = [character.get_rid()]
+	return character.get_world_3d().direct_space_state.intersect_ray(query)
 
 
 # ---------------------------------------------------------------- mira

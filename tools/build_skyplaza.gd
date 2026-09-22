@@ -3,6 +3,7 @@ extends SceneTree
 ##   levels/skyplaza/skyplaza_geometry.tscn  chão, pontes, prédios, coberturas (tudo com colisão,
 ##                                           e é o que a navmesh lê)
 ##   levels/skyplaza/skyplaza_decor.tscn     árvores, arbustos, flores (só visual)
+##   levels/skyplaza/skyplaza_rails.tscn     trilhos aéreos (fora da navmesh)
 ## Depois de rodar, recalcular a navmesh:
 ##   Godot --headless --path . -s res://tools/build_skyplaza.gd
 ##   Godot --headless --path . -s res://tools/bake_navmesh.gd -- res://levels/skyplaza/skyplaza.tscn res://levels/skyplaza/skyplaza_navmesh.tres
@@ -20,6 +21,7 @@ const EAST := {"center": Vector3(42, -1, 0), "radius": 14.0}
 
 var _geometry: Node3D
 var _decor: Node3D
+var _rails: Node3D
 var _shape_cache: Dictionary = {}
 var _materials: Dictionary = {}
 
@@ -47,8 +49,11 @@ func _run() -> void:
 	_build_west_garden()
 	_build_east_courtyard()
 
+	_build_rails()
+
 	_save(_geometry, OUT_DIR + "skyplaza_geometry.tscn")
 	_save(_decor, OUT_DIR + "skyplaza_decor.tscn")
+	_save(_rails, OUT_DIR + "skyplaza_rails.tscn")
 	quit()
 
 
@@ -120,6 +125,35 @@ func _build_east_courtyard() -> void:
 	for spot: Vector3 in [Vector3(-9, 0, -8), Vector3(-9, 0, 8), Vector3(-3, 0, -9), Vector3(-3, 0, 9)]:
 		_place(court, CITY + "Prop_ACUnit.gltf", c + spot, spot.z * 10.0, "box")
 		_place(court, CITY + "Prop_Bollard.gltf", c + spot + Vector3(1.2, 0, 0), 0.0, "box")
+
+
+# Dois trilhos (norte e sul) do jardim ao pátio passando por cima da borda da praça. As pontas
+# ficam sobre as ilhas laterais, uns 7 m para dentro da borda (ao chegar no fim, o personagem
+# cai no chão, freado e ainda andando um pouco para frente).
+func _build_rails() -> void:
+	_rails = Node3D.new()
+	_rails.name = "SkyPlazaRails"
+	root.add_child(_rails)
+	var rail_script: Script = load("res://rails/skyline_rail.gd")
+	for side: float in [-1.0, 1.0]:
+		var points: Array[Vector3] = [Vector3(-35, 7.5, 7), Vector3(-27, 8.5, 13), Vector3(-14, 9.5, 17),
+				Vector3(0, 10, 18), Vector3(14, 9.5, 17), Vector3(26, 8.5, 13), Vector3(35, 7, 8)]
+		var curve := Curve3D.new()
+		for i in points.size():
+			var point: Vector3 = points[i] * Vector3(1, 1, side)
+			var previous: Vector3 = points[maxi(i - 1, 0)] * Vector3(1, 1, side)
+			var next: Vector3 = points[mini(i + 1, points.size() - 1)] * Vector3(1, 1, side)
+			# Alças em volta de cada ponto deixam a curva suave (estilo Catmull-Rom).
+			var handle: Vector3 = (next - previous) * 0.2
+			curve.add_point(point, -handle, handle)
+		var rail := Path3D.new()
+		rail.name = "RailNorth" if side < 0.0 else "RailSouth"
+		rail.curve = curve
+		rail.set_script(rail_script)
+		rail.set(&"tube_material", _materials["brass"])
+		rail.set(&"pylon_material", _materials["iron"])
+		_rails.add_child(rail)
+		rail.owner = _rails
 
 
 # ---------------------------------------------------------------- blocos de construção
@@ -278,6 +312,16 @@ func _make_materials() -> void:
 	bridge.uv1_triplanar = true
 	bridge.uv1_scale = Vector3(0.5, 0.5, 0.5)
 	_materials["bridge"] = bridge
+	var brass := StandardMaterial3D.new()
+	brass.albedo_color = Color(0.85, 0.66, 0.3)
+	brass.metallic = 0.75
+	brass.roughness = 0.35
+	_materials["brass"] = brass
+	var iron := StandardMaterial3D.new()
+	iron.albedo_color = Color(0.2, 0.19, 0.2)
+	iron.metallic = 0.5
+	iron.roughness = 0.6
+	_materials["iron"] = iron
 
 
 func _save(scene_root: Node, path: String) -> void:
