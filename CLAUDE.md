@@ -241,8 +241,9 @@ Atualizar esta seção ao fim de cada sessão.
     teste greybox com 1 bot, 18 testes passando. Jogo testado e rodando no iPhone 15 do usuário.
   - Preset de exportação iOS: Team ID 9337P26ZJ6, bundle com.alexandrejunior.nephelia.
     Falta colocar o filtro `tests/*`.
-  - Git: commits na `main`. Push pendente: falta criar o repositório privado `nephelia` na conta
-    ItsJuniorDias (remoto SSH `origin` já configurado; `gh` não está instalado).
+  - Git: commits na `main`, com push para https://github.com/ItsJuniorDias/nephelia (remoto SSH
+    `origin`; `gh` não está instalado). Em 2026-09-22 o repositório foi criado PÚBLICO; o combinado
+    era privado (usuário avisado para trocar em Settings).
   - Assets: 12 pacotes gratuitos baixados (506 MB) em `~/Downloads/nephelia_assets/` (kenney/,
     quaternius/, weapons/), registrados em `CREDITS.md`, ainda não importados no projeto.
     Downtown City e Nature têm pasta glTF; a Animation Library tem `Unreal-Godot` (.glb);
