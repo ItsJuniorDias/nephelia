@@ -34,6 +34,7 @@ var _geometry: Node3D
 var _decor: Node3D
 var _rails: Node3D
 var _kit := CityKit.new()
+var _items: Node3D
 var _shape_cache: Dictionary = {}
 var _materials: Dictionary = {}
 var _lamp_globes: Array[Vector3] = []
@@ -64,10 +65,13 @@ func _run() -> void:
 	_build_lamp_globes()
 
 	_build_rails()
+	_build_items()
+	_build_items()
 
 	_save(_geometry, OUT_DIR + "skyplaza_geometry.tscn")
 	_save(_decor, OUT_DIR + "skyplaza_decor.tscn")
 	_save(_rails, OUT_DIR + "skyplaza_rails.tscn")
+	_save(_items, OUT_DIR + "skyplaza_items.tscn")
 	print("city pieces: ", _kit.piece_count)
 	quit()
 
@@ -246,6 +250,24 @@ func _build_rails() -> void:
 		rail.set(&"pylon_material", _materials["iron"])
 		_rails.add_child(rail)
 		rail.owner = _rails
+
+
+# Itens: frascos de vida nos dois vãos diagonais da praça (disputados), no parque oeste e na
+# entrada do largo leste. Todos em pontos abertos da navmesh.
+func _build_items() -> void:
+	_items = Node3D.new()
+	_items.name = "SkyPlazaItems"
+	root.add_child(_items)
+	var pickup_scene: PackedScene = load("res://items/pickup.tscn")
+	var health_spots: Array[Vector3] = [Vector3(5, 0, -5), Vector3(-5, 0, 5),
+			Vector3(-34, 1, -10), Vector3(37, -1, 0)]
+	for i in health_spots.size():
+		var item: Node3D = pickup_scene.instantiate()
+		item.name = "Health%d" % (i + 1)
+		item.set(&"kind", 0)  # Pickup.Kind.HEALTH
+		item.position = health_spots[i]
+		_items.add_child(item)
+		item.owner = _items
 
 
 # ---------------------------------------------------------------- blocos de construção

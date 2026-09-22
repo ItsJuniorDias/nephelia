@@ -12,6 +12,8 @@ signal health_changed(health: float, max_health: float)
 ## Morreu. `killer` é null quando foi queda ou outro acidente.
 signal died(killer: Character)
 signal respawned
+## Pegou um item (o MatchReferee decidiu).
+signal picked_up(pickup: Pickup)
 signal rail_attached(rail: SkylineRail)
 signal rail_detached
 
@@ -205,6 +207,11 @@ func receive_hit(result: ShotResult) -> void:
 
 
 ## Muda a vida (só o MatchReferee deve chamar).
+## O juiz deu um item a este personagem (efeito já aplicado): só avisa quem mostra (HUD).
+func receive_pickup(pickup: Pickup) -> void:
+	picked_up.emit(pickup)
+
+
 func set_health(value: float) -> void:
 	health = clampf(value, 0.0, max_health)
 	health_changed.emit(health, max_health)

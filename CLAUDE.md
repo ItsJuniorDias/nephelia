@@ -79,6 +79,10 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   pausa a árvore (`get_tree().paused`) e emite `match_finished`; `restart()` zera e faz todos
   renascerem. UI local: `ui/match_hud/` (roda pausado) e `ui/match_result/` (PLAY AGAIN, roda pausado).
   O jogador local aparece como "You" no placar e na lista de abates.
+- Itens: `items/pickup.gd` (Pickup, grupo `pickups`): área que gira no ar, some quando alguém pega
+  e volta depois de `respawn_time`. Quem decide é o MatchReferee (`try_pickup`), como nos tiros.
+  Aparência montada em código (`items/pickup_visuals.gd`: frasco de tônico + brilho no chão).
+  Os itens da arena saem do `tools/build_skyplaza.gd`; o HUD avisa o que o jogador pegou.
 - Bots: `bots/bot_controller.gd` (estados ROAM/CHASE/ATTACK; percepção 10x/s com linha de visão;
   mira com erro que "passeia"; tempo de reação; anda de lado conferindo a navmesh para não cair;
   vira para quem atirou). Dificuldades em `bots/difficulty_{easy,medium,hard}.tres`. `passive`
@@ -136,8 +140,8 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   `vertex_color_use_as_albedo` (os FBX do pacote Wild West Guns têm cores de vértice azuladas).
 - Capturas de tela para conferir visual: usar `--write-movie <pasta>/f.png --fixed-fps 60` com um
   script `-s`; `get_viewport().get_texture().get_image()` devolve o quadro ANTERIOR.
-- Testes: `Godot --headless --path . -s res://tests/<suíte>.gd` para `test_controls`, `test_bots` e
-  `test_arena` (saída 0 = tudo passou). Rodar as três depois de qualquer mudança. Ao criar presets de exportação, excluir `tests/*`.
+- Testes: `Godot --headless --path . -s res://tests/<suíte>.gd` para `test_controls`, `test_bots`,
+  `test_arena` e `test_items` (saída 0 = tudo passou). Rodar as quatro depois de qualquer mudança. Ao criar presets de exportação, excluir `tests/*`.
   No headless a janela é 64x64 (viewport 1152x1152): eventos simulados precisam ser convertidos com
   `root.get_final_transform()` (o teste já faz isso). Corpo com `process_mode` desligado sai da
   física (`disable_mode = REMOVE`): nos testes, usar `DISABLE_MODE_KEEP_ACTIVE` para o tiro acertar.
@@ -185,5 +189,6 @@ Atualizar esta seção ao fim de cada sessão.
   - Arena v2 (cidade) feita: a Sky Plaza virou três quarteirões de cidade com prédios montados
     peça por peça (CityKit), postes, balaústres e trilhos passando por fora dos prédios.
     37 + 8 + 10 testes passando.
-  - Próximo: Tarefa 8 do `PLANO.md` (poderes e itens). A parte 1 (frascos de vida) está escrita e
-    guardada no `git stash` (mensagem "Tarefa 8 parte 1"), ainda sem testar.
+  - Tarefa 8, parte 1 (itens) feita: frascos de vida na arena, bots buscam quando estão
+    machucados. 37 + 8 + 10 + 5 testes passando.
+  - Próximo: Tarefa 8 parte 2 (poderes) e parte 3 (armas extras).

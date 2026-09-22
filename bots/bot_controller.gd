@@ -8,6 +8,7 @@ extends CharacterController
 ##   ROAM   passeia entre pontos sorteados da navmesh
 ##   ATTACK vê um inimigo: mira (com erro), atira e anda de lado mantendo distância
 ##   CHASE  perdeu o inimigo de vista: vai até onde o viu por último
+## Fora de briga, machucado, vai buscar o frasco de vida mais perto.
 
 enum State { ROAM, CHASE, ATTACK }
 
@@ -31,6 +32,10 @@ const RAIL_COOLDOWN: float = 6.0
 const RAIL_WORTH_FRACTION: float = 0.4
 ## Distância entre os pontos conferidos ao longo do trilho.
 const RAIL_SAMPLE_STEP: float = 4.0
+## Só vai atrás de itens até esta distância (em linha reta).
+const ITEM_SEARCH_DISTANCE: float = 35.0
+## Busca frasco de vida quando a vida cai abaixo desta fração do máximo.
+const WANT_HEALTH_BELOW: float = 0.6
 
 @export var difficulty: BotDifficulty
 ## Só passeia e nunca ataca (testes e, no futuro, tutorial).
@@ -59,6 +64,8 @@ var _stuck_check_position: Vector3 = Vector3.ZERO
 var _rail_cooldown: float = 0.0
 var _rail_goal_distance: float = INF
 var _was_grounded: bool = true
+## Item que está indo buscar (null = nenhum).
+var _item_goal: Pickup
 
 
 func setup(for_character: Character) -> void:
@@ -107,6 +114,7 @@ func get_command(delta: float) -> CharacterCommand:
 	if _think_timer <= 0.0:
 		_think_timer = THINK_INTERVAL
 		_perceive()
+		_think_items()
 	_update_aim_noise(delta)
 
 	_rail_cooldown = maxf(_rail_cooldown - delta, 0.0)
@@ -251,6 +259,7 @@ func _roam(delta: float) -> void:
 	if _try_take_rail(delta):
 		return
 	if _arrived() or _is_stuck(delta):
+		_item_goal = null
 		pick_roam_goal()
 	_follow_path(delta)
 
@@ -259,6 +268,8 @@ func _back_to_roam() -> void:
 	state = State.ROAM
 	target_enemy = null
 	_target_visible = false
+	# O próximo "pensamento" decide de novo se vale buscar um item.
+	_item_goal = null
 	pick_roam_goal()
 
 
@@ -430,6 +441,51 @@ func _ray_down(from: Vector3, length: float) -> Dictionary:
 	var query := PhysicsRayQueryParameters3D.create(from, from + Vector3.DOWN * length)
 	query.exclude = [character.get_rid()]
 	return character.get_world_3d().direct_space_state.intersect_ray(query)
+
+
+# ---------------------------------------------------------------- itens
+
+# Sem briga e precisando de algo: vai buscar o item alcançável (a pé) mais perto.
+func _think_items() -> void:
+	if _item_goal != null:
+		# Alguém pegou antes, ou já não precisa: volta a passear.
+		if not _item_goal.is_available or not _wants(_item_goal):
+			_item_goal = null
+			pick_roam_goal()
+		return
+	if state == State.ATTACK or character.is_on_rail or not character.is_alive:
+		return
+	var candidates: Array[Pickup] = []
+	for node: Node in get_tree().get_nodes_in_group(Pickup.GROUP):
+		var pickup := node as Pickup
+		if pickup.is_available and _wants(pickup) \
+				and character.global_position.distance_to(pickup.global_position) < ITEM_SEARCH_DISTANCE:
+			candidates.append(pickup)
+	if candidates.is_empty():
+		return
+	var here: Vector3 = character.global_position
+	candidates.sort_custom(func(a: Pickup, b: Pickup) -> bool:
+		return here.distance_squared_to(a.global_position) < here.distance_squared_to(b.global_position))
+	for pickup: Pickup in candidates:
+		if _reachable(pickup.global_position):
+			_item_goal = pickup
+			state = State.ROAM
+			go_to(pickup.global_position)
+			return
+
+
+func _wants(pickup: Pickup) -> bool:
+	match pickup.kind:
+		Pickup.Kind.HEALTH:
+			return character.health < character.max_health * WANT_HEALTH_BELOW
+	return false
+
+
+func _reachable(point: Vector3) -> bool:
+	if not _navigation_ready():
+		return false
+	var path: PackedVector3Array = NavigationServer3D.map_get_path(_navigation_map(), character.global_position, point, true)
+	return not path.is_empty() and path[path.size() - 1].distance_to(point) < 1.5
 
 
 # ---------------------------------------------------------------- mira

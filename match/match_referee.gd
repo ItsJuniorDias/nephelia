@@ -1,6 +1,6 @@
 class_name MatchReferee
 extends Node
-## Juiz da partida: decide se cada tiro acertou e em quem.
+## Juiz da partida: decide se cada tiro acertou e em quem, quem pega cada item, vida e morte.
 ##
 ## Hoje roda no próprio aparelho. No multiplayer só o servidor terá o juiz, e é isso que
 ## impede trapaça: o jogador só diz "atirei nesta direção"; quem decide o acerto é o juiz.
@@ -10,6 +10,7 @@ signal character_damaged(victim: Character, attacker: Character, amount: float)
 ## `killer` é null quando foi queda ou outro acidente.
 signal character_died(victim: Character, killer: Character)
 signal character_respawned(character: Character)
+signal item_picked(character: Character, pickup: Pickup)
 
 const GROUP: StringName = &"match_referee"
 ## Altura, a partir dos pés, do ponto que a mira assistida procura no alvo (peito).
@@ -63,6 +64,30 @@ func apply_damage(victim: Character, amount: float, attacker: Character) -> floa
 	if victim.health <= 0.0:
 		kill(victim, attacker)
 	return applied
+
+
+## Devolve vida, sem passar do máximo.
+func heal(character: Character, amount: float) -> void:
+	if character.is_alive and amount > 0.0:
+		character.set_health(character.health + amount)
+
+
+## `character` encostou em `pickup`: pega se o item está lá e se ele precisa (vida cheia não
+## gasta o frasco). Devolve se pegou.
+func try_pickup(character: Character, pickup: Pickup) -> bool:
+	if not character.is_alive or not pickup.is_available:
+		return false
+	match pickup.kind:
+		Pickup.Kind.HEALTH:
+			if character.health >= character.max_health:
+				return false
+			heal(character, pickup.amount)
+		_:
+			return false
+	pickup.take(character)
+	character.receive_pickup(pickup)
+	item_picked.emit(character, pickup)
+	return true
 
 
 ## Mata `victim` e agenda o respawn. `killer` null = queda ou acidente.

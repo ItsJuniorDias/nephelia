@@ -1,0 +1,19 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://items/pickup.gd" id="1_x1sru"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/kenney/glass_002.ogg" id="2_vekj8"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_rsbuy"]
+radius = 0.9
+
+[node name="Pickup" type="Area3D" unique_id=1687453027]
+monitorable = false
+script = ExtResource("1_x1sru")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=714413976]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+shape = SubResource("SphereShape3D_rsbuy")
+
+[node name="PickupSound" type="AudioStreamPlayer3D" parent="." unique_id=1977085308]
+stream = ExtResource("2_vekj8")
+unit_size = 6.0

@@ -109,6 +109,8 @@ func restart() -> void:
 	for node: Node in get_tree().get_nodes_in_group(&"characters"):
 		if referee != null:
 			referee.respawn_now(node as Character)
+	for node: Node in get_tree().get_nodes_in_group(Pickup.GROUP):
+		(node as Pickup).restore()
 	match_started.emit()
 	score_changed.emit()
 

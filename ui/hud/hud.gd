@@ -1,7 +1,7 @@
 class_name Hud
 extends CanvasLayer
 ## HUD do jogador: mira, marcador de acerto, munição, vida, proteção de nascimento, aviso de
-## dano (borda vermelha + direção do tiro) e tela de eliminado.
+## dano (borda vermelha + direção do tiro), item pego e tela de eliminado.
 ## (A arte final e o placar entram na tarefa de HUD.)
 
 const HIT_MARKER_TIME: float = 0.15
@@ -24,12 +24,14 @@ var _last_health: float = 0.0
 var _damage_sources: Array[Dictionary] = []
 var _death_title: String = ""
 var _respawn_countdown: float = 0.0
+var _pickup_tween: Tween
 
 @onready var crosshair: TextureRect = $Root/Crosshair
 @onready var ammo_label: Label = $Root/AmmoLabel
 @onready var health_label: Label = $Root/HealthLabel
 @onready var protection_label: Label = $Root/ProtectionLabel
 @onready var rail_hint: Label = $Root/RailHint
+@onready var pickup_label: Label = $Root/PickupLabel
 @onready var hit_marker: Control = $Root/HitMarker
 @onready var damage_vignette: TextureRect = $Root/DamageVignette
 @onready var damage_directions: Control = $Root/DamageDirections
@@ -54,6 +56,7 @@ func setup(for_character: Character) -> void:
 	character.hit_received.connect(_on_hit_received)
 	character.died.connect(_on_died)
 	character.respawned.connect(_on_respawned)
+	character.picked_up.connect(_on_picked_up)
 	_last_health = character.health
 	_on_health_changed(character.health, character.max_health)
 	if weapon != null:
@@ -84,6 +87,24 @@ func _process(delta: float) -> void:
 	if death_panel.visible:
 		_respawn_countdown = maxf(_respawn_countdown - delta, 0.0)
 		death_label.text = "%s\n\nRespawn in %d" % [_death_title, ceili(_respawn_countdown)]
+
+
+## Mostra por um instante o que o jogador pegou (ex.: "+50 HP"), da cor do item.
+func show_pickup(text: String, color: Color) -> void:
+	pickup_label.text = text
+	pickup_label.add_theme_color_override(&"font_color", color.lightened(0.35))
+	pickup_label.visible = true
+	pickup_label.modulate.a = 1.0
+	if _pickup_tween != null:
+		_pickup_tween.kill()
+	_pickup_tween = pickup_label.create_tween()
+	_pickup_tween.tween_interval(1.0)
+	_pickup_tween.tween_property(pickup_label, ^"modulate:a", 0.0, 0.5)
+	_pickup_tween.tween_callback(pickup_label.hide)
+
+
+func _on_picked_up(pickup: Pickup) -> void:
+	show_pickup(pickup.get_hud_text(), PickupVisuals.color_of(pickup.kind))
 
 
 ## Mostra "HOOK" embaixo da mira quando há um trilho ao alcance.

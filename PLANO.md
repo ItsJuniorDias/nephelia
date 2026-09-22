@@ -83,6 +83,10 @@ aéreos, a 60 FPS no iPhone.
 - 1 ou 2 poderes com barra de energia (ex.: descarga elétrica, empurrão)
 - Itens na arena: vida, munição, energia, armas extras (rifle, espingarda)
 - Pronto quando: pegar itens e usar poderes muda o rumo da partida
+- Parte 1 (itens): [x] feito. Frascos de vida (+50) que somem ao serem pegos e voltam em 20 s;
+  o juiz decide quem pega; aviso no HUD; bots machucados vão buscar o frasco mais perto
+- Parte 2 (poderes): energia, Faísca (descarga) e Rajada (empurrão), frascos de energia
+- Parte 3 (armas extras): rifle e espingarda como itens, com munição limitada
 
 ### 9. HUD e menus
 - Arte dos controles de toque (Kenney Mobile Controls) e mira (Crosshair Pack)
