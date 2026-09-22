@@ -92,7 +92,7 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   10 cm e degrau máx. 20 cm (o personagem só sobe RAMPA, nunca degrau; a escada tem rampa invisível);
   `levels/arena_navigation.gd` ajusta o mapa para a mesma altura de célula.
 - Aparência dos personagens: ficha `characters/character_look.gd` (CharacterLook: corpo homem ou
-  mulher, estampa da roupa, cabelo e cor, barba, chapéu e cor; uma por personagem em
+  mulher, com ou sem roupa (`dressed`), estampa da roupa, cabelo e cor, barba, chapéu e cor; uma por personagem em
   `characters/looks/*.tres`, no campo `look` do Character). `characters/wardrobe.gd` (Wardrobe)
   monta o corpo EM CÓDIGO: a roupa Peasant do Modular Character Outfits (glTF que já traz o
   esqueleto, braços, mãos e pernas; proporção Regular, quase igual à do Superhero), o corpo com a
@@ -100,7 +100,9 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   `assets/models/characters/parts/`) e o chapéu (coco, cartola, boina, feitos de formas simples e
   presos ao osso da cabeça). A textura dos pelos é cinza: a cor vem da ficha. A cor do personagem
   (`body_color`) tinge só o tecido (`Wardrobe.is_cloth`). Os braços da 1ª pessoa usam o mesmo
-  Wardrobe (manga da roupa do jogador).
+  Wardrobe (manga da roupa do jogador). Os BOTS ficam SEM roupa (pedido do usuário, 2026-09-22):
+  corpo original Superhero masculino inteiro, sem cabelo nem chapéu, com a cor tingindo o corpo
+  todo, como antes das roupas. Só o jogador veste a roupa.
 - Peças: `tools/bake_characters.gd` prepara o CORPO (`parts/body_male.res`, `body_female.res`): a
   cabeça ORIGINAL do Universal Base Characters, intacta (o usuário reprovou a cabeça recortada com
   pescoço fabricado), e do tronco só a coluna do pescoço e o decote. A malha é cortada com borda
@@ -160,8 +162,8 @@ ao longo de várias sessões; o usuário testa e dá feedback.
 - Exportação (preset iOS, `exclude_filter`): `tests/*`, `tools/*`,
   `assets/animations/quaternius_ual/*.glb` (7,6 MB, só serve para extrair animações),
   `assets/models/weapons/lowpoly_wild_west/*` (FBX de origem; o jogo usa a malha assada) e os
-  glTF/bin de `quaternius_ubc/` e `quaternius_hair/` (só servem para assar as peças; as texturas
-  ficam, porque as peças usam). As peças
+  glTF/bin de `quaternius_hair/` (só servem para assar as peças). Os glTF de `quaternius_ubc/`
+  ENTRAM: são o corpo dos bots. As peças
   soltas da cidade continuam entrando: alguns objetos (guarda-corpo, jardineira, balizador) são
   instâncias delas; os prédios usam as malhas juntadas de `levels/skyplaza/meshes/`.
 - Armas (malhas): os FBX do pacote trazem a malha 100 vezes menor, com o tamanho numa escala no nó
@@ -307,7 +309,7 @@ Atualizar esta seção ao fim de cada sessão.
     como na 1ª versão, a pedido do usuário. 39 + 8 + 10 + 10 + 6 testes passando.
   - Roupas dos personagens feitas: roupa de trabalhador (Peasant, Quaternius, CC0), cabeça
     ORIGINAL do corpo (pedido do usuário), cabelos com cor, barba e chapéus de época feitos em
-    código. Jogador de boina, Otis de chapéu-coco e barba, Hazel e Mabel com corpo feminino (Mabel
-    de cartola). Pescoço entra na gola sem vão.
+    código. Pescoço entra na gola sem vão. Depois o usuário pediu os BOTS SEM ROUPA de novo:
+    só o jogador veste (boina); os bots são o corpo original colorido, como antes.
     39 + 8 + 12 + 10 + 6 testes passando.
   - Próximo: Tarefa 10 (áudio, precisa aprovar downloads) ou o que o usuário pedir.

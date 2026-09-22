@@ -283,38 +283,25 @@ func _worn(character: Character) -> PackedStringArray:
 
 
 func _test_characters_dressed() -> void:
-	# Cada um veste o que a ficha dele pede, no esqueleto certo, e só o tecido leva a cor.
-	var otis: Character = _level.get_node("Otis")
-	var hazel: Character = _level.get_node("Hazel")
-	var mabel: Character = _level.get_node("Mabel")
-	var otis_parts: PackedStringArray = _worn(otis)
-	var hazel_parts: PackedStringArray = _worn(hazel)
-	var mabel_parts: PackedStringArray = _worn(mabel)
+	# O jogador veste a roupa (cabeça original, boina); os bots são o corpo original sem roupa,
+	# como antes das roupas (pedido do usuário), com a cor deles tingindo o corpo todo.
 	var player_parts: PackedStringArray = _worn(_player)
-	# A cabeça feminina fica mais baixa (corpo de outra proporção).
-	var head_male: float = otis.model.skeleton.get_bone_global_rest(otis.model.skeleton.find_bone("Head")).origin.y
-	var head_female: float = hazel.model.skeleton.get_bone_global_rest(hazel.model.skeleton.find_bone("Head")).origin.y
-	var cloth_tinted: bool = false
-	var skin_untinted: bool = true
-	for node: Node in hazel.model.skeleton.get_children():
-		var instance := node as MeshInstance3D
-		if instance == null:
-			continue
-		for surface: int in instance.mesh.get_surface_count():
-			var material := instance.get_active_material(surface) as BaseMaterial3D
-			if material == null:
-				continue
-			if material.resource_name.begins_with(Wardrobe.CLOTH_MATERIAL_PREFIX):
-				cloth_tinted = cloth_tinted or not material.albedo_color.is_equal_approx(Color.WHITE)
-			elif instance.name == "Body" and instance.mesh.surface_get_name(surface) == "Skin":
-				skin_untinted = skin_untinted and material.albedo_color.is_equal_approx(Color.WHITE)
-	var ok: bool = "Body" in otis_parts and "Beard" in otis_parts and "Hat" in otis_parts \
-			and "Hair" in hazel_parts and not "Hat" in hazel_parts and "Female_Peasant_Body" in hazel_parts \
-			and "Hat" in mabel_parts and "Male_Peasant_Body" in player_parts and "Hat" in player_parts \
-			and head_female < head_male and cloth_tinted and skin_untinted
-	_check("C1 characters wear their looks: outfit, original head, hair, beard and hats; only the cloth is tinted", ok,
-			"otis=%s hazel=%s mabel=%s player=%s heads=%.2f/%.2f cloth_tinted=%s skin_untinted=%s" % [
-			otis_parts, hazel_parts, mabel_parts, player_parts, head_male, head_female, cloth_tinted, skin_untinted])
+	var bots_plain: bool = true
+	var bots_tinted: bool = true
+	var details: PackedStringArray = []
+	for bot: Character in _bots:
+		var parts: PackedStringArray = _worn(bot)
+		details.append("%s=%s" % [bot.name, parts])
+		bots_plain = bots_plain and "SuperHero_Male" in parts and not "Male_Peasant_Body" in parts \
+				and not "Hair" in parts and not "Hat" in parts
+		var body_mesh := bot.model.skeleton.get_node("SuperHero_Male") as MeshInstance3D
+		var material := body_mesh.get_active_material(0) as BaseMaterial3D
+		bots_tinted = bots_tinted and not material.albedo_color.is_equal_approx(Color.WHITE)
+	var player_dressed: bool = "Male_Peasant_Body" in player_parts and "Body" in player_parts \
+			and "Hat" in player_parts
+	_check("C1 the player wears the outfit; bots are the plain original body, tinted with their color",
+			player_dressed and bots_plain and bots_tinted and _bots.size() == 3,
+			"player=%s %s tinted=%s" % [player_parts, ", ".join(details), bots_tinted])
 
 
 func _test_first_person_sleeves() -> void:

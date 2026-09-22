@@ -8,6 +8,9 @@ enum Hair { NONE, BUZZED, PARTED, LONG, BUNS }
 enum Hat { NONE, BOWLER, TOP_HAT, FLAT_CAP }
 
 @export var body: Body = Body.MALE
+## Com roupa (Peasant) ou o corpo original do Universal Base Characters, sem roupa (os bots, a
+## pedido do usuário). Sem roupa, a cor do personagem tinge o corpo inteiro, como antes.
+@export var dressed: bool = true
 ## Estampa da roupa (a Peasant tem duas: 0 e 1). A cor do personagem tinge por cima.
 @export_range(0, 1) var outfit_variant: int = 0
 @export var hair: Hair = Hair.PARTED

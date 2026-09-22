@@ -3,6 +3,7 @@ extends RefCounted
 ## Monta o corpo de um personagem a partir da ficha dele (CharacterLook): a roupa, que já traz
 ## o esqueleto, os braços, as mãos e as pernas (Modular Character Outfits, roupa Peasant), o
 ## corpo original com a cabeça intacta (sem o que a roupa cobre), o cabelo, a barba e o chapéu.
+## Sem roupa (`dressed` falso, os bots) é o corpo original inteiro do Universal Base Characters.
 ##
 ## Tudo em código, e não guardado na cena: nó guardado dentro de cena importada some no build
 ## do iPhone (ver CLAUDE.md). As peças vestidas são malhas presas ao mesmo esqueleto (pelos
@@ -22,6 +23,11 @@ const BODIES: Dictionary[CharacterLook.Body, String] = {
 	CharacterLook.Body.MALE: "res://assets/models/characters/parts/body_male.res",
 	CharacterLook.Body.FEMALE: "res://assets/models/characters/parts/body_female.res",
 }
+## O corpo inteiro, sem roupa (é o glTF original, com o esqueleto dentro).
+const PLAIN_BODIES: Dictionary[CharacterLook.Body, String] = {
+	CharacterLook.Body.MALE: "res://assets/models/characters/quaternius_ubc/Superhero_Male_FullBody.gltf",
+	CharacterLook.Body.FEMALE: "res://assets/models/characters/quaternius_ubc/Superhero_Female_FullBody.gltf",
+}
 const PARTS_DIR := "res://assets/models/characters/parts/"
 ## Material do tecido da roupa (o resto é pele): é nele que entra a cor do personagem.
 const CLOTH_MATERIAL_PREFIX := "MI_Peasant"
@@ -30,12 +36,23 @@ const HAT_MATERIAL_NAME := "Hat"
 
 ## Corpo pronto para pôr no modelo (nó raiz com Armature/Skeleton3D dentro, como o glTF).
 static func build(look: CharacterLook) -> Node3D:
+	var body_part: CharacterPart = load(BODIES[look.body])
+	if not look.dressed:
+		var plain: Node3D = (load(PLAIN_BODIES[look.body]) as PackedScene).instantiate()
+		plain.name = "Model"
+		_add_extras(plain.get_node("Armature/Skeleton3D") as Skeleton3D, look, body_part)
+		return plain
 	var body: Node3D = OUTFITS[look.body].instantiate()
 	body.name = "Model"
 	var skeleton := body.get_node("Armature/Skeleton3D") as Skeleton3D
 	_apply_outfit_variant(skeleton, look.outfit_variant)
-	var body_part: CharacterPart = load(BODIES[look.body])
 	_dye(_wear(skeleton, "Body", body_part), look.hair_color, "Eyebrows")
+	_add_extras(skeleton, look, body_part)
+	return body
+
+
+# Cabelo, barba e chapéu (servem no corpo com e sem roupa: o esqueleto é o mesmo padrão).
+static func _add_extras(skeleton: Skeleton3D, look: CharacterLook, body_part: CharacterPart) -> void:
 	var hair: String = _hair_file(look)
 	if not hair.is_empty():
 		_dye(_wear(skeleton, "Hair", load(PARTS_DIR + hair) as CharacterPart), look.hair_color)
@@ -43,7 +60,6 @@ static func build(look: CharacterLook) -> Node3D:
 		_dye(_wear(skeleton, "Beard", load(PARTS_DIR + "beard.res") as CharacterPart), look.hair_color)
 	if look.hat != CharacterLook.Hat.NONE:
 		_wear_hat(skeleton, look, body_part.head_box)
-	return body
 
 
 ## É o tecido da roupa (recebe a cor do personagem)?

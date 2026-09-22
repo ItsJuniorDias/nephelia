@@ -189,6 +189,11 @@ func _update_pose_blends(delta: float) -> void:
 
 func _apply_tint() -> void:
 	# Mistura com branco: tinge o tecido sem esconder a estampa (pele, cabelo e chapéu não).
+	# Sem roupa não há tecido: tinge o corpo inteiro, como era antes das roupas.
+	if _cloth_materials.is_empty():
+		for material: BaseMaterial3D in _body_materials:
+			material.albedo_color = Color.WHITE.lerp(tint, 0.6)
+		return
 	var color: Color = Color.WHITE.lerp(tint, 0.5)
 	for material: BaseMaterial3D in _cloth_materials:
 		material.albedo_color = color

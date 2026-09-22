@@ -4,8 +4,8 @@
 
 [resource]
 script = ExtResource("1_xxvly")
-body = 1
+dressed = false
 outfit_variant = 1
-hair = 4
+hair = 0
 hair_color = Color(0.5, 0.22, 0.1, 1)
 hat_color = Color(0, 0, 0, 1)
