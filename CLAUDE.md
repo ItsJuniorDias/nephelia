@@ -210,5 +210,8 @@ Atualizar esta seção ao fim de cada sessão.
     machucados. 37 + 8 + 10 + 5 testes passando.
   - Braços em 1ª pessoa feitos: mãos segurando o revólver, com animação de parado, tiro e
     recarga. 38 + 8 + 10 + 5 testes passando.
-  - Próximo: Tarefa 8 parte 2 (poderes; as ações `power_spark` e `power_gust` já estão no Input
-    Map) e parte 3 (armas extras).
+  - Áudio no iPhone: `audio/general/ios/session_category = 3` (Playback). Com o padrão
+    ("Ambient") o jogo fica mudo com o iPhone no silencioso.
+  - Poderes (Tarefa 8 parte 2): começados e REMOVIDOS a pedido do usuário (2026-09-22); estão no
+    histórico do Git se um dia voltarem.
+  - Próximo: Tarefa 8 parte 3 (armas extras) e o que o usuário pedir.
