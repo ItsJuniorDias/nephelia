@@ -1,8 +1,8 @@
 class_name Wardrobe
 extends RefCounted
 ## Monta o corpo de um personagem a partir da ficha dele (CharacterLook): a roupa, que já traz
-## o esqueleto, os braços, as mãos e as pernas (Modular Character Outfits, roupa Peasant), mais
-## a cabeça, o cabelo, a barba e o chapéu.
+## o esqueleto, os braços, as mãos e as pernas (Modular Character Outfits, roupa Peasant), o
+## corpo original com a cabeça intacta (sem o que a roupa cobre), o cabelo, a barba e o chapéu.
 ##
 ## Tudo em código, e não guardado na cena: nó guardado dentro de cena importada some no build
 ## do iPhone (ver CLAUDE.md). As peças vestidas são malhas presas ao mesmo esqueleto (pelos
@@ -17,9 +17,10 @@ const OUTFIT_TEXTURES: Array[Texture2D] = [
 	preload("res://assets/models/characters/quaternius_outfits/T_Peasant_BaseColor.png"),
 	preload("res://assets/models/characters/quaternius_outfits/T_Peasant_2_BaseColor.png"),
 ]
-const HEADS: Dictionary[CharacterLook.Body, CharacterPart] = {
-	CharacterLook.Body.MALE: preload("res://assets/models/characters/parts/head_male.res"),
-	CharacterLook.Body.FEMALE: preload("res://assets/models/characters/parts/head_female.res"),
+## O corpo original (cabeça, rosto e pescoço intactos), sem o que a roupa cobre.
+const BODIES: Dictionary[CharacterLook.Body, String] = {
+	CharacterLook.Body.MALE: "res://assets/models/characters/parts/body_male.res",
+	CharacterLook.Body.FEMALE: "res://assets/models/characters/parts/body_female.res",
 }
 const PARTS_DIR := "res://assets/models/characters/parts/"
 ## Material do tecido da roupa (o resto é pele): é nele que entra a cor do personagem.
@@ -33,15 +34,15 @@ static func build(look: CharacterLook) -> Node3D:
 	body.name = "Model"
 	var skeleton := body.get_node("Armature/Skeleton3D") as Skeleton3D
 	_apply_outfit_variant(skeleton, look.outfit_variant)
-	var head: CharacterPart = HEADS[look.body]
-	_dye(_wear(skeleton, "Head", head), look.hair_color, "Eyebrows")
+	var body_part: CharacterPart = load(BODIES[look.body])
+	_dye(_wear(skeleton, "Body", body_part), look.hair_color, "Eyebrows")
 	var hair: String = _hair_file(look)
 	if not hair.is_empty():
 		_dye(_wear(skeleton, "Hair", load(PARTS_DIR + hair) as CharacterPart), look.hair_color)
 	if look.beard:
 		_dye(_wear(skeleton, "Beard", load(PARTS_DIR + "beard.res") as CharacterPart), look.hair_color)
 	if look.hat != CharacterLook.Hat.NONE:
-		_wear_hat(skeleton, look, head.mesh.get_aabb())
+		_wear_hat(skeleton, look, body_part.head_box)
 	return body
 
 

@@ -1,10 +1,8 @@
 extends SceneTree
 ## Ferramenta de conferência: fotografa como cada arma é segurada, em 1ª pessoa e de fora.
-##   Godot --path . -s res://tools/pose_sheet.gd --write-movie <pasta>/f.png --fixed-fps 30 \
-##       --resolution 1024x640
-## Imprime "SHOT <nome> <quadro>": a foto é o arquivo f<quadro - 1>.png da pasta (o gravador
-## salva o quadro anterior). Também imprime quanto cada braço errou o ponto da arma (IK).
-## Não roda nos testes: precisa de janela (o --write-movie desenha de verdade).
+##   Godot --path . -s res://tools/pose_sheet.gd --resolution 1024x640 -- <pasta absoluta>
+## Salva <pasta>/<nome>.png (cada foto espera a janela desenhar quadros novos) e imprime quanto
+## cada braço errou o ponto da arma (IK). Não roda nos testes: precisa de janela.
 
 const ARENA := "res://levels/skyplaza/skyplaza.tscn"
 ## Rua do braço leste da praça: aberta, com prédios ao fundo.
@@ -104,12 +102,20 @@ func _hold(frames: int) -> void:
 		_place(_bot, SPOT, SPOT + Vector3(0.0, 1.2, 10.0))
 		# Sem física o bot não vira nem anda (o modelo continua animando).
 		_bot.set_physics_process(false)
-	for i in frames:
+	# Quadros DESENHADOS: com a janela escondida o macOS para de desenhar.
+	var target: int = Engine.get_frames_drawn() + frames
+	var guard: int = 0
+	while Engine.get_frames_drawn() < target and guard < 20000:
 		await process_frame
+		guard += 1
 
 
+# A imagem da tela é a do quadro anterior: com a cena parada há quadros, é a mesma.
 func _shot(shot_name: String) -> void:
-	print("SHOT %s %d" % [shot_name, Engine.get_frames_drawn()])
+	var folder: String = OS.get_cmdline_user_args()[0] if not OS.get_cmdline_user_args().is_empty() else "user://"
+	var path: String = folder.path_join(shot_name + ".png")
+	root.get_texture().get_image().save_png(path)
+	print("SHOT ", path)
 
 
 func _report(id: StringName) -> void:

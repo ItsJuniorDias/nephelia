@@ -306,13 +306,13 @@ func _test_characters_dressed() -> void:
 				continue
 			if material.resource_name.begins_with(Wardrobe.CLOTH_MATERIAL_PREFIX):
 				cloth_tinted = cloth_tinted or not material.albedo_color.is_equal_approx(Color.WHITE)
-			elif instance.name == "Head" and instance.mesh.surface_get_name(surface) == "Skin":
+			elif instance.name == "Body" and instance.mesh.surface_get_name(surface) == "Skin":
 				skin_untinted = skin_untinted and material.albedo_color.is_equal_approx(Color.WHITE)
-	var ok: bool = "Head" in otis_parts and "Beard" in otis_parts and "Hat" in otis_parts \
+	var ok: bool = "Body" in otis_parts and "Beard" in otis_parts and "Hat" in otis_parts \
 			and "Hair" in hazel_parts and not "Hat" in hazel_parts and "Female_Peasant_Body" in hazel_parts \
 			and "Hat" in mabel_parts and "Male_Peasant_Body" in player_parts and "Hat" in player_parts \
 			and head_female < head_male and cloth_tinted and skin_untinted
-	_check("C1 characters wear their looks: outfit, head, hair, beard and hats; only the cloth is tinted", ok,
+	_check("C1 characters wear their looks: outfit, original head, hair, beard and hats; only the cloth is tinted", ok,
 			"otis=%s hazel=%s mabel=%s player=%s heads=%.2f/%.2f cloth_tinted=%s skin_untinted=%s" % [
 			otis_parts, hazel_parts, mabel_parts, player_parts, head_male, head_female, cloth_tinted, skin_untinted])
 
@@ -323,6 +323,6 @@ func _test_first_person_sleeves() -> void:
 	var parts := PackedStringArray()
 	for node: Node in view_model.skeleton.get_children():
 		parts.append(node.name)
-	var ok: bool = "Male_Peasant_Arms" in parts and "Head" in parts and "HiddenBones" in parts
+	var ok: bool = "Male_Peasant_Arms" in parts and "Body" in parts and "HiddenBones" in parts
 	_check("C2 first-person arms wear the player's outfit and hide the head", ok, "parts=%s" % [parts])
 

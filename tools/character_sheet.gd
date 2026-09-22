@@ -1,9 +1,9 @@
 extends SceneTree
 ## Ferramenta de conferência: fotografa os personagens da Sky Plaza lado a lado (roupa, cabelo,
-## chapéu) e o jogador em 1ª pessoa.
-##   Godot --path . -s res://tools/character_sheet.gd --always-on-top --write-movie <pasta>/f.png \
-##       --fixed-fps 30 --resolution 1280x720
-## Imprime "SHOT <nome> <quadro>": a foto é o arquivo f<quadro - 1>.png da pasta.
+## chapéu), closes do pescoço (com e sem a roupa) e o jogador em 1ª pessoa.
+##   Godot --path . -s res://tools/character_sheet.gd --resolution 1280x720 -- <pasta absoluta>
+## Salva <pasta>/<nome>.png. Cada foto espera a janela desenhar quadros novos: com a janela
+## escondida o macOS para de desenhar, e antes as fotos saíam repetidas.
 
 const ARENA := "res://levels/skyplaza/skyplaza.tscn"
 const LINE := Vector3(16.0, 0.05, -4.0)
@@ -17,6 +17,7 @@ const ANGLES: Dictionary[String, Array] = {
 	"pescoco_frente": [Vector3(-1.65, 1.62, 1.2), Vector3(-1.65, 1.52, 0.0), 22.0],
 	"pescoco_lado": [Vector3(-0.3, 1.58, 0.9), Vector3(-1.65, 1.52, 0.0), 20.0],
 	"pescoco_mulher": [Vector3(-0.35, 1.55, 1.1), Vector3(-0.55, 1.47, 0.0), 22.0],
+	"peito_mulher_lado": [Vector3(0.35, 1.4, 0.5), Vector3(-0.55, 1.35, 0.0), 24.0],
 }
 
 var _characters: Array[Character] = []
@@ -60,7 +61,23 @@ func _run() -> void:
 		camera.global_position = LINE + (spec[0] as Vector3)
 		camera.look_at(LINE + (spec[1] as Vector3))
 		await _frames(12)
-		print("SHOT %s %d" % [angle_name, Engine.get_frames_drawn()])
+		_shot(angle_name)
+	# Só o corpo (sem a roupa): mostra o que ficou do corpo original em volta do pescoço.
+	var clothes: Array[Node3D] = []
+	for character: Character in _characters:
+		for node: Node in character.model.skeleton.get_children():
+			if node is MeshInstance3D and String(node.name).contains("Peasant"):
+				clothes.append(node as Node3D)
+				(node as Node3D).visible = false
+	for angle_name: String in ["pescoco_frente", "pescoco_lado", "pescoco_mulher"]:
+		var spec: Array = ANGLES[angle_name]
+		camera.fov = spec[2]
+		camera.global_position = LINE + (spec[0] as Vector3)
+		camera.look_at(LINE + (spec[1] as Vector3))
+		await _frames(8)
+		_shot("sem_roupa_" + angle_name)
+	for node: Node3D in clothes:
+		node.visible = true
 	# Jogador em 1ª pessoa, olhando para os outros.
 	player.model.set_shadow_only(true)
 	view_model.visible = true
@@ -68,11 +85,23 @@ func _run() -> void:
 	player.teleport(Transform3D(Basis(Vector3.UP, 0.0), LINE + Vector3(0.0, 0.0, 4.5)))
 	player.camera.current = true
 	await _frames(12)
-	print("SHOT 1a_pessoa %d" % Engine.get_frames_drawn())
+	_shot("1a_pessoa")
 	await _frames(3)
 	quit()
 
 
+# Espera `count` quadros DESENHADOS (não só processados).
 func _frames(count: int) -> void:
-	for i in count:
+	var target: int = Engine.get_frames_drawn() + count
+	var guard: int = 0
+	while Engine.get_frames_drawn() < target and guard < 20000:
 		await process_frame
+		guard += 1
+
+
+# A imagem da tela é a do quadro anterior: com a cena parada há quadros, é a mesma.
+func _shot(shot_name: String) -> void:
+	var folder: String = OS.get_cmdline_user_args()[0] if not OS.get_cmdline_user_args().is_empty() else "user://"
+	var path: String = folder.path_join(shot_name + ".png")
+	root.get_texture().get_image().save_png(path)
+	print("SHOT ", path)

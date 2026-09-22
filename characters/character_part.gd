@@ -6,3 +6,6 @@ extends Resource
 
 @export var mesh: Mesh
 @export var skin: Skin
+## Caixa da CABEÇA (espaço do esqueleto parado), para assentar o chapéu. Vazia nas peças que
+## não são o corpo.
+@export var head_box: AABB

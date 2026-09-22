@@ -95,18 +95,22 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   mulher, estampa da roupa, cabelo e cor, barba, chapéu e cor; uma por personagem em
   `characters/looks/*.tres`, no campo `look` do Character). `characters/wardrobe.gd` (Wardrobe)
   monta o corpo EM CÓDIGO: a roupa Peasant do Modular Character Outfits (glTF que já traz o
-  esqueleto, braços, mãos e pernas; proporção Regular, quase igual à do Superhero), a cabeça, o
-  cabelo, a barba (peças `CharacterPart` = malha + Skin por nome de osso, em
+  esqueleto, braços, mãos e pernas; proporção Regular, quase igual à do Superhero), o corpo com a
+  cabeça original, o cabelo, a barba (peças `CharacterPart` = malha + Skin por nome de osso, em
   `assets/models/characters/parts/`) e o chapéu (coco, cartola, boina, feitos de formas simples e
   presos ao osso da cabeça). A textura dos pelos é cinza: a cor vem da ficha. A cor do personagem
   (`body_color`) tinge só o tecido (`Wardrobe.is_cloth`). Os braços da 1ª pessoa usam o mesmo
   Wardrobe (manga da roupa do jogador).
-- Peças: `tools/bake_characters.gd` recorta a cabeça do corpo inteiro do Universal Base Characters
-  (a versão grátis não tem a cabeça separada; o leia-me da roupa pede só a cabeça). Ficam a cabeça,
-  o pescoço (elipse em volta do eixo dele) e um TUBO que desce da borda do pescoço para dentro da
-  gola, com o pé preso ao peito (`spine_03`): sem ele a cabeça "flutuava" acima da gola (o
-  usuário viu). Outras bordas da malha (boca, olhos) não viram tubo. Conferir com
-  `tools/character_sheet.gd` (fotos de todos lado a lado, closes do pescoço, 1ª pessoa).
+- Peças: `tools/bake_characters.gd` prepara o CORPO (`parts/body_male.res`, `body_female.res`): a
+  cabeça ORIGINAL do Universal Base Characters, intacta (o usuário reprovou a cabeça recortada com
+  pescoço fabricado), e do tronco só a coluna do pescoço e o decote. A malha é cortada com borda
+  lisa (vértices novos no meio das arestas). A pele debaixo da roupa passa a dobrar com os pesos da
+  roupa (transferência de pesos do ponto dela mais perto) e a pele que escapa do tecido em alguma
+  pose das animações (testada em 10 poses, com raios da física do Godot) sai. Tudo no esqueleto da
+  roupa. Conferir com `tools/character_sheet.gd` (fotos, closes do pescoço com e sem roupa).
+- Fotos de conferência (`tools/character_sheet.gd`, `tools/pose_sheet.gd`): rodar com janela e
+  `-- <pasta>`; cada foto espera quadros realmente desenhados (com a janela escondida o macOS para
+  de desenhar e as fotos saíam repetidas).
 - Modelo dos personagens: `characters/character_model.tscn` (corpo montado pelo Wardrobe + arma na
   mão direita) com árvore de animação montada em código: pernas por velocidade, tronco em pose de
   mira (filtrado a partir de `spine_01`), tiro/levar tiro por cima, transição vida/morte. Animações
@@ -301,8 +305,9 @@ Atualizar esta seção ao fim de cada sessão.
   - Tarefa 8, parte 3 (armas extras) feita: repetidora e espingarda como itens, munição contada,
     duas mãos na arma (IK), coice/recarga/som por arma, bots pegam arma perto. Revólver mantido
     como na 1ª versão, a pedido do usuário. 39 + 8 + 10 + 10 + 6 testes passando.
-  - Roupas dos personagens feitas: roupa de trabalhador (Peasant, Quaternius, CC0), cabeça,
-    cabelos com cor, barba e chapéus de época feitos em código. Jogador de boina, Otis de chapéu-coco
-    e barba, Hazel e Mabel com corpo feminino (Mabel de cartola). Pescoço ligado à gola.
+  - Roupas dos personagens feitas: roupa de trabalhador (Peasant, Quaternius, CC0), cabeça
+    ORIGINAL do corpo (pedido do usuário), cabelos com cor, barba e chapéus de época feitos em
+    código. Jogador de boina, Otis de chapéu-coco e barba, Hazel e Mabel com corpo feminino (Mabel
+    de cartola). Pescoço entra na gola sem vão.
     39 + 8 + 12 + 10 + 6 testes passando.
   - Próximo: Tarefa 10 (áudio, precisa aprovar downloads) ou o que o usuário pedir.
