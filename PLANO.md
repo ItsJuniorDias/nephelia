@@ -15,8 +15,9 @@ poderes. O visual é uma cidade flutuante do começo do século XX. Ordem dos mo
 - [x] Curadoria de assets gratuitos + download dos 12 pacotes (ver `CREDITS.md`)
 
 ## Tarefa 0: Arrumação
-- [ ] Primeiro commit e push para o GitHub (repositório privado)
-- [ ] Confirmar que o jogo abre no iPhone 15
+- [x] Primeiro commit (`02aaa5a`)
+- [ ] Push para o GitHub: criar o repositório privado `nephelia` na conta ItsJuniorDias (remoto SSH já configurado)
+- [x] Confirmar que o jogo abre no iPhone 15
 - [ ] Colocar o filtro `tests/*` no preset iOS
 
 ---
@@ -25,7 +26,7 @@ poderes. O visual é uma cidade flutuante do começo do século XX. Ordem dos mo
 Meta: partida de 5 minutos, você contra 3 a 5 bots, numa arena de ilhas com trilhos
 aéreos, a 60 FPS no iPhone.
 
-### 1. Controladores (base para bots e rede)
+### 1. Controladores (base para bots e rede): [x] feito
 - O jogador passa a receber comandos (mover, olhar, pular, atirar) de um **controlador**:
   humano (toque, teclado, controle), bot e, no futuro, jogador remoto
 - A simulação do personagem não lê mais o teclado nem o toque diretamente

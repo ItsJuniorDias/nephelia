@@ -1,25 +1,12 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://player/player.gd" id="1_player"]
-[ext_resource type="PackedScene" path="res://ui/touch_controls/touch_controls.tscn" id="2_touch"]
+[ext_resource type="PackedScene" path="res://characters/character.tscn" id="1_character"]
+[ext_resource type="Script" path="res://player/human_controller.gd" id="2_human"]
+[ext_resource type="PackedScene" path="res://ui/touch_controls/touch_controls.tscn" id="3_touch"]
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
-radius = 0.35
-height = 1.8
+[node name="Player" instance=ExtResource("1_character")]
 
-[node name="Player" type="CharacterBody3D"]
-script = ExtResource("1_player")
+[node name="HumanController" type="Node" parent="."]
+script = ExtResource("2_human")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-shape = SubResource("CapsuleShape3D_body")
-
-[node name="Head" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
-
-[node name="Camera3D" type="Camera3D" parent="Head"]
-current = true
-fov = 75.0
-near = 0.05
-
-[node name="TouchControls" parent="." instance=ExtResource("2_touch")]
+[node name="TouchControls" parent="HumanController" instance=ExtResource("3_touch")]

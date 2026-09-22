@@ -20,8 +20,7 @@ ao longo de várias sessões; o usuário testa e dá feedback.
 ## Tecnologia
 - Godot 4.7.2 (versão padrão, sem .NET), GDScript com tipagem estática.
 - Física: Jolt Physics.
-- Renderizador alvo: **Mobile**. O projeto foi criado com Forward+ e precisa ser trocado
-  em Configurações do Projeto → Renderização → Renderizador.
+- Renderizador: **Mobile**.
 - Plataformas: Android e iOS primeiro; Steam (PC / Steam Deck) depois.
 
 ## Regras do projeto
@@ -52,6 +51,12 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   override por feature) antes de exportar para PC/Steam.
 - Não editar `project.godot` com o editor aberto: o Godot pode sobrescrever. Mudanças de configuração
   via script headless com `ProjectSettings.save()`.
+- Estrutura dos personagens: `characters/character.gd` (Character: corpo, movimento, pulo)
+  obedece a um `CharacterCommand` (mover, yaw/pitch ABSOLUTOS, pular, atirar) vindo do
+  `CharacterController` filho: `player/human_controller.gd` (toque/teclado/controle) ou
+  `bots/bot_controller.gd`. Nada no Character lê Input. O HumanController chama
+  `apply_look()` na hora (câmera responsiva) e o comando repete o mesmo ângulo.
+  `player.tscn` e `bots/bot.tscn` herdam `characters/character.tscn`. Grupos: "characters", "bots".
 - Testes: `Godot --headless --path . -s res://tests/test_controls.gd` (saída 0 = tudo passou). Rodar
   depois de qualquer mudança no jogador/controles/fase. Ao criar presets de exportação, excluir `tests/*`.
   No headless a janela é 64x64 (viewport 1152x1152): eventos simulados precisam ser convertidos com
@@ -66,7 +71,7 @@ ao longo de várias sessões; o usuário testa e dá feedback.
 ## Estrutura de pastas (por funcionalidade, cena + script juntos)
 ```
 res://
-  player/  weapons/  powers/  enemies/  levels/  ui/  autoload/
+  characters/  player/  bots/  weapons/  powers/  levels/  ui/  autoload/  tests/
   assets/   # arquivos de terceiros: models/, textures/, audio/, fonts/
 ```
 
@@ -76,15 +81,16 @@ uma tarefa por vez, e marcar `[x]` ao concluir.
 
 ## Estado atual
 Atualizar esta seção ao fim de cada sessão.
-- 2026-09-22: renderizador Mobile, Git iniciado (sem commits ainda). Input Map configurado.
-  Feitos: `player/` (Player: andar, pular com coyote time/buffer, olhar por toque/mouse/controle,
-  teleport), `ui/touch_controls/` (TouchControls, TouchJoystick, TouchActionButton com FIRE/JUMP),
-  `levels/test_level` (ilha flutuante greybox em CSG + ilha pequena para o futuro trilho) e
-  `tests/test_controls.gd` (15 testes, todos passando). Conferido visualmente com Movie Maker.
-  Preset de exportação iOS criado (Team ID 9337P26ZJ6, bundle com.alexandrejunior.nephelia; filtro
-  `tests/*` ainda não colocado). Teste no iPhone 15 do usuário ainda NÃO confirmado.
-- 2026-09-22: curadoria gratuita feita e 12 pacotes baixados (506 MB) em `~/Downloads/nephelia_assets/`
-  (kenney/, quaternius/, weapons/), registrados em `CREDITS.md`. Downtown City e Nature têm pasta
-  glTF; a Animation Library tem `Unreal-Godot` (.glb); as armas são só FBX.
-  Pendentes (aprovar antes de baixar): Sonniss GDC 2026 (7,5 GB), músicas do Kevin MacLeod (CC-BY),
-  fontes Limelight e Josefin Sans. Próximo: integrar os assets em `res://assets/`, depois arma hitscan.
+- 2026-09-22 (fim da sessão 1):
+  - Feito: personagem com controladores (humano e bot de teste), controles de toque, fase de
+    teste greybox com 1 bot, 18 testes passando. Jogo testado e rodando no iPhone 15 do usuário.
+  - Preset de exportação iOS: Team ID 9337P26ZJ6, bundle com.alexandrejunior.nephelia.
+    Falta colocar o filtro `tests/*`.
+  - Git: commits na `main`. Push pendente: falta criar o repositório privado `nephelia` na conta
+    ItsJuniorDias (remoto SSH `origin` já configurado; `gh` não está instalado).
+  - Assets: 12 pacotes gratuitos baixados (506 MB) em `~/Downloads/nephelia_assets/` (kenney/,
+    quaternius/, weapons/), registrados em `CREDITS.md`, ainda não importados no projeto.
+    Downtown City e Nature têm pasta glTF; a Animation Library tem `Unreal-Godot` (.glb);
+    as armas são só FBX. Pendentes (aprovar antes de baixar): Sonniss GDC 2026 (7,5 GB),
+    músicas do Kevin MacLeod (CC-BY), fontes Limelight e Josefin Sans.
+  - Próximo: Tarefa 2 do `PLANO.md` (revólver).

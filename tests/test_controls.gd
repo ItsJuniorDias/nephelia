@@ -11,7 +11,7 @@ const JOY_POS := Vector2(150, 520)
 
 var _failures: int = 0
 var _level: Node3D
-var _player: Player
+var _player: Character
 var _touch: TouchControls
 var _spawn: Marker3D
 
@@ -26,9 +26,12 @@ func _run() -> void:
 	root.add_child(_level)
 	current_scene = _level
 	_player = _level.get_node("Player")
-	_touch = _player.get_node("TouchControls")
+	_touch = _player.get_node("HumanController/TouchControls")
 	_spawn = _level.get_node("SpawnPoint")
 	_touch.force_visible = true
+	# Bots pausados nos testes do jogador (não esbarram nele); os testes de bot religam.
+	for bot: Node in get_nodes_in_group(&"bots"):
+		bot.process_mode = Node.PROCESS_MODE_DISABLED
 	print("touch mode: ", TouchControls.is_touch_mode(), "  viewport: ", root.get_visible_rect().size)
 
 	await _test_lands()
@@ -46,6 +49,9 @@ func _run() -> void:
 	await _test_stairs()
 	await _test_ramp()
 	await _test_platform_jump()
+	await _test_bodies_and_camera()
+	await _test_bot_reaches_target()
+	await _test_bot_wanders()
 
 	print("RESULT: ", "ALL PASSED" if _failures == 0 else "%d FAILED" % _failures)
 	quit(0 if _failures == 0 else 1)
@@ -337,3 +343,47 @@ func _test_platform_jump() -> void:
 	await _physics(40)
 	_check("15 jumps onto the 1 m platform", _player.global_position.y > 0.95 and _player.is_on_floor(),
 			"y=%.2f z=%.2f" % [_player.global_position.y, _player.global_position.z])
+
+
+func _test_bodies_and_camera() -> void:
+	var bot: Character = _level.get_node("Bot")
+	var ok: bool = root.get_camera_3d() == _player.camera \
+			and _player.body_mesh.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY \
+			and not _player.visor_mesh.visible \
+			and bot.body_mesh.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_ON \
+			and bot.visor_mesh.visible
+	_check("16 own body hidden, bot visible, player camera", ok,
+			"camera_ok=%s" % (root.get_camera_3d() == _player.camera))
+
+
+func _test_bot_reaches_target() -> void:
+	var bot: Character = _level.get_node("Bot")
+	var brain := bot.controller as BotController
+	bot.process_mode = Node.PROCESS_MODE_INHERIT
+	brain.target = bot.global_position + Vector3(0, 0, -3)
+	var goal: Vector3 = brain.target
+	var closest: float = INF
+	for i in 240:
+		await physics_frame
+		closest = minf(closest, Vector2(bot.global_position.x - goal.x, bot.global_position.z - goal.z).length())
+	_check("17 bot walks to a given target", closest < brain.arrive_distance + 0.1, "closest=%.2f" % closest)
+
+
+func _test_bot_wanders() -> void:
+	# O bot anda sozinho: não aperta ações do Input Map e não mexe no jogador.
+	await _reset()
+	var bot: Character = _level.get_node("Bot")
+	var player_start: Vector3 = _player.global_position
+	var last: Vector3 = bot.global_position
+	var travelled: float = 0.0
+	var input_untouched: bool = true
+	for i in 300:
+		await physics_frame
+		travelled += Vector2(bot.global_position.x - last.x, bot.global_position.z - last.z).length()
+		last = bot.global_position
+		if Input.get_action_strength("move_forward") > 0.0 or Input.is_action_pressed("jump"):
+			input_untouched = false
+	var player_moved: float = _player.global_position.distance_to(player_start)
+	_check("18 bot wanders on its own", travelled > 3.0 and bot.global_position.y > -1.0 \
+			and input_untouched and player_moved < 0.05,
+			"travelled=%.2f y=%.2f input_untouched=%s player_moved=%.3f" % [travelled, bot.global_position.y, input_untouched, player_moved])

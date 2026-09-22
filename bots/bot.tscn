@@ -1,0 +1,10 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://characters/character.tscn" id="1_character"]
+[ext_resource type="Script" path="res://bots/bot_controller.gd" id="2_bot"]
+
+[node name="Bot" instance=ExtResource("1_character")]
+body_color = Color(0.76, 0.38, 0.24, 1)
+
+[node name="BotController" type="Node" parent="."]
+script = ExtResource("2_bot")
