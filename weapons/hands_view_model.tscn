@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://weapons/view_model.gd" id="1_view_model"]
 [ext_resource type="PackedScene" path="res://assets/models/characters/quaternius_ubc/Superhero_Male_FullBody.gltf" id="2_body"]
-[ext_resource type="PackedScene" path="res://assets/models/weapons/lowpoly_wild_west/colt_revolver.fbx" id="3_gun"]
+[ext_resource type="Mesh" path="res://assets/models/weapons/colt_revolver.res" id="3_gun"]
 [ext_resource type="Texture2D" path="res://assets/vfx/kenney/star_09.png" id="4_flash"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/kenney/switch_001.ogg" id="5_reload_start"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/kenney/click_001.ogg" id="6_reload_end"]
@@ -31,8 +31,9 @@ transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, -1.5, 0)
 [node name="RightHand" type="BoneAttachment3D" parent="Model/Armature/Skeleton3D"]
 bone_name = "hand_r"
 
-[node name="Gun" parent="Model/Armature/Skeleton3D/RightHand" instance=ExtResource("3_gun")]
+[node name="Gun" type="MeshInstance3D" parent="Model/Armature/Skeleton3D/RightHand"]
 transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0.18, -0.05)
+mesh = ExtResource("3_gun")
 
 [node name="Muzzle" type="Marker3D" parent="Model/Armature/Skeleton3D/RightHand/Gun"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0005, 0.1477, -0.19)

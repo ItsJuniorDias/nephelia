@@ -136,9 +136,16 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   `assets/models/nature/stylized/` (texturas limitadas a 1024 px no .import). Os prédios prontos do
   pacote (18 a 45 mil triângulos) ficaram de fora por desempenho: a arena usa fachadas montadas.
   Arena inteira hoje: ~286 mil triângulos e 267 superfícies com 4 personagens (medir no iPhone).
-- Exportação: excluir `tests/*`, `tools/*`, `assets/animations/quaternius_ual/*.glb` (7,6 MB, só
-  serve para extrair animações) e `assets/models/city/downtown/*.gltf` (as peças soltas só servem
-  para o build; o jogo carrega as malhas juntadas de `levels/skyplaza/meshes/`).
+- Exportação (preset iOS, `exclude_filter`): `tests/*`, `tools/*`,
+  `assets/animations/quaternius_ual/*.glb` (7,6 MB, só serve para extrair animações) e
+  `assets/models/weapons/lowpoly_wild_west/*` (FBX de origem; o jogo usa a malha assada). As peças
+  soltas da cidade continuam entrando: alguns objetos (guarda-corpo, jardineira, balizador) são
+  instâncias delas; os prédios usam as malhas juntadas de `levels/skyplaza/meshes/`.
+- Revólver: o FBX do pacote traz a malha 100 vezes menor, com o tamanho numa escala no nó (3 mm de
+  malha com escala 100). Isso confunde o LOD automático e **a arma some no iPhone**. Por isso
+  `tools/bake_revolver.gd` assa `assets/models/weapons/colt_revolver.res` no tamanho certo, com
+  materiais simples, e as cenas usam essa malha. Vale a regra geral: modelo que depende de escala
+  grande no nó deve ser assado antes de entrar no jogo.
 - Braços em 1ª pessoa: `weapons/hands_view_model.tscn` + `weapons/view_model.gd`. É o mesmo corpo
   e as mesmas animações de pistola do personagem (parado, tiro, recarga, com a velocidade ajustada
   ao ritmo da arma), com a cabeça e as pernas encolhidas pelo `characters/hidden_bones_modifier.gd`

@@ -6,6 +6,7 @@ extends Node
 ## impede trapaça: o jogador só diz "atirei nesta direção"; quem decide o acerto é o juiz.
 
 signal shot_resolved(result: ShotResult)
+signal power_resolved(result: PowerResult)
 signal character_damaged(victim: Character, attacker: Character, amount: float)
 ## `killer` é null quando foi queda ou outro acidente.
 signal character_died(victim: Character, killer: Character)
@@ -13,6 +14,8 @@ signal character_respawned(character: Character)
 signal item_picked(character: Character, pickup: Pickup)
 
 const GROUP: StringName = &"match_referee"
+## Depois de levar dano, a queda conta como abate de quem atacou por este tempo (empurrão vale).
+const FALL_CREDIT_TIME: float = 3.0
 ## Altura, a partir dos pés, do ponto que a mira assistida procura no alvo (peito).
 const CHEST_HEIGHT: float = 1.2
 
@@ -32,6 +35,8 @@ const CHEST_HEIGHT: float = 1.2
 var _rng := RandomNumberGenerator.new()
 ## Quem está esperando para renascer, e quanto tempo falta.
 var _respawn_timers: Dictionary[Character, float] = {}
+## Último a machucar cada personagem, e quanto tempo o crédito ainda vale (quedas).
+var _last_attackers: Dictionary[Character, Array] = {}
 
 
 ## Acha o juiz da cena atual (ou null se não houver).
@@ -44,10 +49,16 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	for character: Character in _last_attackers.keys():
+		var credit: Array = _last_attackers[character]
+		credit[1] -= delta
+		if credit[1] <= 0.0:
+			_last_attackers.erase(character)
 	for node: Node in get_tree().get_nodes_in_group(&"characters"):
 		var character := node as Character
 		if character.is_alive and character.global_position.y < fall_limit_y:
-			kill(character, null)
+			# Caiu: se alguém acabou de acertar ou empurrar, o abate é dele.
+			kill(character, _recent_attacker(character))
 	for character: Character in _respawn_timers.keys():
 		_respawn_timers[character] -= delta
 		if _respawn_timers[character] <= 0.0:
@@ -59,6 +70,8 @@ func apply_damage(victim: Character, amount: float, attacker: Character) -> floa
 	if not victim.is_alive or victim.is_spawn_protected or amount <= 0.0:
 		return 0.0
 	var applied: float = minf(amount, victim.health)
+	if attacker != null and attacker != victim:
+		_last_attackers[victim] = [attacker, FALL_CREDIT_TIME]
 	victim.set_health(victim.health - amount)
 	character_damaged.emit(victim, attacker, applied)
 	if victim.health <= 0.0:
@@ -102,6 +115,8 @@ func kill(victim: Character, killer: Character) -> void:
 ## Faz renascer já, no ponto mais seguro (usado pelo cronômetro e pelos testes).
 func respawn_now(character: Character) -> void:
 	_respawn_timers.erase(character)
+	# Vida nova: o crédito da queda para quem atacou antes não vale mais.
+	_last_attackers.erase(character)
 	character.respawn(pick_spawn_point(character), spawn_protection_time)
 	character_respawned.emit(character)
 
@@ -121,6 +136,86 @@ func pick_spawn_point(for_character: Character) -> Transform3D:
 			best_distance = nearest_enemy
 			best = spawn.global_transform
 	return best
+
+
+## Faísca: descarga elétrica reta, com a mesma mira assistida do tiro. Precisa rodar dentro do
+## passo de física.
+func resolve_spark(caster: Character, powers: Powers, aim_assist: bool) -> PowerResult:
+	var result := PowerResult.new()
+	result.kind = PowerResult.Kind.SPARK
+	result.caster = caster
+	result.origin = caster.head.global_position
+	result.damage = powers.spark_damage
+	var aim: Vector3 = -caster.head.global_basis.z
+	if aim_assist:
+		var target: Character = _find_assist_target(caster, result.origin, aim, powers.spark_range)
+		if target != null:
+			aim = (_chest_of(target) - result.origin).normalized()
+	result.direction = aim
+	var hit: Dictionary = _ray(caster, result.origin, result.origin + aim * powers.spark_range)
+	result.end_point = hit.get("position", result.origin + aim * powers.spark_range)
+	var victim := hit.get("collider") as Character
+	if victim != null:
+		_hurt_with_power(victim, caster, powers.spark_damage, result)
+	power_resolved.emit(result)
+	return result
+
+
+## Rajada: sopro em cone que machuca pouco e empurra muito (pode jogar o inimigo da ilha).
+func resolve_gust(caster: Character, powers: Powers) -> PowerResult:
+	var result := PowerResult.new()
+	result.kind = PowerResult.Kind.GUST
+	result.caster = caster
+	result.origin = caster.head.global_position
+	result.direction = -caster.head.global_basis.z
+	result.end_point = result.origin + result.direction * powers.gust_range
+	result.damage = powers.gust_damage
+	var half_angle: float = deg_to_rad(powers.gust_angle_degrees) * 0.5
+	for node: Node in get_tree().get_nodes_in_group(&"characters"):
+		var victim := node as Character
+		if victim == caster or not victim.is_alive or victim.is_spawn_protected:
+			continue
+		var to_victim: Vector3 = _chest_of(victim) - result.origin
+		if to_victim.length() > powers.gust_range or result.direction.angle_to(to_victim) > half_angle:
+			continue
+		# Parede no meio segura o sopro.
+		if _ray(caster, result.origin, _chest_of(victim)).get("collider") != victim:
+			continue
+		_hurt_with_power(victim, caster, powers.gust_damage, result)
+		var away: Vector3 = to_victim
+		away.y = 0.0
+		if away.length_squared() < 0.01:
+			away = result.direction
+		victim.apply_impulse(away.normalized() * powers.gust_push + Vector3.UP * powers.gust_lift)
+	power_resolved.emit(result)
+	return result
+
+
+# Dano de um poder: conta como ataque de quem usou (vale para a queda) e avisa a vítima, que
+# mostra o clarão e a direção do dano como faz com os tiros.
+func _hurt_with_power(victim: Character, caster: Character, amount: float, result: PowerResult) -> void:
+	var applied: float = apply_damage(victim, amount, caster)
+	if applied <= 0.0 and not victim.is_alive:
+		return
+	result.victims.append(victim)
+	var as_shot := ShotResult.new()
+	as_shot.shooter = caster
+	as_shot.origin = result.origin
+	as_shot.direction = result.direction
+	as_shot.end_point = _chest_of(victim)
+	as_shot.hit = true
+	as_shot.victim = victim
+	as_shot.damage = applied
+	victim.receive_hit(as_shot)
+
+
+# Quem machucou `character` há pouco (crédito da queda), ou null.
+func _recent_attacker(character: Character) -> Character:
+	var credit: Array = _last_attackers.get(character, [])
+	if credit.is_empty():
+		return null
+	var attacker := credit[0] as Character
+	return attacker if attacker != character else null
 
 
 ## Resolve um tiro: aplica mira assistida e imprecisão, lança o raio e avisa quem foi atingido.

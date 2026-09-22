@@ -87,6 +87,7 @@ func _run() -> void:
 	await _test_score_limit()
 	await _test_timer_format()
 	await _test_first_person_arms()
+	await _test_fall_after_hit_scores()
 
 	# Deixa rastros e faíscas terminarem antes de sair (evita aviso de recurso em uso).
 	_shots.clear()
@@ -795,12 +796,28 @@ func _test_fall_scores() -> void:
 	var player_kills: int = _match.get_kills(_player)
 	var bot_kills: int = _match.get_kills(bot)
 	var bot_deaths: int = _match.get_deaths(bot)
+	# Vida nova (sem ninguém tendo acertado agora há pouco): a queda não dá ponto a ninguém.
+	_referee.respawn_now(bot)
+	await _physics(2)
 	bot.global_position = Vector3(0, -100, 0)
 	await _physics(3)
 	await _frames(2)
 	var ok: bool = _match.get_deaths(bot) == bot_deaths + 1 and _match.get_kills(_player) == player_kills \
 			and _match.get_kills(bot) == bot_kills and match_hud.get_feed_lines().back() == "%s fell" % bot.display_name
 	_check("33 falling counts a death but gives no point", ok, "feed=%s" % [match_hud.get_feed_lines()])
+
+
+# Quem acabou de acertar (ou empurrar) alguém leva o abate se a pessoa cair da arena.
+func _test_fall_after_hit_scores() -> void:
+	var bot: Character = await _prepare_weapon_test()
+	var player_kills: int = _match.get_kills(_player)
+	_referee.apply_damage(bot, 10.0, _player)
+	await _physics(3)
+	bot.global_position = Vector3(0, -100, 0)
+	await _physics(3)
+	await _frames(2)
+	_check("39 falling right after being hit counts for whoever hit", _match.get_kills(_player) == player_kills + 1,
+			"kills=%d" % _match.get_kills(_player))
 
 
 func _test_time_up_and_result() -> void:

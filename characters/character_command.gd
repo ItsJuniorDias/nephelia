@@ -22,6 +22,10 @@ var reload: bool = false
 var aim_assist: bool = false
 ## Engatar/soltar do trilho aéreo está apertado neste passo.
 var use_rail: bool = false
+## Poder Faísca (descarga elétrica) está apertado neste passo.
+var spark: bool = false
+## Poder Rajada (empurrão) está apertado neste passo.
+var gust: bool = false
 
 
 ## Limpa os botões e o movimento (o olhar é sempre preenchido pelo controlador).
@@ -32,3 +36,5 @@ func reset() -> void:
 	reload = false
 	aim_assist = false
 	use_rail = false
+	spark = false
+	gust = false
