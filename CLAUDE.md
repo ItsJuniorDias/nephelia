@@ -109,6 +109,10 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   convexa), não a malha, e a navmesh lê as colisões (`geometry_parsed_geometry_type = 1`). Nada
   pode ter degrau: os pisos são planos 1 cm acima da plataforma, sem colisão (por isso não se usa
   calçada com meio-fio), e as pontes têm patamares planos na altura de cada quarteirão.
+- Nuvens: o `build_skyplaza.gd` gera `skyplaza_clouds.tscn` (aglomerados de esferas achatadas
+  numa malha só, sem sombra e sem colisão) por baixo e em volta dos quarteirões: a cidade flutua
+  sobre um mar de nuvens e dá para cair atravessando. O "chão" do céu é claro (acima das nuvens),
+  senão a base das plataformas fica preta.
 - Prédios: `tools/city_kit.gd` (CityKit, só ferramenta) monta fachadas com as peças modulares do
   Downtown City MegaKit (parede de 2 m x 3 m de altura, face de fora para +Z) e junta cada prédio
   numa malha só, com uma superfície por material e LOD automático. Estilos: "brick" (casa de

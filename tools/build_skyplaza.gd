@@ -5,6 +5,7 @@ extends SceneTree
 ##                                           colisão; é o que a navmesh lê)
 ##   levels/skyplaza/skyplaza_decor.tscn     árvores, arbustos, flores, rochas (só visual)
 ##   levels/skyplaza/skyplaza_rails.tscn     trilhos aéreos (fora da navmesh)
+##   levels/skyplaza/skyplaza_clouds.tscn    mar de nuvens em volta (só visual)
 ##   levels/skyplaza/meshes/*.res            prédios e enfeites já juntados (CityKit)
 ## Depois de rodar, recalcular a navmesh:
 ##   Godot --headless --path . -s res://tools/build_skyplaza.gd
@@ -33,6 +34,7 @@ const ARM_HALF: float = 10.0
 var _geometry: Node3D
 var _decor: Node3D
 var _rails: Node3D
+var _clouds: Node3D
 var _kit := CityKit.new()
 var _items: Node3D
 var _shape_cache: Dictionary = {}
@@ -66,12 +68,14 @@ func _run() -> void:
 
 	_build_rails()
 	_build_items()
+	_build_clouds()
 	_build_items()
 
 	_save(_geometry, OUT_DIR + "skyplaza_geometry.tscn")
 	_save(_decor, OUT_DIR + "skyplaza_decor.tscn")
 	_save(_rails, OUT_DIR + "skyplaza_rails.tscn")
 	_save(_items, OUT_DIR + "skyplaza_items.tscn")
+	_save(_clouds, OUT_DIR + "skyplaza_clouds.tscn")
 	print("city pieces: ", _kit.piece_count)
 	quit()
 
@@ -268,6 +272,43 @@ func _build_items() -> void:
 		item.position = health_spots[i]
 		_items.add_child(item)
 		item.owner = _items
+
+
+# Mar de nuvens: cada nuvem é um aglomerado de esferas achatadas (opacas, baratas no celular),
+# tudo junto numa malha só, sem sombra e sem colisão. A maioria fica abaixo dos quarteirões, para
+# a cidade parecer flutuar sobre as nuvens; algumas passam mais alto, ao longe.
+func _build_clouds() -> void:
+	const COUNT := 70
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 20260922
+	var puff := SphereMesh.new()
+	puff.radius = 1.0
+	puff.height = 2.0
+	puff.radial_segments = 8
+	puff.rings = 4
+	var tool := SurfaceTool.new()
+	tool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for i in COUNT:
+		var angle: float = rng.randf() * TAU
+		var distance: float = rng.randf_range(58.0, 180.0)
+		var height: float = rng.randf_range(-30.0, -7.0) if rng.randf() < 0.75 else rng.randf_range(14.0, 36.0)
+		var center := Vector3(cos(angle) * distance, height, sin(angle) * distance * 0.85)
+		var size: float = rng.randf_range(0.8, 1.9)
+		for p in rng.randi_range(4, 8):
+			var offset := Vector3(rng.randf_range(-7.0, 7.0), rng.randf_range(-1.2, 1.2), rng.randf_range(-5.0, 5.0)) * size
+			var radius: float = rng.randf_range(3.5, 7.0) * size
+			var shape := Basis.from_scale(Vector3(radius, radius * rng.randf_range(0.35, 0.55), radius))
+			tool.append_from(puff, 0, Transform3D(shape, center + offset))
+	_clouds = Node3D.new()
+	_clouds.name = "SkyPlazaClouds"
+	root.add_child(_clouds)
+	var instance := MeshInstance3D.new()
+	instance.name = "Clouds"
+	instance.mesh = tool.commit()
+	instance.material_override = _materials["cloud"]
+	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_clouds.add_child(instance)
+	instance.owner = _clouds
 
 
 # ---------------------------------------------------------------- blocos de construção
@@ -521,7 +562,8 @@ func _place(parent: Node3D, path: String, at: Vector3, rotation_degrees: float, 
 
 func _make_materials() -> void:
 	_materials["grass"] = _flat_material(Color(0.42, 0.62, 0.3))
-	_materials["rock"] = _flat_material(Color(0.52, 0.46, 0.4))
+	# A rocha da base fica só com a luz do céu (o sol não bate embaixo): textura de terra clara.
+	_materials["rock"] = _world_material("T_Dirt_BaseColor.png", 0.12, Color(1.8, 1.7, 1.55))
 	_materials["foundation"] = _world_material("T_Concrete_BaseColor.png", 0.25, Color(0.86, 0.8, 0.7))
 	_materials["marble"] = _world_material("T_MarbleFloor_BaseColor.png", 0.25, Color.WHITE)
 	_materials["asphalt"] = _world_material("T_Concrete_Asphalt_BaseColor.png", 0.15, Color(0.75, 0.75, 0.75))
@@ -537,6 +579,11 @@ func _make_materials() -> void:
 	iron.metallic = 0.5
 	iron.roughness = 0.6
 	_materials["iron"] = iron
+	var cloud := StandardMaterial3D.new()
+	cloud.albedo_color = Color(0.98, 0.98, 1.0)
+	cloud.roughness = 1.0
+	cloud.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
+	_materials["cloud"] = cloud
 	var lamp := StandardMaterial3D.new()
 	lamp.albedo_color = Color(1.0, 0.93, 0.75)
 	lamp.emission_enabled = true
