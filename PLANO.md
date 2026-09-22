@@ -1,0 +1,125 @@
+# Plano de tarefas: Nephelia
+
+Uma tarefa por vez, em primeiro plano. Cada tarefa termina com os testes passando
+(`tests/`), o jogo rodando no Mac e um commit. Marcar `[x]` ao concluir.
+
+**O jogo (decidido em 2026-09-22):** arena de tiro frenética nos céus. Partidas rápidas de
+todos contra todos, com 4 a 6 jogadores, em ilhas flutuantes ligadas por trilhos aéreos, com
+poderes. O visual é uma cidade flutuante do começo do século XX. Ordem dos modos:
+**bots → multiplayer na mesma Wi-Fi → online** (bots completando vagas).
+
+## Já feito
+- [x] Projeto Godot 4.7.2 (renderizador Mobile, física Jolt), Git iniciado, Input Map
+- [x] Jogador em primeira pessoa + controles de toque + fase de teste + 15 testes automáticos
+- [x] Preset de exportação iOS
+- [x] Curadoria de assets gratuitos + download dos 12 pacotes (ver `CREDITS.md`)
+
+## Tarefa 0: Arrumação
+- [ ] Primeiro commit e push para o GitHub (repositório privado)
+- [ ] Confirmar que o jogo abre no iPhone 15
+- [ ] Colocar o filtro `tests/*` no preset iOS
+
+---
+
+## Marco 1: arena contra bots (offline)
+Meta: partida de 5 minutos, você contra 3 a 5 bots, numa arena de ilhas com trilhos
+aéreos, a 60 FPS no iPhone.
+
+### 1. Controladores (base para bots e rede)
+- O jogador passa a receber comandos (mover, olhar, pular, atirar) de um **controlador**:
+  humano (toque, teclado, controle), bot e, no futuro, jogador remoto
+- A simulação do personagem não lê mais o teclado nem o toque diretamente
+- Pronto quando: tudo funciona como hoje, os 15 testes passam e um bot de teste anda sozinho
+
+### 2. Arma: revólver
+- Modelo em primeira pessoa (Low Poly Wild West Guns), tiro por raio (hitscan), munição, recarga
+- Mira assistida para toque, coice e balanço por código, clarão, faíscas e sons
+- Acertos decididos por um **juiz da partida** (no futuro, esse juiz vira o servidor)
+- Pronto quando: atirar funciona no toque, no mouse e no controle, com testes
+
+### 3. Vida, morte e respawn
+- Vida, dano, morte e respawn rápido em pontos espalhados, com proteção curta ao nascer
+- Indicador de dano e de onde veio o tiro
+- Pronto quando: morrer e voltar é rápido e justo
+
+### 4. Partida: todos contra todos
+- Placar de abates, cronômetro de 5 minutos, vencedor, tela de resultado, jogar de novo
+- Nomes dos jogadores e lista de abates ("A derrubou B")
+- Pronto quando: uma partida completa funciona do início ao fim
+
+### 5. Bots
+- Personagem Quaternius + animações da Universal Animation Library
+- IA: andar pela arena (navmesh), achar alvos, atirar com erro conforme a dificuldade, pegar itens
+- Dificuldades: fácil, médio, difícil
+- Pronto quando: você contra 3 bots é divertido, e os bots não travam nem atravessam paredes
+
+### 6. Arena v1 (arte)
+- 3 ilhas ligadas: cidade (Downtown City MegaKit) sobre rochas e vegetação (Stylized Nature MegaKit)
+- Layout pensado para combate: coberturas, linhas de visão, pontos de respawn e de itens
+- Paleta Nephelia (dourado, creme, azul-céu), colisões, iluminação com LightmapGI, texturas reduzidas
+- Pronto quando: a arena fica bonita, os bots navegam nela e o FPS se mantém no iPhone
+
+### 7. Trilhos aéreos
+- Engatar e desengatar (botão contextual), velocidade, pular do trilho, atirar pendurado
+- Bots também usam os trilhos
+- Pronto quando: os trilhos viram parte da estratégia da partida
+
+### 8. Poderes e itens
+- 1 ou 2 poderes com barra de energia (ex.: descarga elétrica, empurrão)
+- Itens na arena: vida, munição, energia, armas extras (rifle, espingarda)
+- Pronto quando: pegar itens e usar poderes muda o rumo da partida
+
+### 9. HUD e menus
+- Arte dos controles de toque (Kenney Mobile Controls) e mira (Crosshair Pack)
+- HUD: vida, munição, energia, placar, lista de abates
+- Menu inicial (Jogar contra bots, escolha de dificuldade) e pausa com opções (sensibilidade,
+  tamanho dos botões, volume)
+- Pronto quando: tudo é legível e alcançável com os dedões num iPhone
+
+### 10. Áudio
+- Tiros, passos, impactos, trilhos, poderes, vento, interface e música (se aprovada)
+
+### 11. Desempenho e ajuste no iPhone
+- 6 personagens em tela a 60 FPS estáveis; ajustar sombras, LOD, texturas
+- Ajustar sensibilidade e tamanho dos botões com toques reais
+
+### 12. Fechamento do marco 1
+- Jogar muitas partidas, corrigir bugs, tag `v0.1` no Git
+
+---
+
+## Marco 2: multiplayer na mesma Wi-Fi
+- [ ] Rede com a API de multiplayer do Godot (ENet): um aparelho hospeda e é o servidor
+- [ ] Lobby: achar partidas na rede local, entrar, escolher nome
+- [ ] Sincronizar jogadores, tiros (o servidor valida os acertos), itens e placar
+- [ ] Previsão do próprio movimento e suavização dos outros jogadores (sem "teleportes")
+- [ ] Bots completam as vagas vazias
+- [ ] Testes com Mac + iPhone e lag simulado
+- Pronto quando: 2 ou mais aparelhos jogam juntos sem travadas perceptíveis
+
+## Marco 3: online
+- [ ] Servidor dedicado (Godot sem tela) e onde hospedar: VPS ou serviço (Edgegap, W4 Cloud,
+      Nakama). Decidir custo antes.
+- [ ] Busca de partida (matchmaking) com bots completando vagas; região Brasil primeiro
+- [ ] Identidade do jogador (anônimo, Game Center ou Google Play Games) e nomes
+- [ ] Proteção básica contra trapaça (servidor decide tiros e movimento)
+- [ ] Reconexão, medição de ping
+- Pronto quando: dá para jogar com gente de outra cidade
+
+## Marco 4: publicação
+- [ ] Nome definitivo (checar marca no INPI e nas lojas), ícone, tela de abertura
+- [ ] Modelo de negócio (pago, gratuito com cosméticos, etc.)
+- [ ] TestFlight (iOS) com testadores
+- [ ] Android: JDK/SDK, exportar, teste interno no Google Play (US$ 25)
+- [ ] PC/Steam: modo de controle para PC (desligar emulação de toque, telas de toque e Steam Deck),
+      Steamworks (GodotSteam), taxa Steam Direct (US$ 100)
+- [ ] Política de privacidade (obrigatória com online), classificação etária, páginas das lojas
+
+---
+
+## Decisões pendentes (do usuário)
+- Baixar também: Sonniss GDC 2026 (7,5 GB), músicas do Kevin MacLeod (CC-BY), fontes
+  Limelight e Josefin Sans
+- Nome definitivo do jogo
+- Modelo de negócio
+- Hospedagem do servidor online (Marco 3)

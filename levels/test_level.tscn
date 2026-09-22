@@ -1,0 +1,197 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://levels/test_level.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://player/player.tscn" id="2_player"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_day"]
+sky_top_color = Color(0.2, 0.45, 0.85, 1)
+sky_horizon_color = Color(0.66, 0.79, 0.93, 1)
+ground_bottom_color = Color(0.47, 0.6, 0.8, 1)
+ground_horizon_color = Color(0.66, 0.79, 0.93, 1)
+sun_angle_max = 30.0
+sun_curve = 0.15
+
+[sub_resource type="Sky" id="Sky_day"]
+sky_material = SubResource("ProceduralSkyMaterial_day")
+
+[sub_resource type="Environment" id="Environment_day"]
+background_mode = 2
+sky = SubResource("Sky_day")
+ambient_light_source = 3
+reflected_light_source = 2
+tonemap_mode = 3
+fog_enabled = true
+fog_mode = 1
+fog_light_color = Color(0.74, 0.84, 0.95, 1)
+fog_sun_scatter = 0.15
+fog_density = 0.35
+fog_sky_affect = 0.0
+fog_depth_begin = 60.0
+fog_depth_end = 400.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_grass"]
+albedo_color = Color(0.36, 0.6, 0.27, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rock"]
+albedo_color = Color(0.5, 0.44, 0.38, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cream"]
+albedo_color = Color(0.93, 0.88, 0.76, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_brass"]
+albedo_color = Color(0.83, 0.64, 0.28, 1)
+metallic = 0.6
+roughness = 0.4
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_terracotta"]
+albedo_color = Color(0.76, 0.38, 0.24, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sky_blue"]
+albedo_color = Color(0.47, 0.7, 0.88, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wood"]
+albedo_color = Color(0.56, 0.38, 0.22, 1)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_stairs_ramp"]
+points = PackedVector3Array(-1.25, 0, 0.6, 1.25, 0, 0.6, -1.25, 0, -1.2, 1.25, 0, -1.2, -1.25, 0.9, -1.2, 1.25, 0.9, -1.2)
+
+[node name="TestLevel" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_day")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.8660254, -0.3830222, 0.3213938, 0, 0.6427876, 0.7660444, -0.5, -0.6634139, 0.5566704, 0, 20, 0)
+light_color = Color(1, 0.95, 0.86, 1)
+shadow_enabled = true
+directional_shadow_mode = 1
+directional_shadow_max_distance = 60.0
+
+[node name="SpawnPoint" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 8)
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 8)
+
+[node name="MainIsland" type="CSGCombiner3D" parent="."]
+use_collision = true
+
+[node name="Top" type="CSGCylinder3D" parent="MainIsland"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.75, 0)
+radius = 18.0
+height = 1.5
+sides = 32
+material = SubResource("StandardMaterial3D_grass")
+
+[node name="Underside" type="CSGCylinder3D" parent="MainIsland"]
+transform = Transform3D(1, 0, 0, 0, -1, 0, 0, 0, -1, 0, -7.3, 0)
+radius = 17.5
+height = 12.0
+sides = 12
+cone = true
+smooth_faces = false
+material = SubResource("StandardMaterial3D_rock")
+
+[node name="Props" type="Node3D" parent="."]
+
+[node name="Crate1" type="CSGBox3D" parent="Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0.5, 5)
+use_collision = true
+material = SubResource("StandardMaterial3D_wood")
+
+[node name="Crate2" type="CSGBox3D" parent="Props"]
+transform = Transform3D(0.9659258, 0, 0.258819, 0, 1, 0, -0.258819, 0, 0.9659258, -5.2, 0.5, 5.3)
+use_collision = true
+material = SubResource("StandardMaterial3D_wood")
+
+[node name="Crate3" type="CSGBox3D" parent="Props"]
+transform = Transform3D(0.9848078, 0, -0.1736482, 0, 1, 0, 0.1736482, 0, 0.9848078, -4, 1.5, 5)
+use_collision = true
+material = SubResource("StandardMaterial3D_wood")
+
+[node name="Staircase" type="CSGCombiner3D" parent="Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0, 0)
+use_collision = true
+
+[node name="Step1" type="CSGBox3D" parent="Props/Staircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, -1.6)
+size = Vector3(2.5, 0.3, 3.2)
+material = SubResource("StandardMaterial3D_cream")
+
+[node name="Step2" type="CSGBox3D" parent="Props/Staircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, -1.9)
+size = Vector3(2.5, 0.6, 2.6)
+material = SubResource("StandardMaterial3D_cream")
+
+[node name="Step3" type="CSGBox3D" parent="Props/Staircase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, -2.2)
+size = Vector3(2.5, 0.9, 2)
+material = SubResource("StandardMaterial3D_cream")
+
+[node name="StairsRamp" type="StaticBody3D" parent="Props/Staircase"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Props/Staircase/StairsRamp"]
+shape = SubResource("ConvexPolygonShape3D_stairs_ramp")
+
+[node name="Ramp" type="CSGPolygon3D" parent="Props"]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 8.5, 0, 1)
+use_collision = true
+polygon = PackedVector2Array(0, 0, 6.12, 0, 6.12, 1.5, 4.12, 1.5)
+depth = 2.5
+material = SubResource("StandardMaterial3D_sky_blue")
+
+[node name="Platform" type="CSGBox3D" parent="Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -2)
+use_collision = true
+size = Vector3(4, 1, 4)
+material = SubResource("StandardMaterial3D_cream")
+
+[node name="Wall" type="CSGBox3D" parent="Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -10)
+use_collision = true
+size = Vector3(8, 3, 0.5)
+material = SubResource("StandardMaterial3D_terracotta")
+
+[node name="Pillar1" type="CSGCylinder3D" parent="Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 2, -7)
+use_collision = true
+radius = 0.4
+height = 4.0
+sides = 16
+material = SubResource("StandardMaterial3D_brass")
+
+[node name="Pillar2" type="CSGCylinder3D" parent="Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 2, -7)
+use_collision = true
+radius = 0.4
+height = 4.0
+sides = 16
+material = SubResource("StandardMaterial3D_brass")
+
+[node name="SmallIsland" type="CSGCombiner3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 4, -30)
+use_collision = true
+
+[node name="Top" type="CSGCylinder3D" parent="SmallIsland"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.6, 0)
+radius = 7.0
+height = 1.2
+sides = 24
+material = SubResource("StandardMaterial3D_grass")
+
+[node name="Underside" type="CSGCylinder3D" parent="SmallIsland"]
+transform = Transform3D(1, 0, 0, 0, -1, 0, 0, 0, -1, 0, -3.5, 0)
+radius = 6.8
+height = 6.0
+sides = 10
+cone = true
+smooth_faces = false
+material = SubResource("StandardMaterial3D_rock")
+
+[node name="Beacon" type="CSGCylinder3D" parent="SmallIsland"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
+radius = 0.25
+height = 3.0
+sides = 12
+material = SubResource("StandardMaterial3D_brass")
