@@ -79,7 +79,7 @@ aéreos, a 60 FPS no iPhone.
   trilho, pernas no ar). Bots pegam o trilho quando o destino é longe e só soltam onde o pouso é
   chão ligado ao destino. Pendente: testar no iPhone se o HOOK é fácil de alcançar.
 
-### 8. Poderes e itens
+### 8. Poderes e itens: [x] feito (itens e armas extras; poderes removidos a pedido do usuário)
 - 1 ou 2 poderes com barra de energia (ex.: descarga elétrica, empurrão)
 - Itens na arena: vida, munição, energia, armas extras (rifle, espingarda)
 - Pronto quando: pegar itens e usar poderes muda o rumo da partida
@@ -93,7 +93,7 @@ aéreos, a 60 FPS no iPhone.
   seguradas com as duas mãos (IK própria), coice e recarga próprios, som e clarão por arma;
   bots pegam arma que esteja perto (vida antes de arma). Revólver mantido como na 1ª versão
 
-### 9. HUD e menus
+### 9. HUD e menus: [x] feito
 - Parte 1 (menus): [x] feito. Menu inicial (jogar, dificuldade, opções, sair), pausa dentro da
   partida e opções salvas no aparelho (sensibilidade do olhar, tamanho dos botões, volume);
   fontes do jogo (Limelight e Josefin Sans) aplicadas por um tema
@@ -155,8 +155,7 @@ aéreos, a 60 FPS no iPhone.
 ---
 
 ## Decisões pendentes (do usuário)
-- Baixar também: Sonniss GDC 2026 (7,5 GB), músicas do Kevin MacLeod (CC-BY), fontes
-  Limelight e Josefin Sans
+- Baixar também: Sonniss GDC 2026 (7,5 GB) e músicas do Kevin MacLeod (CC-BY). (Fontes já baixadas.)
 - Nome definitivo do jogo
 - Modelo de negócio
 - Hospedagem do servidor online (Marco 3)
