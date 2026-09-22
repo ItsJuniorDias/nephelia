@@ -19,6 +19,7 @@ var _death_tween: Tween
 @onready var hud: Hud = $Hud
 @onready var match_hud: MatchHud = $MatchHud
 @onready var match_result: MatchResult = $MatchResult
+@onready var pause_menu: PauseMenu = $PauseMenu
 
 
 func setup(for_character: Character) -> void:
@@ -57,7 +58,12 @@ func _unhandled_input(event: InputEvent) -> void:
 	if character == null:
 		return
 	if event.is_action_pressed("pause"):
-		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		pause_menu.toggle()
+		if not pause_menu.is_open() and not TouchControls.is_touch_mode():
+			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		return
+	# Com a pausa aberta o jogo não recebe mais nada (os botões da pausa é que mandam).
+	if pause_menu.is_open():
 		return
 	# No modo toque o mouse nunca é capturado: o olhar vem do TouchControls.
 	if TouchControls.is_touch_mode():
@@ -71,7 +77,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	var motion := event as InputEventMouseMotion
 	if motion != null and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		# screen_relative ignora o esticamento da tela: a sensibilidade não muda com a resolução.
-		rotate_look(-motion.screen_relative.x * mouse_sensitivity, -motion.screen_relative.y * mouse_sensitivity)
+		var sensitivity: float = mouse_sensitivity * Settings.look_sensitivity
+		rotate_look(-motion.screen_relative.x * sensitivity, -motion.screen_relative.y * sensitivity)
 
 
 func _process(delta: float) -> void:
@@ -85,7 +92,8 @@ func _process(delta: float) -> void:
 	# Analógico direito: gira a uma velocidade fixa por segundo (por isso * delta).
 	var look: Vector2 = Input.get_vector("look_left", "look_right", "look_up", "look_down")
 	if look != Vector2.ZERO:
-		rotate_look(-look.x * gamepad_look_speed * delta, -look.y * gamepad_look_speed * delta)
+		var speed: float = gamepad_look_speed * Settings.look_sensitivity
+		rotate_look(-look.x * speed * delta, -look.y * speed * delta)
 
 
 func get_command(_delta: float) -> CharacterCommand:
@@ -111,7 +119,8 @@ func rotate_look(yaw_degrees: float, pitch_degrees: float) -> void:
 
 func _on_touch_look_dragged(relative: Vector2) -> void:
 	# Arrastar para a direita vira para a direita; arrastar para cima olha para cima.
-	rotate_look(-relative.x * touch_look_sensitivity, -relative.y * touch_look_sensitivity)
+	var sensitivity: float = touch_look_sensitivity * Settings.look_sensitivity
+	rotate_look(-relative.x * sensitivity, -relative.y * sensitivity)
 
 
 func _connect_to_match() -> void:

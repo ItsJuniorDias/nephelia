@@ -1,0 +1,50 @@
+class_name MainMenu
+extends Control
+## Menu inicial: jogar contra bots, escolher a dificuldade, opções e sair.
+##
+## É a primeira cena do jogo. "JOGAR" troca para a arena; a dificuldade escolhida fica salva em
+## `Settings` e a arena a aplica aos bots ao abrir.
+
+const ARENA := "res://levels/skyplaza/skyplaza.tscn"
+
+@onready var play_button: Button = $Rows/PlayButton
+@onready var difficulty_button: Button = $Rows/DifficultyButton
+@onready var options_button: Button = $Rows/OptionsButton
+@onready var quit_button: Button = $Rows/QuitButton
+@onready var options_menu: OptionsMenu = $OptionsMenu
+
+
+func _ready() -> void:
+	# No menu o dedo/mouse precisa aparecer (na partida o mouse é capturado).
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	play_button.pressed.connect(start_match)
+	difficulty_button.pressed.connect(_on_difficulty)
+	options_button.pressed.connect(_on_options)
+	quit_button.pressed.connect(_on_quit)
+	options_menu.closed.connect(func() -> void: play_button.grab_focus())
+	# No celular não existe "sair": o sistema é que fecha o aplicativo.
+	quit_button.visible = not OS.has_feature("mobile")
+	_refresh_difficulty()
+	play_button.grab_focus()
+
+
+## Começa a partida na arena (também usado pelos testes).
+func start_match() -> void:
+	get_tree().change_scene_to_file(ARENA)
+
+
+func _on_difficulty() -> void:
+	Settings.next_difficulty()
+	_refresh_difficulty()
+
+
+func _on_options() -> void:
+	options_menu.open()
+
+
+func _on_quit() -> void:
+	get_tree().quit()
+
+
+func _refresh_difficulty() -> void:
+	difficulty_button.text = "DIFICULDADE: %s" % Settings.difficulty_label()

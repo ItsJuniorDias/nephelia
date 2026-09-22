@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" path="res://ui/hud/hud.tscn" id="5_hud"]
 [ext_resource type="PackedScene" path="res://ui/match_hud/match_hud.tscn" id="6_match_hud"]
 [ext_resource type="PackedScene" path="res://ui/match_result/match_result.tscn" id="7_match_result"]
+[ext_resource type="PackedScene" path="res://ui/pause_menu/pause_menu.tscn" id="8_pause"]
 
 [node name="Player" instance=ExtResource("1_character")]
 
@@ -20,5 +21,7 @@ script = ExtResource("2_human")
 [node name="MatchHud" parent="HumanController" instance=ExtResource("6_match_hud")]
 
 [node name="MatchResult" parent="HumanController" instance=ExtResource("7_match_result")]
+
+[node name="PauseMenu" parent="HumanController" instance=ExtResource("8_pause")]
 
 [node name="ViewModel" parent="Head/Camera3D" instance=ExtResource("4_view_model")]

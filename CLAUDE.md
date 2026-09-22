@@ -162,6 +162,16 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   a pele com brilho de plástico, e os FBX do Wild West Guns têm cores de vértice azuladas. Sempre
   com `use_z_clip_scale` (não atravessa paredes) e `disable_receive_shadows` (senão pega a sombra
   do próprio corpo e fica azul). Coice, balanço ao andar e clarão são por cima, em código.
+- Menus: `ui/main_menu/` (cena principal do jogo), `ui/pause_menu/` (dentro do jogador, com
+  `process_mode` sempre, senão os botões não responderiam com o jogo pausado) e `ui/options_menu/`
+  (usado pelos dois). As telas são montadas por `tools/make_menus.gd`. Ao montar cena em código,
+  marcar o dono só dos nós criados ali: nos filhos de uma cena instanciada, ela é salva duas vezes.
+- Opções: `autoload/settings.gd` é uma CLASSE ESTÁTICA (`Settings`), não um autoload: no modo de
+  teste (`-s`) o compilador do Godot não reconhece o nome de um autoload, mas reconhece
+  `class_name`. Guarda sensibilidade, tamanho dos botões, volume e dificuldade em
+  `user://settings.cfg`. Quem precisa reagir a mudanças compara `Settings.version` (sinal estático
+  não existe). `levels/arena_setup.gd` aplica a dificuldade aos bots ao abrir a arena (com
+  `call_deferred`: os bots ficam prontos depois dele).
 - Interface: o tema `ui/theme/nephelia_theme.tres` (gerado por `tools/make_theme.gd` e aplicado a
   tudo por `gui/theme/custom`) traz as fontes: Josefin Sans na interface e Limelight (Art Déco) nos
   títulos, pela variação de tipo "Title"/"Subtitle"/"TitleButton". Nome de classe do Godot não pode
@@ -169,7 +179,9 @@ ao longo de várias sessões; o usuário testa e dá feedback.
 - Capturas de tela para conferir visual: usar `--write-movie <pasta>/f.png --fixed-fps 60` com um
   script `-s`; `get_viewport().get_texture().get_image()` devolve o quadro ANTERIOR.
 - Testes: `Godot --headless --path . -s res://tests/<suíte>.gd` para `test_controls`, `test_bots`,
-  `test_arena` e `test_items` (saída 0 = tudo passou). Rodar as quatro depois de qualquer mudança. Ao criar presets de exportação, excluir `tests/*`.
+  `test_arena`, `test_items` e `test_menus` (saída 0 = tudo passou). Rodar as cinco depois de
+  qualquer mudança. Num script de teste (`extends SceneTree`) não existe `get_tree()`: o próprio
+  script é a árvore (usar `self.paused`, `root`, `get_nodes_in_group`). Ao criar presets de exportação, excluir `tests/*`.
   No headless a janela é 64x64 (viewport 1152x1152): eventos simulados precisam ser convertidos com
   `root.get_final_transform()` (o teste já faz isso). Corpo com `process_mode` desligado sai da
   física (`disable_mode = REMOVE`): nos testes, usar `DISABLE_MODE_KEEP_ACTIVE` para o tiro acertar.
@@ -227,4 +239,10 @@ Atualizar esta seção ao fim de cada sessão.
     histórico do Git se um dia voltarem.
   - Arma sumida no iPhone: resolvida montando a arma em código (ver notas técnicas). Confirmado
     no aparelho pelo usuário.
-  - Próximo: Tarefa 8 parte 3 (armas extras) e o que o usuário pedir.
+  - Fontes: Limelight (títulos) e Josefin Sans (interface), do Google Fonts (OFL), aplicadas ao
+    jogo inteiro pelo tema.
+  - Tarefa 9, parte 1 (menus) feita: menu inicial (jogar, dificuldade, opções, sair), pausa e
+    opções salvas no aparelho (sensibilidade, tamanho dos botões, volume). A cena principal
+    agora é o menu. 39 + 8 + 10 + 5 + 6 testes passando.
+  - Próximo: Tarefa 9 parte 2 (arte do HUD e dos controles de toque) e depois a Tarefa 8 parte 3
+    (armas extras).

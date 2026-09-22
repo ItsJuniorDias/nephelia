@@ -14,6 +14,7 @@
 [ext_resource type="PackedScene" path="res://levels/skyplaza/skyplaza_decor.tscn" id="12_decor"]
 [ext_resource type="NavigationMesh" path="res://levels/skyplaza/skyplaza_navmesh.tres" id="13_navmesh"]
 [ext_resource type="Script" path="res://levels/arena_navigation.gd" id="14_navigation"]
+[ext_resource type="Script" path="res://levels/arena_setup.gd" id="22_setup"]
 [ext_resource type="PackedScene" path="res://levels/skyplaza/skyplaza_rails.tscn" id="15_rails"]
 [ext_resource type="PackedScene" path="res://levels/skyplaza/skyplaza_items.tscn" id="16_items"]
 [ext_resource type="PackedScene" path="res://levels/skyplaza/skyplaza_clouds.tscn" id="17_clouds"]
@@ -82,6 +83,9 @@ directional_shadow_max_distance = 70.0
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
 navigation_mesh = ExtResource("13_navmesh")
 script = ExtResource("14_navigation")
+
+[node name="ArenaSetup" type="Node" parent="."]
+script = ExtResource("22_setup")
 
 [node name="SpawnPoints" type="Node3D" parent="."]
 

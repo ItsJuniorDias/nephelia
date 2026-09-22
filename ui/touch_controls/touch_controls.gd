@@ -32,6 +32,10 @@ const SAFE_AREA_CHECK_INTERVAL: float = 0.5
 # Dono de cada dedo (índice do toque -> nó): o joystick, um botão ou `self` (= dedo de olhar).
 var _finger_owners: Dictionary[int, Node] = {}
 var _buttons: Array[TouchActionButton] = []
+## Tamanho de fábrica de cada botão (as opções multiplicam por cima).
+var _base_radius: Dictionary[TouchActionButton, float] = {}
+## Última versão das opções já aplicada (elas mudam na tela de opções, durante a pausa).
+var _settings_version: int = -1
 var _last_safe_area: Rect2i = Rect2i()
 var _safe_area_timer: float = 0.0
 
@@ -48,7 +52,10 @@ static func is_touch_mode() -> bool:
 func _ready() -> void:
 	for child: Node in _root.get_children():
 		if child is TouchActionButton:
-			_buttons.append(child as TouchActionButton)
+			var button := child as TouchActionButton
+			_buttons.append(button)
+			_base_radius[button] = button.radius
+	_apply_button_scale()
 	visibility_changed.connect(_on_visibility_changed)
 	get_viewport().size_changed.connect(_apply_safe_area)
 	if is_touch_mode():
@@ -58,6 +65,13 @@ func _ready() -> void:
 
 func _exit_tree() -> void:
 	release_all()
+
+
+# Tamanho dos botões escolhido nas opções (o jogador ajusta para o dedão dele).
+func _apply_button_scale() -> void:
+	_settings_version = Settings.version
+	for button: TouchActionButton in _buttons:
+		button.radius = _base_radius[button] * Settings.button_scale
 
 
 func _notification(what: int) -> void:
@@ -73,6 +87,8 @@ func _notification(what: int) -> void:
 
 
 func _process(delta: float) -> void:
+	if _settings_version != Settings.version:
+		_apply_button_scale()
 	_safe_area_timer -= delta
 	if _safe_area_timer > 0.0:
 		return

@@ -90,6 +90,10 @@ aéreos, a 60 FPS no iPhone.
 - Parte 3 (armas extras): rifle e espingarda como itens, com munição limitada
 
 ### 9. HUD e menus
+- Parte 1 (menus): [x] feito. Menu inicial (jogar, dificuldade, opções, sair), pausa dentro da
+  partida e opções salvas no aparelho (sensibilidade do olhar, tamanho dos botões, volume);
+  fontes do jogo (Limelight e Josefin Sans) aplicadas por um tema
+- Parte 2 (arte do HUD e dos controles de toque): pendente
 - Arte dos controles de toque (Kenney Mobile Controls) e mira (Crosshair Pack)
 - HUD: vida, munição, energia, placar, lista de abates
 - Menu inicial (Jogar contra bots, escolha de dificuldade) e pausa com opções (sensibilidade,

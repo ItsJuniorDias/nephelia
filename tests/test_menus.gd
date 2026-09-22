@@ -1,0 +1,154 @@
+extends SceneTree
+## Testes do menu inicial, das opções e da pausa.
+##
+## Rodar (no Terminal, na pasta do projeto):
+##   ~/Downloads/Godot.app/Contents/MacOS/Godot --headless --path . -s res://tests/test_menus.gd
+## Código de saída 0 = tudo passou. Esta pasta não deve ir no jogo exportado.
+
+const MAIN_MENU := "res://ui/main_menu/main_menu.tscn"
+const ARENA := "res://levels/skyplaza/skyplaza.tscn"
+
+var _failures: int = 0
+
+
+func _initialize() -> void:
+	_run.call_deferred()
+
+
+func _run() -> void:
+	await _test_menu_buttons()
+	await _test_difficulty_saves()
+	await _test_options_change_settings()
+	await _test_play_opens_arena()
+	await _test_pause_freezes_and_resumes()
+	await _test_difficulty_reaches_bots()
+
+	print("RESULT: ", "ALL PASSED" if _failures == 0 else "%d FAILED" % _failures)
+	quit(0 if _failures == 0 else 1)
+
+
+func _check(test_name: String, ok: bool, detail: String = "") -> void:
+	if ok:
+		print("PASS  ", test_name, "  ", detail)
+	else:
+		_failures += 1
+		print("FAIL  ", test_name, "  ", detail)
+
+
+func _physics(n: int) -> void:
+	for i in n:
+		await physics_frame
+
+
+# Abre o menu inicial numa árvore limpa.
+func _open_menu() -> MainMenu:
+	var menu: MainMenu = (load(MAIN_MENU) as PackedScene).instantiate()
+	root.add_child(menu)
+	current_scene = menu
+	await _physics(3)
+	return menu
+
+
+func _close(node: Node) -> void:
+	node.queue_free()
+	await _physics(2)
+
+
+func _test_menu_buttons() -> void:
+	var menu: MainMenu = await _open_menu()
+	var buttons: Array[String] = []
+	for child: Node in menu.get_node(^"Rows").get_children():
+		if child is Button:
+			buttons.append((child as Button).text)
+	_check("M1 the main menu shows play, difficulty, options and quit", buttons.size() == 4
+			and buttons[0] == "JOGAR" and buttons[1].begins_with("DIFICULDADE")
+			and buttons[2] == "OPÇÕES" and buttons[3] == "SAIR", "botões=%s" % [buttons])
+	await _close(menu)
+
+
+func _test_difficulty_saves() -> void:
+	var menu: MainMenu = await _open_menu()
+	Settings.set_option(&"difficulty", &"easy")
+	menu._refresh_difficulty()
+	var before: String = menu.difficulty_button.text
+	menu.difficulty_button.pressed.emit()
+	await _physics(2)
+	# Recarrega do arquivo: a escolha tem que sobreviver a fechar o jogo.
+	var chosen: StringName = Settings.difficulty
+	Settings.difficulty = &"medium"
+	Settings.load_settings()
+	_check("M2 the difficulty button cycles and the choice is saved",
+			before.ends_with("FÁCIL") and chosen == &"medium" and Settings.difficulty == chosen,
+			"antes=%s escolhida=%s salva=%s" % [before, chosen, Settings.difficulty])
+	await _close(menu)
+
+
+func _test_options_change_settings() -> void:
+	var menu: MainMenu = await _open_menu()
+	var options: OptionsMenu = menu.options_menu
+	menu.options_button.pressed.emit()
+	await _physics(2)
+	var opened: bool = options.visible
+	options.sensitivity_slider.value = 2.0
+	options.volume_slider.value = 0.3
+	await _physics(2)
+	var applied: bool = is_equal_approx(Settings.look_sensitivity, 2.0) and is_equal_approx(Settings.volume, 0.3)
+	var label: String = options.sensitivity_value.text
+	options.back_button.pressed.emit()
+	await _physics(2)
+	_check("M3 options change and show the settings", opened and applied and label == "200%"
+			and not options.visible, "aberta=%s aplicou=%s label=%s" % [opened, applied, label])
+	# Deixa como estava para os outros testes.
+	Settings.set_option(&"look_sensitivity", 1.0)
+	Settings.set_option(&"volume", 0.8)
+	await _close(menu)
+
+
+func _test_play_opens_arena() -> void:
+	var menu: MainMenu = await _open_menu()
+	menu.play_button.pressed.emit()
+	# A troca de cena acontece no fim do quadro; a arena demora alguns quadros para montar.
+	await _physics(30)
+	var arena: Node = current_scene
+	var loaded: bool = arena != null and arena.name == "SkyPlaza" and arena.get_node_or_null(^"Player") != null
+	_check("M4 play opens the arena", loaded, "cena=%s" % [arena.name if arena else "nenhuma"])
+	if arena != null:
+		await _close(arena)
+
+
+func _test_pause_freezes_and_resumes() -> void:
+	var arena: Node3D = (load(ARENA) as PackedScene).instantiate()
+	root.add_child(arena)
+	current_scene = arena
+	await _physics(10)
+	var pause: PauseMenu = arena.get_node(^"Player/HumanController/PauseMenu")
+	pause.open()
+	await _physics(2)
+	var was_paused: bool = self.paused and pause.is_open()
+	# Pausado, o tempo da partida não anda.
+	var deathmatch: Deathmatch = arena.get_node(^"Deathmatch")
+	var time_before: float = deathmatch.time_left
+	await _physics(10)
+	var frozen: bool = is_equal_approx(deathmatch.time_left, time_before)
+	pause.close()
+	await _physics(10)
+	var running: bool = not self.paused and deathmatch.time_left < time_before
+	_check("M5 pause freezes the match and resume brings it back", was_paused and frozen and running,
+			"pausou=%s congelou=%s voltou=%s" % [was_paused, frozen, running])
+	await _close(arena)
+
+
+func _test_difficulty_reaches_bots() -> void:
+	Settings.set_option(&"difficulty", &"hard")
+	var arena: Node3D = (load(ARENA) as PackedScene).instantiate()
+	root.add_child(arena)
+	current_scene = arena
+	await _physics(5)
+	var wrong: Array[String] = []
+	for node: Node in get_nodes_in_group(&"bots"):
+		var controller := (node as Character).controller as BotController
+		if controller.difficulty != Settings.difficulty_resource():
+			wrong.append(node.name)
+	_check("M6 the chosen difficulty reaches the bots", wrong.is_empty(), "errados=%s" % [wrong])
+	Settings.set_option(&"difficulty", &"medium")
+	await _close(arena)
