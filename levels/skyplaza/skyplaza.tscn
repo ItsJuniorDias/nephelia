@@ -17,7 +17,6 @@
 [ext_resource type="PackedScene" path="res://levels/skyplaza/skyplaza_rails.tscn" id="15_rails"]
 [ext_resource type="PackedScene" path="res://levels/skyplaza/skyplaza_items.tscn" id="16_items"]
 [ext_resource type="PackedScene" path="res://levels/skyplaza/skyplaza_clouds.tscn" id="17_clouds"]
-[ext_resource type="PackedScene" path="res://ui/debug_overlay/debug_overlay.tscn" id="21_debug"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_day"]
 sky_top_color = Color(0.2, 0.45, 0.85, 1)
@@ -79,8 +78,6 @@ directional_shadow_max_distance = 70.0
 [node name="Items" parent="." instance=ExtResource("16_items")]
 
 [node name="Clouds" parent="." instance=ExtResource("17_clouds")]
-
-[node name="DebugOverlay" parent="." instance=ExtResource("21_debug")]
 
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
 navigation_mesh = ExtResource("13_navmesh")

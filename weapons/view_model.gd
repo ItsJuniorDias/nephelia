@@ -8,8 +8,9 @@ extends Node3D
 ## de verdade sai do olho e quem decide o acerto é o MatchReferee.
 
 const ANIMATIONS: AnimationLibrary = preload("res://assets/animations/quaternius_ual/character_animations.res")
+const FLASH_TEXTURE: Texture2D = preload("res://assets/vfx/kenney/star_09.png")
 ## Ponta do cano no espaço do modelo do Colt (medido nos vértices do FBX).
-const BARREL_TIP := Vector3(0.0005, 0.1477, -0.19)
+const BARREL_TIP := GunMount.BARREL_TIP
 
 @export_group("Coice")
 ## Quanto a arma sobe e recua a cada tiro.
@@ -39,18 +40,48 @@ var _bob_time: float = 0.0
 var _bob_weight: float = 0.0
 var _flash_timer: float = 0.0
 
+## Revólver, ponta do cano e clarão (criados em código, como no corpo do personagem).
+var gun: MeshInstance3D
+var muzzle: Marker3D
+var flash: MeshInstance3D
+
 @onready var model: Node3D = $Model
 @onready var skeleton: Skeleton3D = $Model/Armature/Skeleton3D
-@onready var muzzle: Marker3D = $Model/Armature/Skeleton3D/RightHand/Gun/Muzzle
-@onready var flash: MeshInstance3D = $Model/Armature/Skeleton3D/RightHand/Gun/Muzzle/Flash
 @onready var audio: AudioStreamPlayer = $Audio
 
 
 func _ready() -> void:
 	_rest_position = position
+	_build_gun()
 	_prepare_meshes()
 	_hide_bones()
 	_build_tree()
+
+
+# Revólver na mão, marcador da ponta do cano e o clarão do tiro.
+func _build_gun() -> void:
+	gun = GunMount.attach(skeleton)
+	muzzle = Marker3D.new()
+	muzzle.name = "Muzzle"
+	muzzle.position = GunMount.BARREL_TIP
+	gun.add_child(muzzle)
+	var flash_material := StandardMaterial3D.new()
+	flash_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	flash_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	flash_material.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	flash_material.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	flash_material.no_depth_test = true
+	flash_material.albedo_color = Color(1.0, 0.86, 0.55)
+	flash_material.albedo_texture = FLASH_TEXTURE
+	var quad := QuadMesh.new()
+	quad.size = Vector2(0.16, 0.16)
+	quad.material = flash_material
+	flash = MeshInstance3D.new()
+	flash.name = "Flash"
+	flash.mesh = quad
+	flash.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	flash.visible = false
+	muzzle.add_child(flash)
 
 
 ## Chamado pelo HumanController: liga os braços na lógica de tiro do personagem.

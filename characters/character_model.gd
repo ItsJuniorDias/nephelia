@@ -41,11 +41,14 @@ var _hanging: bool = false
 var _air_amount: float = 0.0
 var _grip: RailGripModifier
 
+## Revólver na mão direita (criado em código por GunMount).
+var gun: MeshInstance3D
+
 @onready var skeleton: Skeleton3D = $Model/Armature/Skeleton3D
-@onready var gun: Node3D = $Model/Armature/Skeleton3D/RightHand/Gun
 
 
 func _ready() -> void:
+	gun = GunMount.attach(skeleton)
 	_prepare_materials()
 	_apply_tint()
 	_build_tree()

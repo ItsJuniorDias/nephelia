@@ -142,10 +142,17 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   soltas da cidade continuam entrando: alguns objetos (guarda-corpo, jardineira, balizador) são
   instâncias delas; os prédios usam as malhas juntadas de `levels/skyplaza/meshes/`.
 - Revólver: o FBX do pacote traz a malha 100 vezes menor, com o tamanho numa escala no nó (3 mm de
-  malha com escala 100). Isso confunde o LOD automático e **a arma some no iPhone**. Por isso
-  `tools/bake_revolver.gd` assa `assets/models/weapons/colt_revolver.res` no tamanho certo, com
-  materiais simples, e as cenas usam essa malha. Vale a regra geral: modelo que depende de escala
-  grande no nó deve ser assado antes de entrar no jogo.
+  malha com escala 100). `tools/bake_revolver.gd` assa `assets/models/weapons/colt_revolver.res` no
+  tamanho certo, com materiais simples. Regra geral: modelo que depende de escala grande no nó
+  deve ser assado antes de entrar no jogo.
+- **Nó dentro de cena instanciada não sobrevive ao build do iOS**: a arma era um nó guardado dentro
+  da cena do modelo glTF (filho do esqueleto). No Mac funcionava; no iPhone o nó simplesmente não
+  existia e ninguém aparecia armado (levou uma sessão inteira para achar, com um painel de
+  depuração na tela do aparelho). Agora `characters/gun_mount.gd` cria a arma em código, com
+  `characters/bone_follower.gd` (nosso BoneAttachment3D) seguindo o osso `hand_r`. Ao pendurar algo
+  num modelo importado, montar em código.
+- Atenção: no arquivo `.tscn` a matriz de um `Transform3D` é escrita por LINHAS; no construtor em
+  código, por COLUNAS (uma é a transposta da outra).
 - Braços em 1ª pessoa: `weapons/hands_view_model.tscn` + `weapons/view_model.gd`. É o mesmo corpo
   e as mesmas animações de pistola do personagem (parado, tiro, recarga, com a velocidade ajustada
   ao ritmo da arma), com a cabeça e as pernas encolhidas pelo `characters/hidden_bones_modifier.gd`
@@ -214,4 +221,6 @@ Atualizar esta seção ao fim de cada sessão.
     ("Ambient") o jogo fica mudo com o iPhone no silencioso.
   - Poderes (Tarefa 8 parte 2): começados e REMOVIDOS a pedido do usuário (2026-09-22); estão no
     histórico do Git se um dia voltarem.
+  - Arma sumida no iPhone: resolvida montando a arma em código (ver notas técnicas). Confirmado
+    no aparelho pelo usuário.
   - Próximo: Tarefa 8 parte 3 (armas extras) e o que o usuário pedir.

@@ -2,18 +2,8 @@
 
 [ext_resource type="Script" path="res://characters/character_model.gd" id="1_model"]
 [ext_resource type="PackedScene" path="res://assets/models/characters/quaternius_ubc/Superhero_Male_FullBody.gltf" id="2_body"]
-[ext_resource type="Mesh" path="res://assets/models/weapons/colt_revolver.res" id="3_gun"]
-[ext_resource type="Script" path="res://characters/bone_follower.gd" id="4_follower"]
 
 [node name="CharacterModel" type="Node3D"]
 script = ExtResource("1_model")
 
 [node name="Model" parent="." instance=ExtResource("2_body")]
-
-[node name="RightHand" type="Node3D" parent="Model/Armature/Skeleton3D"]
-script = ExtResource("4_follower")
-bone_name = &"hand_r"
-
-[node name="Gun" type="MeshInstance3D" parent="Model/Armature/Skeleton3D/RightHand"]
-transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0.18, -0.05)
-mesh = ExtResource("3_gun")
