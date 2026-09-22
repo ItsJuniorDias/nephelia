@@ -3,6 +3,9 @@ extends Node3D
 ## Arma vista em primeira pessoa, só para o jogador local. É só visual: coice, balanço ao
 ## andar, recarga e clarão. O tiro de verdade sai do olho e quem decide é o MatchReferee.
 
+## Ponta do cano no espaço do modelo do Colt (medido nos vértices do FBX).
+const BARREL_TIP := Vector3(0.0005, 0.1477, -0.19)
+
 @export_group("Coice")
 ## Quanto a arma sobe e recua a cada tiro.
 @export var recoil_offset: Vector3 = Vector3(0.0, 0.025, 0.09)

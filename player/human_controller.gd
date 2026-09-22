@@ -25,8 +25,7 @@ func setup(for_character: Character) -> void:
 	super.setup(for_character)
 	character.camera.current = true
 	# O jogador não vê o próprio corpo, mas a sombra dele continua no chão.
-	character.body_mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
-	character.visor_mesh.visible = false
+	character.model.set_shadow_only(true)
 	touch_controls.look_dragged.connect(_on_touch_look_dragged)
 	character.died.connect(_on_died)
 	character.respawned.connect(_on_respawned)

@@ -48,7 +48,7 @@ aéreos, a 60 FPS no iPhone.
 - Nomes dos jogadores e lista de abates ("A derrubou B")
 - Pronto quando: uma partida completa funciona do início ao fim
 
-### 5. Bots
+### 5. Bots: [x] feito (pegar itens fica para a tarefa 8, quando existirem itens)
 - Personagem Quaternius + animações da Universal Animation Library
 - IA: andar pela arena (navmesh), achar alvos, atirar com erro conforme a dificuldade, pegar itens
 - Dificuldades: fácil, médio, difícil
@@ -84,6 +84,7 @@ aéreos, a 60 FPS no iPhone.
 
 ### 11. Desempenho e ajuste no iPhone
 - 6 personagens em tela a 60 FPS estáveis; ajustar sombras, LOD, texturas
+- 4 a 6 personagens com 16,5 mil triângulos e árvore de animação cada: medir no iPhone
 - Pré-aquecer shaders dos efeitos (rastro, faíscas, clarão) ao carregar a arena: o primeiro tiro
   hoje compila shaders e dá um engasgo
 - Ajustar sensibilidade e tamanho dos botões com toques reais
@@ -128,3 +129,6 @@ aéreos, a 60 FPS no iPhone.
 - Nome definitivo do jogo
 - Modelo de negócio
 - Hospedagem do servidor online (Marco 3)
+- Roupa dos personagens: o pacote grátis de personagens base da Quaternius vem só de roupa de
+  baixo (hoje os bots são "manequins" coloridos). Opções: baixar outro pacote grátis com roupa
+  (ex.: Quaternius Ultimate Modular Men/Women, CC0) ou encomendar roupas de época

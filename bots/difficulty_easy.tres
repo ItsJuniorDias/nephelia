@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="BotDifficulty" format=3]
+
+[ext_resource type="Script" path="res://bots/bot_difficulty.gd" id="1_difficulty"]
+
+[resource]
+script = ExtResource("1_difficulty")
+label = "Easy"
+reaction_time = 0.65
+aim_error_degrees = 7.0
+turn_speed_degrees = 180
+fire_tolerance_degrees = 4.0
+view_distance = 25
+field_of_view_degrees = 100
+preferred_distance = 8
+strafe_interval = 1.8

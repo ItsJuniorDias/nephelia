@@ -66,8 +66,8 @@ func _visual_origin(result: ShotResult) -> Vector3:
 	var view_model := shooter.camera.get_node_or_null("ViewModel") as ViewModel
 	if view_model != null and view_model.is_visible_in_tree():
 		return view_model.muzzle.global_position
-	# Para os outros personagens: mais ou menos na mão direita.
-	return shooter.head.global_transform * Vector3(0.25, -0.35, -0.5)
+	# Para os outros personagens: a ponta do cano do revólver na mão do modelo.
+	return shooter.model.gun.global_transform * ViewModel.BARREL_TIP
 
 
 func _spawn_tracer(from: Vector3, to: Vector3) -> void:

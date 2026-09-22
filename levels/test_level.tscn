@@ -4,6 +4,8 @@
 [ext_resource type="PackedScene" path="res://bots/bot.tscn" id="3_bot"]
 [ext_resource type="Script" path="res://match/match_referee.gd" id="4_referee"]
 [ext_resource type="Script" path="res://match/deathmatch.gd" id="11_deathmatch"]
+[ext_resource type="NavigationMesh" path="res://levels/test_level_navmesh.tres" id="12_navmesh"]
+[ext_resource type="Script" path="res://levels/arena_navigation.gd" id="13_navigation"]
 [ext_resource type="Script" path="res://weapons/shot_effects.gd" id="5_effects"]
 [ext_resource type="Texture2D" path="res://assets/vfx/kenney/spark_01.png" id="6_spark"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/nephelia/revolver_shot_placeholder.wav" id="7_shot"]
@@ -110,8 +112,29 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 8)
 
 [node name="Bot" parent="." instance=ExtResource("3_bot")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0.1, 8)
+display_name = "Hazel"
 
-[node name="MainIsland" type="CSGCombiner3D" parent="."]
+[node name="Otis" parent="." instance=ExtResource("3_bot")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0.1, -3)
+display_name = "Otis"
+body_color = Color(0.22, 0.55, 0.6, 1)
+
+[node name="BotController" parent="Otis"]
+random_seed = 2
+
+[node name="Mabel" parent="." instance=ExtResource("3_bot")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 0.1, -9)
+display_name = "Mabel"
+body_color = Color(0.85, 0.68, 0.2, 1)
+
+[node name="BotController" parent="Mabel"]
+random_seed = 3
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
+navigation_mesh = ExtResource("12_navmesh")
+script = ExtResource("13_navigation")
+
+[node name="MainIsland" type="CSGCombiner3D" parent="." groups=["navigation_geometry"]]
 use_collision = true
 
 [node name="Top" type="CSGCylinder3D" parent="MainIsland"]
@@ -130,7 +153,7 @@ cone = true
 smooth_faces = false
 material = SubResource("StandardMaterial3D_rock")
 
-[node name="Props" type="Node3D" parent="."]
+[node name="Props" type="Node3D" parent="." groups=["navigation_geometry"]]
 
 [node name="Crate1" type="CSGBox3D" parent="Props"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0.5, 5)
@@ -206,7 +229,7 @@ height = 4.0
 sides = 16
 material = SubResource("StandardMaterial3D_brass")
 
-[node name="SmallIsland" type="CSGCombiner3D" parent="."]
+[node name="SmallIsland" type="CSGCombiner3D" parent="." groups=["navigation_geometry"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 4, -30)
 use_collision = true
 

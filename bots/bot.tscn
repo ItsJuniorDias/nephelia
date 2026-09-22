@@ -2,9 +2,17 @@
 
 [ext_resource type="PackedScene" path="res://characters/character.tscn" id="1_character"]
 [ext_resource type="Script" path="res://bots/bot_controller.gd" id="2_bot"]
+[ext_resource type="Resource" path="res://bots/difficulty_medium.tres" id="3_difficulty"]
 
 [node name="Bot" instance=ExtResource("1_character")]
 body_color = Color(0.76, 0.38, 0.24, 1)
 
 [node name="BotController" type="Node" parent="."]
 script = ExtResource("2_bot")
+difficulty = ExtResource("3_difficulty")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+path_desired_distance = 0.6
+target_desired_distance = 0.8
+radius = 0.4
+height = 1.8

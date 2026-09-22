@@ -37,9 +37,16 @@ func _run() -> void:
 	_match.time_left = 3600.0
 	_referee.shot_resolved.connect(func(result: ShotResult) -> void: _shots.append(result))
 	_touch.force_visible = true
-	# Bots pausados nos testes do jogador (não esbarram nele); os testes de bot religam.
+	# Esta suíte testa os controles com UM bot de teste ("Bot"): os outros saem da cena.
+	# (A IA dos bots tem a suíte própria em tests/test_bots.gd.)
 	for bot: Node in get_nodes_in_group(&"bots"):
-		bot.process_mode = Node.PROCESS_MODE_DISABLED
+		if bot.name != "Bot":
+			bot.get_parent().remove_child(bot)
+			bot.queue_free()
+	# O bot fica pausado nos testes do jogador (não esbarra nele); os testes de bot religam.
+	var test_bot: Character = _level.get_node("Bot")
+	test_bot.process_mode = Node.PROCESS_MODE_DISABLED
+	(test_bot.controller as BotController).passive = true
 	print("touch mode: ", TouchControls.is_touch_mode(), "  viewport: ", root.get_visible_rect().size)
 
 	await _test_lands()
@@ -389,11 +396,8 @@ func _test_platform_jump() -> void:
 
 func _test_bodies_and_camera() -> void:
 	var bot: Character = _level.get_node("Bot")
-	var ok: bool = root.get_camera_3d() == _player.camera \
-			and _player.body_mesh.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY \
-			and not _player.visor_mesh.visible \
-			and bot.body_mesh.cast_shadow == GeometryInstance3D.SHADOW_CASTING_SETTING_ON \
-			and bot.visor_mesh.visible
+	var ok: bool = root.get_camera_3d() == _player.camera and _player.model.is_shadow_only() \
+			and not bot.model.is_shadow_only() and bot.model.visible
 	_check("16 own body hidden, bot visible, player camera", ok,
 			"camera_ok=%s" % (root.get_camera_3d() == _player.camera))
 
@@ -402,13 +406,14 @@ func _test_bot_reaches_target() -> void:
 	var bot: Character = _level.get_node("Bot")
 	var brain := bot.controller as BotController
 	bot.process_mode = Node.PROCESS_MODE_INHERIT
-	brain.target = bot.global_position + Vector3(0, 0, -3)
-	var goal: Vector3 = brain.target
+	await _physics(5)
+	var goal: Vector3 = bot.global_position + Vector3(0, 0, -3)
+	brain.go_to(goal)
 	var closest: float = INF
 	for i in 240:
 		await physics_frame
 		closest = minf(closest, Vector2(bot.global_position.x - goal.x, bot.global_position.z - goal.z).length())
-	_check("17 bot walks to a given target", closest < brain.arrive_distance + 0.1, "closest=%.2f" % closest)
+	_check("17 bot walks to a given target", closest < BotController.ARRIVE_DISTANCE + 0.1, "closest=%.2f" % closest)
 
 
 func _test_bot_wanders() -> void:
@@ -426,9 +431,14 @@ func _test_bot_wanders() -> void:
 		if Input.get_action_strength("move_forward") > 0.0 or Input.is_action_pressed("jump"):
 			input_untouched = false
 	var player_moved: float = _player.global_position.distance_to(player_start)
+	var brain := bot.controller as BotController
+	var agent: NavigationAgent3D = bot.get_node("NavigationAgent3D")
 	_check("18 bot wanders on its own", travelled > 3.0 and bot.global_position.y > -1.0 \
 			and input_untouched and player_moved < 0.05,
-			"travelled=%.2f y=%.2f input_untouched=%s player_moved=%.3f" % [travelled, bot.global_position.y, input_untouched, player_moved])
+			"travelled=%.2f y=%.2f input_untouched=%s player_moved=%.3f | state=%d goal=%s pos=%s finished=%s path=%d alive=%s mode=%d" % [
+			travelled, bot.global_position.y, input_untouched, player_moved, brain.state, brain.roam_goal,
+			bot.global_position, agent.is_navigation_finished(), agent.get_current_navigation_path().size(),
+			bot.is_alive, bot.process_mode])
 
 
 # ---------------------------------------------------------------- arma
@@ -635,7 +645,8 @@ func _test_kill_and_respawn() -> void:
 	_referee.character_died.connect(on_died)
 	for i in 3:
 		await _fire_once()
-	var dead: bool = not bot.is_alive and not bot.body_mesh.visible
+	await physics_frame
+	var dead: bool = not bot.is_alive and bot.collision_shape.disabled
 	var killed_by_player: bool = deaths.size() == 1 and deaths[0][0] == bot and deaths[0][1] == _player
 	# Morto não colide: o 4º tiro passa por onde ele estava.
 	await _fire_once()
@@ -650,7 +661,7 @@ func _test_kill_and_respawn() -> void:
 	await _physics(ceili(_referee.respawn_delay * Engine.physics_ticks_per_second) + 5)
 	_referee.character_died.disconnect(on_died)
 	var respawned_ok: bool = bot.is_alive and bot.health == bot.max_health and bot.is_spawn_protected \
-			and bot.body_mesh.visible and bot.global_position.distance_to(expected.global_position) < 0.3
+			and not bot.collision_shape.disabled and bot.global_position.distance_to(expected.global_position) < 0.3
 	_check("28 three shots kill, dead bot is not solid, respawns far away", dead and killed_by_player
 			and passes_through and respawned_ok,
 			"dead=%s killer_ok=%s passes=%s respawn=%s at=%s expected=%s" % [dead, killed_by_player,
@@ -697,7 +708,7 @@ func _test_player_death() -> void:
 	await physics_frame
 	_referee.apply_damage(_player, 200.0, bot)
 	await _physics(40)
-	var dead_ui: bool = not _player.is_alive and hud.death_panel.visible and "by Bot" in hud.death_label.text \
+	var dead_ui: bool = not _player.is_alive and hud.death_panel.visible and ("by %s" % bot.display_name) in hud.death_label.text \
 			and not view_model.visible and _player.camera.position.y < -1.0
 	var before: Vector3 = _player.global_position
 	var yaw_before: float = _player.yaw
@@ -748,8 +759,8 @@ func _test_kill_scores() -> void:
 	await _frames(2)
 	var feed: Array[String] = match_hud.get_feed_lines()
 	var ok: bool = _match.get_kills(_player) == kills_before + 1 and _match.get_deaths(bot) == deaths_before + 1 \
-			and not feed.is_empty() and feed.back() == "You eliminated Bot" \
-			and match_hud.elimination_label.visible and match_hud.elimination_label.text == "ELIMINATED Bot" \
+			and not feed.is_empty() and feed.back() == "You eliminated %s" % bot.display_name \
+			and match_hud.elimination_label.visible and match_hud.elimination_label.text == "ELIMINATED %s" % bot.display_name \
 			and match_hud.score_label.text.begins_with("#1")
 	_check("32 kill scores a point, shows in kill feed and center message", ok,
 			"kills=%d deaths=%d feed=%s center=%s score=%s" % [_match.get_kills(_player), _match.get_deaths(bot),
@@ -766,7 +777,7 @@ func _test_fall_scores() -> void:
 	await _physics(3)
 	await _frames(2)
 	var ok: bool = _match.get_deaths(bot) == bot_deaths + 1 and _match.get_kills(_player) == player_kills \
-			and _match.get_kills(bot) == bot_kills and match_hud.get_feed_lines().back() == "Bot fell"
+			and _match.get_kills(bot) == bot_kills and match_hud.get_feed_lines().back() == "%s fell" % bot.display_name
 	_check("33 falling counts a death but gives no point", ok, "feed=%s" % [match_hud.get_feed_lines()])
 
 

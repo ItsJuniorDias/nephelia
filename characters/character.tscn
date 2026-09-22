@@ -2,20 +2,11 @@
 
 [ext_resource type="Script" path="res://characters/character.gd" id="1_character"]
 [ext_resource type="Script" path="res://weapons/weapon.gd" id="2_weapon"]
+[ext_resource type="PackedScene" path="res://characters/character_model.tscn" id="3_model"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
 radius = 0.35
 height = 1.8
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_body"]
-radius = 0.35
-height = 1.8
-
-[sub_resource type="BoxMesh" id="BoxMesh_visor"]
-size = Vector3(0.5, 0.12, 0.2)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_visor"]
-albedo_color = Color(0.12, 0.1, 0.09, 1)
 
 [node name="Character" type="CharacterBody3D"]
 script = ExtResource("1_character")
@@ -24,9 +15,8 @@ script = ExtResource("1_character")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 shape = SubResource("CapsuleShape3D_body")
 
-[node name="Body" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-mesh = SubResource("CapsuleMesh_body")
+[node name="Model" parent="." instance=ExtResource("3_model")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 0)
 
 [node name="Head" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
@@ -34,11 +24,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
 [node name="Camera3D" type="Camera3D" parent="Head"]
 fov = 75.0
 near = 0.05
-
-[node name="Visor" type="MeshInstance3D" parent="Head"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.3)
-mesh = SubResource("BoxMesh_visor")
-surface_material_override/0 = SubResource("StandardMaterial3D_visor")
 
 [node name="Weapon" type="Node" parent="."]
 script = ExtResource("2_weapon")

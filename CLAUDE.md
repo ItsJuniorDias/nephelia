@@ -79,13 +79,29 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   pausa a árvore (`get_tree().paused`) e emite `match_finished`; `restart()` zera e faz todos
   renascerem. UI local: `ui/match_hud/` (roda pausado) e `ui/match_result/` (PLAY AGAIN, roda pausado).
   O jogador local aparece como "You" no placar e na lista de abates.
+- Bots: `bots/bot_controller.gd` (estados ROAM/CHASE/ATTACK; percepção 10x/s com linha de visão;
+  mira com erro que "passeia"; tempo de reação; anda de lado conferindo a navmesh para não cair;
+  vira para quem atirou). Dificuldades em `bots/difficulty_{easy,medium,hard}.tres`. `passive`
+  = só passeia. Todos usam o mesmo CharacterCommand que o humano (sem trapaça).
+- Navegação: `levels/test_level_navmesh.tres` é pré-calculada com `tools/bake_navmesh.gd` (rodar
+  de novo ao mudar o cenário). Geometria navegável = grupo `navigation_geometry`. Altura de célula
+  10 cm e degrau máx. 20 cm (o personagem só sobe RAMPA, nunca degrau; a escada tem rampa invisível);
+  `levels/arena_navigation.gd` ajusta o mapa para a mesma altura de célula.
+- Modelo dos personagens: `characters/character_model.tscn` (Quaternius Superhero_Male + revólver na
+  mão direita) com árvore de animação montada em código: pernas por velocidade, tronco em pose de
+  mira (filtrado a partir de `spine_01`), tiro/levar tiro por cima, transição vida/morte. Animações
+  extraídas do UAL para `assets/animations/quaternius_ual/character_animations.res` com
+  `tools/extract_bot_animations.gd`. O modelo olha para +Z: dentro do Character ele é girado 180°.
+  AnimationNodeTransition começa SEM estado: sempre pedir "alive" ao montar.
+- Exportação: excluir `tests/*`, `tools/*` e `assets/animations/quaternius_ual/*.glb` (7,6 MB, só
+  serve para extrair animações).
 - Arma em 1ª pessoa: materiais com `use_z_clip_scale` (não atravessa paredes),
   `disable_receive_shadows` (senão fica na sombra do próprio corpo e fica azul) e sem
   `vertex_color_use_as_albedo` (os FBX do pacote Wild West Guns têm cores de vértice azuladas).
 - Capturas de tela para conferir visual: usar `--write-movie <pasta>/f.png --fixed-fps 60` com um
   script `-s`; `get_viewport().get_texture().get_image()` devolve o quadro ANTERIOR.
-- Testes: `Godot --headless --path . -s res://tests/test_controls.gd` (saída 0 = tudo passou). Rodar
-  depois de qualquer mudança no jogador/controles/fase. Ao criar presets de exportação, excluir `tests/*`.
+- Testes: `Godot --headless --path . -s res://tests/test_controls.gd` e `... -s res://tests/test_bots.gd`
+  (saída 0 = tudo passou). Rodar os dois depois de qualquer mudança. Ao criar presets de exportação, excluir `tests/*`.
   No headless a janela é 64x64 (viewport 1152x1152): eventos simulados precisam ser convertidos com
   `root.get_final_transform()` (o teste já faz isso). Corpo com `process_mode` desligado sai da
   física (`disable_mode = REMOVE`): nos testes, usar `DISABLE_MODE_KEEP_ACTIVE` para o tiro acertar.
@@ -124,4 +140,6 @@ Atualizar esta seção ao fim de cada sessão.
   - Tarefa 2 (revólver) feita: 26 testes passando. Som de tiro ainda provisório (sintetizado).
   - Tarefa 3 (vida, morte e respawn) feita: 31 testes passando.
   - Tarefa 4 (partida todos contra todos) feita: 37 testes passando.
-  - Próximo: Tarefa 5 do `PLANO.md` (bots com IA, modelo Quaternius e animações).
+  - Tarefa 5 (bots) feita: 37 testes de controles + 8 de bots passando. Arena com 3 bots
+    (Hazel, Otis, Mabel) + jogador. Bots usam o corpo base da Quaternius (sem roupa: decisão pendente).
+  - Próximo: Tarefa 6 do `PLANO.md` (arena v1 com a arte da cidade).

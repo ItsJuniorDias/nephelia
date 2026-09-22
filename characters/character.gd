@@ -34,7 +34,7 @@ signal respawned
 @export_group("Aparência")
 ## Nome mostrado no HUD (ex.: "eliminado por ..."). Vazio = nome do nó.
 @export var display_name: String = ""
-## Cor provisória do corpo (uma por jogador/bot), até entrarem os modelos 3D.
+## Cor de identificação (tinge a roupa do modelo; uma por jogador/bot).
 @export var body_color: Color = Color(0.85, 0.85, 0.8)
 
 ## Para onde o corpo aponta (radianos).
@@ -60,15 +60,10 @@ var _coyote_timer: float = 0.0
 var _jump_buffer_timer: float = 0.0
 var _was_jump_held: bool = false
 var _protection_timer: float = 0.0
-var _body_material := StandardMaterial3D.new()
-var _flash_tween: Tween
-var _body_visible_when_alive: bool = true
-var _visor_visible_when_alive: bool = true
 
 @onready var head: Node3D = $Head
 @onready var camera: Camera3D = $Head/Camera3D
-@onready var body_mesh: MeshInstance3D = $Body
-@onready var visor_mesh: MeshInstance3D = $Head/Visor
+@onready var model: CharacterModel = $Model
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
 
 
@@ -77,8 +72,7 @@ func _ready() -> void:
 	if display_name.is_empty():
 		display_name = name
 	health = max_health
-	_body_material.albedo_color = body_color
-	body_mesh.material_override = _body_material
+	model.tint = body_color
 
 	for child: Node in get_children():
 		if child is Weapon and weapon == null:
@@ -88,12 +82,13 @@ func _ready() -> void:
 	# A arma primeiro: o controlador humano liga a mira e o contador de balas nela.
 	if weapon != null:
 		weapon.setup(self)
+		weapon.fired.connect(model.play_shoot.unbind(1))
 	if controller != null:
 		controller.setup(self)
 
 
 func _physics_process(delta: float) -> void:
-	# Morto fica parado e invisível até o juiz mandar renascer.
+	# Morto fica caído, sem colisão, até o juiz mandar renascer.
 	if not is_alive:
 		return
 	if _protection_timer > 0.0:
@@ -135,6 +130,7 @@ func _physics_process(delta: float) -> void:
 	velocity.z = horizontal.y
 
 	move_and_slide()
+	model.update_motion(Vector2(velocity.x, velocity.z).length(), pitch)
 
 
 ## Aponta o corpo (yaw) e a cabeça (pitch). A inclinação fica limitada a ±max_pitch_degrees.
@@ -146,14 +142,9 @@ func apply_look(new_yaw: float, new_pitch: float) -> void:
 
 ## Chamado pelo MatchReferee quando um tiro acerta este personagem (já com o dano decidido).
 func receive_hit(result: ShotResult) -> void:
-	# Pisca em branco: resposta visual imediata de que o tiro pegou.
+	# Tranco e brilho branco: resposta visual imediata de que o tiro pegou.
 	if result.damage > 0.0:
-		if _flash_tween != null:
-			_flash_tween.kill()
-		_body_material.albedo_color = Color(Color.WHITE, _body_material.albedo_color.a)
-		_flash_tween = create_tween()
-		_flash_tween.tween_property(_body_material, "albedo_color",
-				Color(body_color, _body_material.albedo_color.a), 0.15)
+		model.play_hit()
 	hit_received.emit(result)
 
 
@@ -163,7 +154,7 @@ func set_health(value: float) -> void:
 	health_changed.emit(health, max_health)
 
 
-## Morre: some, deixa de colidir e para de obedecer comandos (só o MatchReferee deve chamar).
+## Morre: cai (animação), deixa de colidir e para de obedecer comandos (só o MatchReferee deve chamar).
 func die(killer: Character) -> void:
 	if not is_alive:
 		return
@@ -171,10 +162,8 @@ func die(killer: Character) -> void:
 	health = 0.0
 	velocity = Vector3.ZERO
 	_protection_timer = 0.0
-	_body_visible_when_alive = body_mesh.visible
-	_visor_visible_when_alive = visor_mesh.visible
-	body_mesh.visible = false
-	visor_mesh.visible = false
+	model.set_protected(false)
+	model.play_death()
 	# set_deferred: mudar colisão no meio do passo de física não é permitido.
 	collision_shape.set_deferred(&"disabled", true)
 	health_changed.emit(health, max_health)
@@ -186,21 +175,20 @@ func respawn(at: Transform3D, protection_time: float) -> void:
 	teleport(at)
 	is_alive = true
 	_was_jump_held = false
-	body_mesh.visible = _body_visible_when_alive
-	visor_mesh.visible = _visor_visible_when_alive
+	model.reset_alive()
 	collision_shape.set_deferred(&"disabled", false)
 	if weapon != null:
 		weapon.refill()
 	set_health(max_health)
 	_protection_timer = protection_time
-	_set_body_alpha(0.45 if protection_time > 0.0 else 1.0)
+	model.set_protected(protection_time > 0.0)
 	respawned.emit()
 
 
 ## Tira a proteção de nascimento (acaba sozinha ou quando o personagem atira).
 func end_spawn_protection() -> void:
 	_protection_timer = 0.0
-	_set_body_alpha(1.0)
+	model.set_protected(false)
 
 
 ## Leva o personagem até `target` (posição e direção), parado e olhando reto.
@@ -212,14 +200,6 @@ func teleport(target: Transform3D) -> void:
 	_coyote_timer = 0.0
 	_jump_buffer_timer = 0.0
 	reset_physics_interpolation()
-
-
-# Corpo meio transparente = protegido (os outros veem que não adianta atirar).
-func _set_body_alpha(alpha: float) -> void:
-	var protected: bool = alpha < 1.0
-	_body_material.transparency = (BaseMaterial3D.TRANSPARENCY_ALPHA if protected
-			else BaseMaterial3D.TRANSPARENCY_DISABLED)
-	_body_material.albedo_color = Color(body_color, alpha)
 
 
 func _update_jump_timers(delta: float, jump_pressed: bool) -> void:
