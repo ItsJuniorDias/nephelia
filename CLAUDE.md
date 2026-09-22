@@ -93,12 +93,26 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   extraídas do UAL para `assets/animations/quaternius_ual/character_animations.res` com
   `tools/extract_bot_animations.gd`. O modelo olha para +Z: dentro do Character ele é girado 180°.
   AnimationNodeTransition começa SEM estado: sempre pedir "alive" ao montar.
-- Arena Sky Plaza (`levels/skyplaza/`): gerada por `tools/build_skyplaza.gd` (mapa em código) em
-  `skyplaza_geometry.tscn` (tudo com colisão; grupo `navigation_geometry`) e `skyplaza_decor.tscn`
-  (só visual); `skyplaza.tscn` junta sistemas, personagens e 8 pontos de nascimento. Ao mudar o
-  mapa: rodar o build e depois `tools/bake_navmesh.gd -- <cena> <navmesh.tres>`. Colisões são formas
-  simples (caixa/cilindro/convexa), não a malha. Nada pode ter degrau: pisos ficam 1 cm acima do
-  chão sem colisão; pontes têm patamares planos na altura de cada ilha.
+- Arena Sky Plaza (`levels/skyplaza/`): três quarteirões de cidade flutuantes (começo do séc. XX),
+  gerados por `tools/build_skyplaza.gd` (mapa em código) em `skyplaza_geometry.tscn` (tudo com
+  colisão; grupo `navigation_geometry`), `skyplaza_decor.tscn` (só visual), `skyplaza_rails.tscn` e
+  `meshes/*.res` (prédios juntados). `skyplaza.tscn` junta sistemas, personagens e 8 pontos de
+  nascimento. Mapa: praça central 44 x 44 m com prédios nos 4 cantos formando uma cruz (praça no
+  meio + 4 braços; leste/oeste levam às pontes, norte/sul terminam em balaústre onde os trilhos
+  passam por cima = "estações"); quarteirão oeste residencial (casas, rua, parque) e leste
+  comercial (lojas, largo). Norte = -Z, leste = +X. Ao mudar o mapa: rodar o build e depois
+  `tools/bake_navmesh.gd -- <cena> <navmesh.tres>`. Colisões são formas simples (caixa/cilindro/
+  convexa), não a malha, e a navmesh lê as colisões (`geometry_parsed_geometry_type = 1`). Nada
+  pode ter degrau: os pisos são planos 1 cm acima da plataforma, sem colisão (por isso não se usa
+  calçada com meio-fio), e as pontes têm patamares planos na altura de cada quarteirão.
+- Prédios: `tools/city_kit.gd` (CityKit, só ferramenta) monta fachadas com as peças modulares do
+  Downtown City MegaKit (parede de 2 m x 3 m de altura, face de fora para +Z) e junta cada prédio
+  numa malha só, com uma superfície por material e LOD automático. Estilos: "brick" (casa de
+  tijolo), "shop" (vitrine de ferro) e "civic" (pedra clara); telhado "mansard" (ardósia com
+  lucarnas) ou "flat" (cornija). Os lados que não dão para a área de jogo usam peças simples
+  (janela cara = até 1100 triângulos). Materiais compartilhados em `assets/materials/city/*.tres`,
+  com cor de vértice desligada (senão as peças sem cor ficam pretas), vidro opaco escuro (o
+  "interior falso" do pacote é só um plano branco) e sem as faces internas.
 - Trilhos aéreos: `rails/skyline_rail.gd` (SkylineRail, um Path3D; grupo `skyline_rails`; tubo CSG e
   postes montados ao carregar). Os da Sky Plaza saem do `tools/build_skyplaza.gd` em
   `skyplaza_rails.tscn`; as pontas ficam ~7 m para dentro da borda das ilhas. O Character engata
@@ -110,10 +124,13 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   animação "Jump" (também usada ao pular/cair). Bots: pegam o trilho se o destino está a mais de
   22 m; não se guiam no ar; só soltam se o pouso previsto (com a freada no ar) é navmesh ligada ao
   destino (topo de muro tem navmesh "ilhada"); ao pousar pedem caminho novo.
-- Peças usadas: `assets/models/city/downtown/` e `assets/models/nature/stylized/` (texturas
-  limitadas a 1024 px no .import). Prédio grande (45 mil triângulos) ficou de fora por desempenho.
-- Exportação: excluir `tests/*`, `tools/*` e `assets/animations/quaternius_ual/*.glb` (7,6 MB, só
-  serve para extrair animações).
+- Peças usadas: `assets/models/city/downtown/` (84 peças modulares) e
+  `assets/models/nature/stylized/` (texturas limitadas a 1024 px no .import). Os prédios prontos do
+  pacote (18 a 45 mil triângulos) ficaram de fora por desempenho: a arena usa fachadas montadas.
+  Arena inteira hoje: ~286 mil triângulos e 267 superfícies com 4 personagens (medir no iPhone).
+- Exportação: excluir `tests/*`, `tools/*`, `assets/animations/quaternius_ual/*.glb` (7,6 MB, só
+  serve para extrair animações) e `assets/models/city/downtown/*.gltf` (as peças soltas só servem
+  para o build; o jogo carrega as malhas juntadas de `levels/skyplaza/meshes/`).
 - Arma em 1ª pessoa: materiais com `use_z_clip_scale` (não atravessa paredes),
   `disable_receive_shadows` (senão fica na sombra do próprio corpo e fica azul) e sem
   `vertex_color_use_as_albedo` (os FBX do pacote Wild West Guns têm cores de vértice azuladas).
@@ -165,4 +182,8 @@ Atualizar esta seção ao fim de cada sessão.
   - Tarefa 7 (trilhos aéreos) feita: 37 + 8 + 10 testes passando. A Sky Plaza virou a cena
     principal e o Input Map ganhou `use_rail`, mudados com o editor aberto: reabrir o Godot.
     Texturas usadas em 3D passaram sozinhas para compressão de GPU (ETC2/ASTC) com mipmaps.
-  - Próximo: Tarefa 8 do `PLANO.md` (poderes e itens).
+  - Arena v2 (cidade) feita: a Sky Plaza virou três quarteirões de cidade com prédios montados
+    peça por peça (CityKit), postes, balaústres e trilhos passando por fora dos prédios.
+    37 + 8 + 10 testes passando.
+  - Próximo: Tarefa 8 do `PLANO.md` (poderes e itens). A parte 1 (frascos de vida) está escrita e
+    guardada no `git stash` (mensagem "Tarefa 8 parte 1"), ainda sem testar.

@@ -27,6 +27,10 @@ const ROAM_PICK_ATTEMPTS: int = 8
 const RAIL_MIN_TRIP: float = 22.0
 ## Depois de soltar de um trilho, espera este tempo antes de pegar outro.
 const RAIL_COOLDOWN: float = 6.0
+## Só pega o trilho se ele chega a esta fração da distância que falta até o destino.
+const RAIL_WORTH_FRACTION: float = 0.4
+## Distância entre os pontos conferidos ao longo do trilho.
+const RAIL_SAMPLE_STEP: float = 4.0
 
 @export var difficulty: BotDifficulty
 ## Só passeia e nunca ataca (testes e, no futuro, tutorial).
@@ -244,8 +248,7 @@ func _chase(delta: float) -> void:
 func _roam(delta: float) -> void:
 	if character.is_on_rail:
 		return
-	if _should_take_rail():
-		command.use_rail = true
+	if _try_take_rail(delta):
 		return
 	if _arrived() or _is_stuck(delta):
 		pick_roam_goal()
@@ -328,23 +331,51 @@ func _is_stuck(delta: float) -> bool:
 
 # ---------------------------------------------------------------- trilhos
 
-# Pega o trilho se o destino é longe e há um trilho ao alcance indo mais ou menos para lá
-# (no sentido para onde o bot está virado, que é o sentido em que ele vai deslizar).
-func _should_take_rail() -> bool:
+# Pega o trilho quando o destino é longe e o trilho leva bem mais perto dele. O personagem
+# desliza para o lado em que está virado: se o bom sentido é o contrário, o bot primeiro vira.
+# Devolve true enquanto está tratando do trilho (engatando ou virando para ele).
+func _try_take_rail(delta: float) -> bool:
 	if _rail_cooldown > 0.0:
 		return false
 	var to_goal: Vector3 = roam_goal - character.global_position
 	to_goal.y = 0.0
-	if to_goal.length() < RAIL_MIN_TRIP:
+	var distance: float = to_goal.length()
+	if distance < RAIL_MIN_TRIP:
 		return false
 	var hook: Dictionary = character.find_hookable_rail(rail_hook_cone)
 	if hook.is_empty():
 		return false
-	var tangent: Vector3 = (hook["rail"] as SkylineRail).tangent_at(hook["offset"])
-	tangent.y = 0.0
-	var forward: Vector3 = -character.global_basis.z
-	var travel: Vector3 = tangent.normalized() * signf(tangent.dot(forward))
-	return travel.dot(to_goal.normalized()) > 0.6
+	var rail: SkylineRail = hook["rail"]
+	var offset: float = hook["offset"]
+	var best_direction: float = 0.0
+	var best_distance: float = distance * RAIL_WORTH_FRACTION
+	for direction: float in [1.0, -1.0]:
+		var reach: float = _rail_closest_approach(rail, offset, direction)
+		if reach < best_distance:
+			best_distance = reach
+			best_direction = direction
+	if best_direction == 0.0:
+		return false
+	var travel: Vector3 = rail.tangent_at(offset) * best_direction
+	travel.y = 0.0
+	if travel.dot(-character.global_basis.z) > 0.2:
+		command.use_rail = true
+	else:
+		command.yaw = rotate_toward(character.yaw, atan2(-travel.x, -travel.z),
+				deg_to_rad(difficulty.turn_speed_degrees) * delta)
+	return true
+
+
+# Quanto o trilho chega perto do destino, andando dele a partir de `offset` no sentido `direction`.
+func _rail_closest_approach(rail: SkylineRail, offset: float, direction: float) -> float:
+	var closest: float = INF
+	var length: float = rail.get_length()
+	var along: float = offset
+	while along >= 0.0 and along <= length:
+		var point: Vector3 = rail.point_at(along)
+		closest = minf(closest, Vector2(point.x - roam_goal.x, point.z - roam_goal.z).length())
+		along += direction * RAIL_SAMPLE_STEP
+	return closest
 
 
 # Pendurado: acelera, olha para onde vai (se não estiver mirando) e solta perto do destino,

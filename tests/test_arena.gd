@@ -72,7 +72,8 @@ func _test_connected_and_spawns() -> void:
 	var map: RID = _level.get_world_3d().navigation_map
 	var start := Vector3(0, 0, 16)
 	var unreachable: Array[String] = []
-	for goal: Vector3 in [Vector3(-42, 1, 3), Vector3(-50, 1, -2), Vector3(33, -1, 0), Vector3(0, 0, -9)]:
+	for goal: Vector3 in [Vector3(-42, 1, 3), Vector3(-34, 1, -12), Vector3(38, -1, 0), Vector3(0, 0, -9),
+			Vector3(0, 0, 19)]:
 		var path: PackedVector3Array = NavigationServer3D.map_get_path(map, start, goal, true)
 		if path.is_empty() or path[path.size() - 1].distance_to(goal) > 1.2:
 			unreachable.append(str(goal))
@@ -167,9 +168,9 @@ func _test_hook_and_ride_rail() -> void:
 	var touch: TouchControls = _player.get_node("HumanController/TouchControls")
 	var hud: Hud = _player.get_node("HumanController/Hud")
 	touch.force_visible = true
-	_place(_player, Vector3(0, 0.05, 15), Vector3(10, 0, 15))
+	_place(_player, Vector3(0, 0.05, 18), Vector3(10, 0, 18))
 	await _physics(10)
-	_look_at_point(rail.point_at(rail.closest_offset(Vector3(0, 10, 18))))
+	_look_at_point(rail.point_at(rail.closest_offset(Vector3(0, 10, 21))))
 	await _physics(3)
 	var hint_shown: bool = hud.rail_hint.visible and (touch.get_node("Root/HookButton") as Control).visible
 	await _press(&"use_rail")
@@ -218,9 +219,9 @@ func _test_hook_hidden_without_rail() -> void:
 
 func _test_death_on_rail() -> void:
 	var rail: SkylineRail = _level.get_node("Rails/RailNorth")
-	_place(_player, Vector3(0, 0.05, -15), Vector3(10, 0, -15))
+	_place(_player, Vector3(0, 0.05, -18), Vector3(10, 0, -18))
 	await _physics(10)
-	_look_at_point(rail.point_at(rail.closest_offset(Vector3(0, 10, -18))))
+	_look_at_point(rail.point_at(rail.closest_offset(Vector3(0, 10, -21))))
 	await _press(&"use_rail")
 	await _physics(_seconds(0.8))
 	var was_on_rail: bool = _player.is_on_rail
@@ -249,7 +250,7 @@ func _test_bot_rides_rail() -> void:
 	var on_detached := func() -> void: dropped_at[0] = bot.global_position
 	bot.rail_attached.connect(on_attached)
 	bot.rail_detached.connect(on_detached)
-	_place(bot, Vector3(-37, 1.05, 5), Vector3(0, 1, 5))
+	_place(bot, Vector3(-36, 1.05, 5), Vector3(0, 1, 5))
 	brain.go_to(Vector3(36, -1, 4))
 	var arrived_east: bool = false
 	for i in _seconds(14.0):

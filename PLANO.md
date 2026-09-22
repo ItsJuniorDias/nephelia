@@ -61,6 +61,14 @@ aéreos, a 60 FPS no iPhone.
 - Paleta Nephelia (dourado, creme, azul-céu), colisões, iluminação com LightmapGI, texturas reduzidas
 - Pronto quando: a arena fica bonita, os bots navegam nela e o FPS se mantém no iPhone
 
+### 6b. Arena v2: cidade de verdade: [x] feito
+- Pedido do usuário (2026-09-22): em vez de ilhas com jardim, quarteirões de cidade flutuantes
+- `tools/city_kit.gd` monta prédios com as peças modulares do Downtown City MegaKit (tijolo,
+  vitrine, pedra clara; telhado mansarda ou cornija) e junta cada prédio numa malha só com LOD
+- Praça central com prédios nos 4 cantos (cruz de ruas), quarteirão residencial a oeste e
+  comercial a leste; postes de ferro, balaústres e as "estações" dos trilhos
+- Pronto quando: a arena parece uma cidade do começo do século XX e os testes passam
+
 ### 7. Trilhos aéreos: [x] feito
 - Engatar e desengatar (botão contextual), velocidade, pular do trilho, atirar pendurado
 - Bots também usam os trilhos

@@ -1,0 +1,18 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/models/city/downtown/T_Trim_BaseColor.png" id="1_kwxl6"]
+[ext_resource type="Texture2D" path="res://assets/models/city/downtown/T_Trim_ORM.png" id="2_287ix"]
+[ext_resource type="Texture2D" path="res://assets/models/city/downtown/T_Trim_Normal.png" id="3_1h86g"]
+
+[resource]
+resource_name = "MI_Trim_Green"
+cull_mode = 2
+albedo_texture = ExtResource("1_kwxl6")
+metallic = 1.0
+metallic_texture = ExtResource("2_287ix")
+metallic_texture_channel = 2
+roughness_texture = ExtResource("2_287ix")
+roughness_texture_channel = 1
+normal_enabled = true
+normal_texture = ExtResource("3_1h86g")
+metadata/_gltf_primary_texture_coord = 0
