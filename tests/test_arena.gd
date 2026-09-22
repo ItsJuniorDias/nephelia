@@ -303,11 +303,19 @@ func _test_characters_dressed() -> void:
 
 
 func _test_first_person_sleeves() -> void:
-	# Os braços da 1ª pessoa vestem a roupa do jogador (a manga aparece) e escondem a cabeça.
+	# Em 1ª pessoa só os braços (com as mangas da roupa do jogador) aparecem: a gola, o pescoço, o
+	# peito, a cabeça e o chapéu ficariam em volta da câmera (faixa marrom na tela, visto no iPhone).
 	var view_model := _player.camera.get_node("ViewModel") as ViewModel
-	var parts := PackedStringArray()
+	var shown := PackedStringArray()
+	var hidden := PackedStringArray()
 	for node: Node in view_model.skeleton.get_children():
-		parts.append(node.name)
-	var ok: bool = "Male_Peasant_Arms" in parts and "Body" in parts and "HiddenBones" in parts
-	_check("C2 first-person arms wear the player's outfit and hide the head", ok, "parts=%s" % [parts])
+		if node is MeshInstance3D:
+			if (node as MeshInstance3D).visible:
+				shown.append(node.name)
+			else:
+				hidden.append(node.name)
+	var ok: bool = shown == PackedStringArray(["Male_Peasant_Arms"]) and "Body" in hidden \
+			and "Male_Peasant_Body" in hidden and "Hat" in hidden
+	_check("C2 first-person shows only the arms (sleeves); collar, neck, head and hat are hidden", ok,
+			"shown=%s hidden=%s" % [shown, hidden])
 

@@ -86,6 +86,11 @@ func _run() -> void:
 	player.camera.current = true
 	await _frames(12)
 	_shot("1a_pessoa")
+	# Olhando para cima e para baixo (nada do próprio corpo pode entrar na frente da câmera).
+	for pitch: float in [45.0, -45.0]:
+		player.apply_look(player.yaw, deg_to_rad(pitch))
+		await _frames(10)
+		_shot("1a_pessoa_%s" % ("cima" if pitch > 0.0 else "baixo"))
 	await _frames(3)
 	quit()
 

@@ -100,7 +100,10 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   `assets/models/characters/parts/`) e o chapéu (coco, cartola, boina, feitos de formas simples e
   presos ao osso da cabeça). A textura dos pelos é cinza: a cor vem da ficha. A cor do personagem
   (`body_color`) tinge só o tecido (`Wardrobe.is_cloth`). Os braços da 1ª pessoa usam o mesmo
-  Wardrobe (manga da roupa do jogador). Os BOTS (pedido do usuário, 2026-09-22) vestem a roupa
+  Wardrobe (manga da roupa do jogador) e mostram SÓ a malha dos braços (`*_Arms`): a câmera fica
+  na altura do pescoço, e a gola/pescoço/peito (tecido com os dois lados visíveis) apareciam como
+  uma faixa marrom no meio da tela (visto no iPhone). A foto de conferência `1a_pessoa` já
+  mostrava isso: conferir SEMPRE as fotos de 1ª pessoa (reta, para cima e para baixo). Os BOTS (pedido do usuário, 2026-09-22) vestem a roupa
   mas mantêm a cabeça de antes das roupas: corpo masculino, careca, sem chapéu, e a cor deles
   tinge a pele também (`tint_skin`). `dressed` falso ainda monta o corpo original inteiro, sem
   roupa (não usado hoje).

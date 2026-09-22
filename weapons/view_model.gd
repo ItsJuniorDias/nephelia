@@ -88,6 +88,23 @@ func _build_body() -> void:
 	add_child(model)
 	move_child(model, 0)
 	skeleton = model.get_node("Armature/Skeleton3D")
+	_show_only_arms()
+
+
+# Em 1ª pessoa só os braços aparecem. A câmera fica na altura do pescoço: a gola, o pescoço e o
+# peito ficariam em volta dela e o tecido (que tem os dois lados visíveis) aparecia na tela como
+# uma faixa marrom no meio da visão (visto no iPhone). Com roupa, braços e mãos são uma malha só
+# ("*_Arms"); sem roupa o corpo é uma malha só e quem some é a cabeça (HiddenBonesModifier).
+func _show_only_arms() -> void:
+	var arms_found: bool = false
+	for node: Node in skeleton.get_children():
+		if node is MeshInstance3D and String(node.name).ends_with("_Arms"):
+			arms_found = true
+	if not arms_found:
+		return
+	for node: Node in skeleton.get_children():
+		if node is MeshInstance3D and not String(node.name).ends_with("_Arms"):
+			(node as MeshInstance3D).visible = false
 
 
 # Arma na mão, marcador da ponta do cano e o clarão do tiro.
