@@ -3,6 +3,7 @@
 [ext_resource type="PackedScene" path="res://player/player.tscn" id="2_player"]
 [ext_resource type="PackedScene" path="res://bots/bot.tscn" id="3_bot"]
 [ext_resource type="Script" path="res://match/match_referee.gd" id="4_referee"]
+[ext_resource type="Script" path="res://match/deathmatch.gd" id="11_deathmatch"]
 [ext_resource type="Script" path="res://weapons/shot_effects.gd" id="5_effects"]
 [ext_resource type="Texture2D" path="res://assets/vfx/kenney/spark_01.png" id="6_spark"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/nephelia/revolver_shot_placeholder.wav" id="7_shot"]
@@ -66,6 +67,9 @@ points = PackedVector3Array(-1.25, 0, 0.6, 1.25, 0, 0.6, -1.25, 0, -1.2, 1.25, 0
 
 [node name="MatchReferee" type="Node" parent="."]
 script = ExtResource("4_referee")
+
+[node name="Deathmatch" type="Node" parent="." groups=["game_mode"]]
+script = ExtResource("11_deathmatch")
 
 [node name="ShotEffects" type="Node3D" parent="."]
 script = ExtResource("5_effects")

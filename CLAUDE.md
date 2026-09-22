@@ -74,6 +74,11 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   só guarda o estado (`health`, `is_alive`, `is_spawn_protected`) e emite `died`/`respawned`.
   Morto: corpo some e a colisão é desligada (`set_deferred`). HUD mostra vida, borda vermelha,
   direção do dano e tela de eliminado; a câmera do humano "cai" ao morrer.
+- Partida: `match/deathmatch.gd` (Deathmatch, grupo `game_mode`) escuta `character_died` do juiz,
+  conta abates/mortes (queda = morte sem ponto), cronômetro de 5 min e limite de 15 abates; ao acabar
+  pausa a árvore (`get_tree().paused`) e emite `match_finished`; `restart()` zera e faz todos
+  renascerem. UI local: `ui/match_hud/` (roda pausado) e `ui/match_result/` (PLAY AGAIN, roda pausado).
+  O jogador local aparece como "You" no placar e na lista de abates.
 - Arma em 1ª pessoa: materiais com `use_z_clip_scale` (não atravessa paredes),
   `disable_receive_shadows` (senão fica na sombra do próprio corpo e fica azul) e sem
   `vertex_color_use_as_albedo` (os FBX do pacote Wild West Guns têm cores de vértice azuladas).
@@ -118,4 +123,5 @@ Atualizar esta seção ao fim de cada sessão.
     músicas do Kevin MacLeod (CC-BY), fontes Limelight e Josefin Sans.
   - Tarefa 2 (revólver) feita: 26 testes passando. Som de tiro ainda provisório (sintetizado).
   - Tarefa 3 (vida, morte e respawn) feita: 31 testes passando.
-  - Próximo: Tarefa 4 do `PLANO.md` (partida todos contra todos).
+  - Tarefa 4 (partida todos contra todos) feita: 37 testes passando.
+  - Próximo: Tarefa 5 do `PLANO.md` (bots com IA, modelo Quaternius e animações).

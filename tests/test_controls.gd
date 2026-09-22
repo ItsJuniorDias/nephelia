@@ -15,6 +15,7 @@ var _player: Character
 var _touch: TouchControls
 var _spawn: Marker3D
 var _referee: MatchReferee
+var _match: Deathmatch
 var _shots: Array[ShotResult] = []
 
 
@@ -31,6 +32,9 @@ func _run() -> void:
 	_touch = _player.get_node("HumanController/TouchControls")
 	_spawn = _level.get_node("SpawnPoint")
 	_referee = _level.get_node("MatchReferee")
+	_match = _level.get_node("Deathmatch")
+	# Os testes duram mais que uma partida de 5 min em tempo de jogo? Não, mas por garantia:
+	_match.time_left = 3600.0
 	_referee.shot_resolved.connect(func(result: ShotResult) -> void: _shots.append(result))
 	_touch.force_visible = true
 	# Bots pausados nos testes do jogador (não esbarram nele); os testes de bot religam.
@@ -69,6 +73,12 @@ func _run() -> void:
 	await _test_spawn_protection()
 	await _test_player_death()
 	await _test_damage_direction()
+	await _test_kill_scores()
+	await _test_fall_scores()
+	await _test_time_up_and_result()
+	await _test_play_again()
+	await _test_score_limit()
+	await _test_timer_format()
 
 	# Deixa rastros e faíscas terminarem antes de sair (evita aviso de recurso em uso).
 	_shots.clear()
@@ -719,3 +729,110 @@ func _test_damage_direction() -> void:
 	_check("31 damage direction indicator and red vignette", ok,
 			"angles=%s vignette=%.2f hp=%s" % [angles, hud.damage_vignette.modulate.a, hud.health_label.text])
 	_revive(_player)
+
+
+# ---------------------------------------------------------------- partida
+
+func _kill_bot_by_player(bot: Character) -> void:
+	await physics_frame
+	_referee.apply_damage(bot, 999.0, _player)
+
+
+func _test_kill_scores() -> void:
+	var bot: Character = await _prepare_weapon_test(Vector3(0, 0, 3.5))
+	var match_hud: MatchHud = _player.get_node("HumanController/MatchHud")
+	var kills_before: int = _match.get_kills(_player)
+	var deaths_before: int = _match.get_deaths(bot)
+	for i in 3:
+		await _fire_once()
+	await _frames(2)
+	var feed: Array[String] = match_hud.get_feed_lines()
+	var ok: bool = _match.get_kills(_player) == kills_before + 1 and _match.get_deaths(bot) == deaths_before + 1 \
+			and not feed.is_empty() and feed.back() == "You eliminated Bot" \
+			and match_hud.elimination_label.visible and match_hud.elimination_label.text == "ELIMINATED Bot" \
+			and match_hud.score_label.text.begins_with("#1")
+	_check("32 kill scores a point, shows in kill feed and center message", ok,
+			"kills=%d deaths=%d feed=%s center=%s score=%s" % [_match.get_kills(_player), _match.get_deaths(bot),
+			feed, match_hud.elimination_label.text, match_hud.score_label.text])
+
+
+func _test_fall_scores() -> void:
+	var bot: Character = await _prepare_weapon_test()
+	var match_hud: MatchHud = _player.get_node("HumanController/MatchHud")
+	var player_kills: int = _match.get_kills(_player)
+	var bot_kills: int = _match.get_kills(bot)
+	var bot_deaths: int = _match.get_deaths(bot)
+	bot.global_position = Vector3(0, -100, 0)
+	await _physics(3)
+	await _frames(2)
+	var ok: bool = _match.get_deaths(bot) == bot_deaths + 1 and _match.get_kills(_player) == player_kills \
+			and _match.get_kills(bot) == bot_kills and match_hud.get_feed_lines().back() == "Bot fell"
+	_check("33 falling counts a death but gives no point", ok, "feed=%s" % [match_hud.get_feed_lines()])
+
+
+func _test_time_up_and_result() -> void:
+	await _prepare_weapon_test()
+	var result: MatchResult = _player.get_node("HumanController/MatchResult")
+	var touch: TouchControls = _player.get_node("HumanController/TouchControls")
+	_match.time_left = 0.3
+	await _physics(30)
+	await _frames(2)
+	# Jogador tem mais abates que o bot nos testes anteriores: deve ganhar.
+	var ok: bool = _match.is_finished and paused and result.visible and result.title_label.text == "YOU WIN!" \
+			and result.ranking_label.text.begins_with("1.  You") and not touch.visible
+	# Pausado: ninguém se mexe.
+	var before: Vector3 = _player.global_position
+	Input.action_press("move_forward")
+	await _physics(20)
+	Input.action_release("move_forward")
+	var frozen: bool = _player.global_position.distance_to(before) < 0.001
+	_check("34 time up: game freezes and result screen shows the winner", ok and frozen,
+			"finished=%s paused=%s visible=%s title=%s ranking=%s touch=%s frozen=%s" % [_match.is_finished, paused,
+			result.visible, result.title_label.text, result.ranking_label.text.replace("\n", " / "), touch.visible, frozen])
+
+
+func _test_play_again() -> void:
+	var result: MatchResult = _player.get_node("HumanController/MatchResult")
+	var touch: TouchControls = _player.get_node("HumanController/TouchControls")
+	var match_hud: MatchHud = _player.get_node("HumanController/MatchHud")
+	result.play_again_button.pressed.emit()
+	await _frames(2)
+	var bot: Character = _level.get_node("Bot")
+	var ok: bool = not _match.is_finished and not paused and not result.visible and touch.visible \
+			and _match.get_kills(_player) == 0 and _match.get_deaths(bot) == 0 and _match.time_left > 299.0 \
+			and _player.is_alive and bot.is_alive and match_hud.get_feed_lines().is_empty()
+	_match.time_left = 3600.0
+	_check("35 PLAY AGAIN restarts: scores, timer and everyone alive", ok,
+			"finished=%s paused=%s result=%s touch=%s kills=%d time=%.0f" % [_match.is_finished, paused,
+			result.visible, touch.visible, _match.get_kills(_player), _match.time_left])
+
+
+func _test_score_limit() -> void:
+	var bot: Character = await _prepare_weapon_test()
+	var result: MatchResult = _player.get_node("HumanController/MatchResult")
+	_match.score_limit = 2
+	await _kill_bot_by_player(bot)
+	_revive(bot)
+	var after_one: bool = not _match.is_finished
+	await _kill_bot_by_player(bot)
+	await _frames(2)
+	var ok: bool = after_one and _match.is_finished and result.visible and result.title_label.text == "YOU WIN!"
+	_check("36 reaching the kill limit ends the match", ok, "after_one=%s finished=%s" % [after_one, _match.is_finished])
+	_match.score_limit = 15
+	_match.restart()
+	_match.time_left = 3600.0
+	await _frames(2)
+
+
+func _test_timer_format() -> void:
+	var match_hud: MatchHud = _player.get_node("HumanController/MatchHud")
+	_match.time_left = 125.2
+	await _frames(2)
+	var text_normal: String = match_hud.timer_label.text
+	_match.time_left = 9.5
+	await _frames(2)
+	var text_hurry: String = match_hud.timer_label.text
+	var hurry_color: Color = match_hud.timer_label.get_theme_color(&"font_color")
+	_match.time_left = 3600.0
+	_check("37 timer shows m:ss and turns red at the end", text_normal == "2:06" and text_hurry == "0:10"
+			and hurry_color == MatchHud.HURRY_COLOR, "normal=%s hurry=%s" % [text_normal, text_hurry])

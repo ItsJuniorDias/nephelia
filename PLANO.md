@@ -43,7 +43,7 @@ aéreos, a 60 FPS no iPhone.
 - Indicador de dano e de onde veio o tiro
 - Pronto quando: morrer e voltar é rápido e justo
 
-### 4. Partida: todos contra todos
+### 4. Partida: todos contra todos: [x] feito
 - Placar de abates, cronômetro de 5 minutos, vencedor, tela de resultado, jogar de novo
 - Nomes dos jogadores e lista de abates ("A derrubou B")
 - Pronto quando: uma partida completa funciona do início ao fim

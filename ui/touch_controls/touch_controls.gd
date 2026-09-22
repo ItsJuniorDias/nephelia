@@ -19,6 +19,13 @@ const SAFE_AREA_CHECK_INTERVAL: float = 0.5
 		if is_node_ready():
 			_apply_active()
 
+## Desligado = controles somem e soltam tudo (ex.: na tela de fim de partida).
+@export var enabled: bool = true:
+	set(value):
+		enabled = value
+		if is_node_ready():
+			_apply_active()
+
 ## Fração esquerda da tela onde um dedo novo faz nascer o joystick.
 @export_range(0.2, 0.6, 0.01) var joystick_zone_ratio: float = 0.4
 
@@ -153,7 +160,7 @@ func _remove_mouse_buttons_from_action(action: StringName) -> void:
 
 # Liga os controles só em modo toque (ou se forçado); desligados, não seguram nenhuma ação.
 func _apply_active() -> void:
-	var active: bool = force_visible or is_touch_mode()
+	var active: bool = enabled and (force_visible or is_touch_mode())
 	visible = active
 	set_process_input(active)
 	set_process(active)

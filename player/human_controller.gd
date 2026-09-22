@@ -17,6 +17,8 @@ var _death_tween: Tween
 
 @onready var touch_controls: TouchControls = $TouchControls
 @onready var hud: Hud = $Hud
+@onready var match_hud: MatchHud = $MatchHud
+@onready var match_result: MatchResult = $MatchResult
 
 
 func setup(for_character: Character) -> void:
@@ -32,6 +34,8 @@ func setup(for_character: Character) -> void:
 	_view_model = character.camera.get_node_or_null("ViewModel") as ViewModel
 	if _view_model != null and character.weapon != null:
 		_view_model.setup(character, character.weapon)
+	# A partida pode ficar pronta depois do jogador: conectamos no fim do quadro.
+	_connect_to_match.call_deferred()
 
 
 func _exit_tree() -> void:
@@ -103,6 +107,27 @@ func rotate_look(yaw_degrees: float, pitch_degrees: float) -> void:
 func _on_touch_look_dragged(relative: Vector2) -> void:
 	# Arrastar para a direita vira para a direita; arrastar para cima olha para cima.
 	rotate_look(-relative.x * touch_look_sensitivity, -relative.y * touch_look_sensitivity)
+
+
+func _connect_to_match() -> void:
+	var deathmatch: Deathmatch = Deathmatch.find(self)
+	if deathmatch == null:
+		match_hud.visible = false
+		return
+	match_hud.setup(character, deathmatch)
+	match_result.setup(character, deathmatch)
+	deathmatch.match_finished.connect(_on_match_finished.unbind(1))
+	deathmatch.match_started.connect(_on_match_started)
+
+
+# Fim de partida: solta o mouse (para clicar em "jogar de novo") e esconde o toque.
+func _on_match_finished() -> void:
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	touch_controls.enabled = false
+
+
+func _on_match_started() -> void:
+	touch_controls.enabled = true
 
 
 # Câmera "cai" no chão e a arma some enquanto espera o respawn.
