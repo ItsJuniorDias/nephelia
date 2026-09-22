@@ -34,6 +34,8 @@ const RAIL_WORTH_FRACTION: float = 0.4
 const RAIL_SAMPLE_STEP: float = 4.0
 ## Só vai atrás de itens até esta distância (em linha reta).
 const ITEM_SEARCH_DISTANCE: float = 35.0
+## Arma vale menos que vida: o bot só desvia do caminho por uma que esteja aqui do lado.
+const WEAPON_SEARCH_DISTANCE: float = 16.0
 ## Busca frasco de vida quando a vida cai abaixo desta fração do máximo.
 const WANT_HEALTH_BELOW: float = 0.6
 
@@ -459,12 +461,15 @@ func _think_items() -> void:
 	for node: Node in get_tree().get_nodes_in_group(Pickup.GROUP):
 		var pickup := node as Pickup
 		if pickup.is_available and _wants(pickup) \
-				and character.global_position.distance_to(pickup.global_position) < ITEM_SEARCH_DISTANCE:
+				and character.global_position.distance_to(pickup.global_position) < _search_distance(pickup):
 			candidates.append(pickup)
 	if candidates.is_empty():
 		return
+	# Machucado, vida antes de arma: só depois procura uma arma melhor. Entre iguais, a mais perto.
 	var here: Vector3 = character.global_position
 	candidates.sort_custom(func(a: Pickup, b: Pickup) -> bool:
+		if _item_priority(a) != _item_priority(b):
+			return _item_priority(a) < _item_priority(b)
 		return here.distance_squared_to(a.global_position) < here.distance_squared_to(b.global_position))
 	for pickup: Pickup in candidates:
 		if _reachable(pickup.global_position):
@@ -474,10 +479,23 @@ func _think_items() -> void:
 			return
 
 
+func _search_distance(pickup: Pickup) -> float:
+	return ITEM_SEARCH_DISTANCE if pickup.kind == Pickup.Kind.HEALTH else WEAPON_SEARCH_DISTANCE
+
+
+# Ordem de interesse: 0 = vida (urgente), 1 = arma.
+func _item_priority(pickup: Pickup) -> int:
+	return 0 if pickup.kind == Pickup.Kind.HEALTH else 1
+
+
 func _wants(pickup: Pickup) -> bool:
 	match pickup.kind:
 		Pickup.Kind.HEALTH:
 			return character.health < character.max_health * WANT_HEALTH_BELOW
+		Pickup.Kind.RIFLE, Pickup.Kind.SHOTGUN:
+			# Troca o revólver por qualquer arma da arena, e volta nela quando a munição baixa.
+			var weapon: Weapon = character.weapon
+			return weapon != null and (weapon.is_default() or not weapon.is_full())
 	return false
 
 

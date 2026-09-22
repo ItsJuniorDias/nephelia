@@ -37,6 +37,11 @@ func _run() -> void:
 	await _test_pickup_respawns()
 	await _test_bot_fetches_health()
 	await _test_restart_restores_pickups()
+	await _test_weapon_pickup()
+	await _test_weapon_runs_out()
+	await _test_shotgun_pellets()
+	await _test_two_handed_grip()
+	await _test_first_person_aim()
 
 	await _physics(10)
 	print("RESULT: ", "ALL PASSED" if _failures == 0 else "%d FAILED" % _failures)
@@ -149,3 +154,128 @@ func _test_restart_restores_pickups() -> void:
 		all_back = all_back and (node as Pickup).is_available
 	_check("I5 restarting the match brings every item back", taken_before > 0 and all_back,
 			"taken_before=%d all_back=%s" % [taken_before, all_back])
+
+
+# Atira uma vez e espera o intervalo da arma (como no teste dos controles).
+func _fire_once() -> void:
+	await physics_frame
+	Input.action_press(&"fire")
+	await _physics(2)
+	Input.action_release(&"fire")
+	await _physics(_seconds(_player.weapon.fire_interval) + 2)
+
+
+func _test_weapon_pickup() -> void:
+	# Andar até a repetidora troca a arma do jogador: tambor maior, reserva contada, e as mãos
+	# em 1ª pessoa passam a segurar o rifle.
+	var item: Pickup = _item("Rifle")
+	var hud: Hud = _player.get_node("HumanController/Hud")
+	var view_model := _player.camera.get_node_or_null("ViewModel") as ViewModel
+	_place(_player, item.global_position + Vector3(3, 0.05, 0), item.global_position)
+	await _walk_forward(1.0)
+	var weapon: Weapon = _player.weapon
+	var rifle: WeaponData = WeaponCatalog.get_weapon(&"repeater")
+	_check("I6 walking into the rifle swaps the weapon, the reserve and the hands",
+			weapon.data == rifle and weapon.magazine_size == 8 and weapon.reserve == 16
+			and not item.is_available and hud.pickup_label.text == "REPEATER"
+			and hud.ammo_pips.magazine == 8 and view_model != null and view_model.gun.mesh == rifle.mesh,
+			"weapon=%s ammo=%d/%d reserve=%d hud='%s' pips=%d" % [weapon.weapon_name, weapon.ammo,
+			weapon.magazine_size, weapon.reserve, hud.pickup_label.text, hud.ammo_pips.magazine])
+
+
+func _test_weapon_runs_out() -> void:
+	# Sem tambor nem reserva, a arma da arena é guardada e o revólver volta sozinho, cheio.
+	_place(_player, Vector3(0, 0.05, 0), Vector3(0, 0, -20))
+	_referee.give_weapon(_player, &"shotgun")
+	var weapon: Weapon = _player.weapon
+	var took_shotgun: bool = weapon.data.id == &"shotgun" and weapon.magazine_size == 2
+	weapon.reserve = 0
+	weapon.ammo = 1
+	await _fire_once()
+	var empty: bool = weapon.ammo == 0
+	await _physics(_seconds(WeaponCatalog.default_weapon().reload_time + 0.4))
+	_check("I7 an empty arena weapon is put away and the revolver comes back full",
+			took_shotgun and empty and weapon.is_default() and weapon.ammo == 6 and weapon.reserve == -1,
+			"took=%s empty=%s now=%s ammo=%d reserve=%d" % [took_shotgun, empty, weapon.weapon_name,
+			weapon.ammo, weapon.reserve])
+
+
+func _test_shotgun_pellets() -> void:
+	# Um tiro de espingarda são vários chumbos: de perto machuca bem mais que o revólver.
+	# Parado, mas ainda "sólido": por padrão um corpo pausado sai da física (e já estava fora
+	# desde o começo do teste), então ele volta por um instante antes de parar de novo.
+	var bot: Character = _bots[1]
+	bot.disable_mode = CollisionObject3D.DISABLE_MODE_KEEP_ACTIVE
+	bot.process_mode = Node.PROCESS_MODE_INHERIT
+	await _physics(2)
+	bot.process_mode = Node.PROCESS_MODE_DISABLED
+	# Na rua do braço leste, longe dos itens e do monumento do meio da praça.
+	_place(_player, Vector3(20, 0.05, -2), Vector3(16, 0, -2))
+	_place(bot, Vector3(16, 0.05, -2), Vector3(20, 0, -2))
+	await _physics(2)
+	bot.set_health(bot.max_health)
+	bot.end_spawn_protection()
+	_referee.give_weapon(_player, &"shotgun")
+	var shots: Array[ShotResult] = []
+	var on_fired := func(result: ShotResult) -> void: shots.append(result)
+	_player.weapon.fired.connect(on_fired)
+	await _fire_once()
+	_player.weapon.fired.disconnect(on_fired)
+	var result: ShotResult = shots[0] if not shots.is_empty() else null
+	_check("I8 one shotgun blast is several pellets and hurts more than the revolver up close",
+			result != null and result.pellet_points.size() == 7 and result.damage >= 36.0
+			and is_equal_approx(bot.health, bot.max_health - result.damage),
+			"shots=%d pellets=%d damage=%.0f bot=%.0f end=%s" % [shots.size(),
+			result.pellet_points.size() if result != null else -1,
+			result.damage if result != null else -1.0, bot.health,
+			result.end_point.snappedf(0.01) if result != null else Vector3.ZERO])
+	_player.weapon.refill()
+
+
+# Erro de cada braço (IK) e se está ligado, no esqueleto de um modelo.
+func _grip_state(skeleton: Skeleton3D) -> Dictionary:
+	var right := skeleton.get_node(GunMount.RIGHT_ARM_IK) as WeaponGripModifier
+	var left := skeleton.get_node(GunMount.LEFT_ARM_IK) as WeaponGripModifier
+	return {"active": right.active and left.active, "idle": not right.active and not left.active,
+			"miss": maxf(right.miss, left.miss)}
+
+
+func _test_two_handed_grip() -> void:
+	# Armas longas: as duas mãos chegam na arma (corpo de fora e braços da 1ª pessoa).
+	# Revólver: nenhuma IK, fica a pose da animação de pistola.
+	# O bot precisa estar processando (o suporte da arma anda no _process), mas parado.
+	var bot: Character = _bots[1]
+	bot.process_mode = Node.PROCESS_MODE_INHERIT
+	bot.set_physics_process(false)
+	var view_model := _player.camera.get_node("ViewModel") as ViewModel
+	var results: PackedStringArray = []
+	var ok: bool = true
+	for id: StringName in [&"repeater", &"shotgun"]:
+		_referee.give_weapon(_player, id)
+		_referee.give_weapon(bot, id)
+		await _physics(8)
+		for skeleton: Skeleton3D in [bot.model.skeleton, view_model.skeleton]:
+			var state: Dictionary = _grip_state(skeleton)
+			ok = ok and state["active"] and state["miss"] < 0.005
+			results.append("%s active=%s miss=%.3f" % [id, state["active"], state["miss"]])
+	_player.weapon.refill()
+	bot.weapon.refill()
+	await _physics(3)
+	var revolver_idle: bool = _grip_state(bot.model.skeleton)["idle"] and _grip_state(view_model.skeleton)["idle"]
+	bot.set_physics_process(true)
+	bot.process_mode = Node.PROCESS_MODE_DISABLED
+	_check("I9 both hands reach the long guns; the revolver keeps the pistol animation",
+			ok and revolver_idle, "%s revolver_idle=%s" % [", ".join(results), revolver_idle])
+
+
+func _test_first_person_aim() -> void:
+	# Em 1ª pessoa o cano da arma longa cruza o centro da tela (onde o tiro vai).
+	var view_model := _player.camera.get_node("ViewModel") as ViewModel
+	_referee.give_weapon(_player, &"repeater")
+	await _physics(10)
+	var rifle_error: float = view_model.get_aim_error_degrees()
+	_player.weapon.refill()
+	await _physics(3)
+	_check("I10 in first person the rifle barrel crosses the crosshair",
+			rifle_error < 1.5, "error=%.2f°" % rifle_error)
+

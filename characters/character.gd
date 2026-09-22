@@ -119,6 +119,9 @@ func _ready() -> void:
 	if weapon != null:
 		weapon.setup(self)
 		weapon.fired.connect(model.play_shoot.unbind(1))
+		weapon.weapon_changed.connect(model.set_weapon)
+		model.set_weapon(weapon.data)
+		model.mount.watch(weapon)
 	if controller != null:
 		controller.setup(self)
 

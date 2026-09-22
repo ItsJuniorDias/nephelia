@@ -60,6 +60,7 @@ func setup(for_character: Character) -> void:
 	_last_health = character.health
 	_on_health_changed(character.health, character.max_health)
 	if weapon != null:
+		weapon.weapon_changed.connect(_refresh_ammo.unbind(1))
 		weapon.ammo_changed.connect(_on_ammo_changed.unbind(2))
 		weapon.reload_started.connect(_refresh_ammo)
 		weapon.reload_finished.connect(_refresh_ammo)
@@ -123,7 +124,8 @@ func get_damage_angles() -> Array[float]:
 
 
 func _refresh_ammo() -> void:
-	ammo_pips.show_ammo(weapon.ammo, weapon.magazine_size, weapon.is_reloading, weapon.get_reload_progress())
+	ammo_pips.show_ammo(weapon.ammo, weapon.magazine_size, weapon.is_reloading,
+			weapon.get_reload_progress(), weapon.reserve, weapon.weapon_name)
 
 
 func _on_ammo_changed() -> void:

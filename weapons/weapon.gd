@@ -4,34 +4,76 @@ extends Node
 ##
 ## A arma só diz "atirei desta posição, nesta direção". Quem decide se acertou é o
 ## MatchReferee, o juiz da partida, que no multiplayer vai rodar no servidor.
+##
+## O nó é sempre o mesmo: pegar um item de arma só troca a FICHA (`WeaponData`) dele. As armas
+## de item têm munição contada (tambor + reserva); quando acaba tudo, o personagem volta
+## sozinho para o revólver, que nunca acaba.
 
 signal fired(result: ShotResult)
 signal reload_started
 signal reload_finished
 signal ammo_changed(ammo: int, magazine_size: int)
+## Trocou de arma (pegou um item ou acabou a munição).
+signal weapon_changed(data: WeaponData)
 
-@export var weapon_name: String = "Revolver"
-@export_range(1.0, 200.0, 1.0) var damage: float = 34.0
-## Tempo mínimo entre tiros. Segurar o gatilho continua atirando nesse ritmo.
-@export_range(0.05, 2.0, 0.01, "suffix:s") var fire_interval: float = 0.35
-@export_range(1, 100, 1) var magazine_size: int = 6
-@export_range(0.1, 5.0, 0.05, "suffix:s") var reload_time: float = 1.6
-@export_range(5.0, 500.0, 1.0, "suffix:m") var max_range: float = 80.0
-## Imprecisão: cada tiro sai num cone aleatório deste tamanho.
-@export_range(0.0, 10.0, 0.1, "suffix:°") var spread_degrees: float = 0.6
+## Ficha da arma em uso; os valores abaixo são cópias dela (dá para ajustar num teste).
+var data: WeaponData
+var weapon_name: String = "Revolver"
+var damage: float = 34.0
+var fire_interval: float = 0.35
+var magazine_size: int = 6
+var reload_time: float = 1.6
+var max_range: float = 80.0
+var spread_degrees: float = 0.6
+var pellets: int = 1
 
 var ammo: int = 0
+## Munição fora do tambor (-1 = infinita).
+var reserve: int = -1
 var is_reloading: bool = false
 var character: Character
 
 var _cooldown: float = 0.0
 var _reload_timer: float = 0.0
+var _reload_duration: float = 1.0
+## Arma que entra quando esta "recarga" acabar (troca por falta de munição).
+var _pending_weapon: WeaponData
 
 
 ## Chamado pelo personagem quando ele está pronto.
 func setup(for_character: Character) -> void:
 	character = for_character
+	equip(WeaponCatalog.default_weapon())
+
+
+## Troca a arma (item pego, munição no fim ou respawn): tambor e reserva cheios.
+func equip(new_data: WeaponData) -> void:
+	data = new_data
+	weapon_name = data.weapon_name
+	damage = data.damage
+	fire_interval = data.fire_interval
+	magazine_size = data.magazine_size
+	reload_time = data.reload_time
+	max_range = data.max_range
+	spread_degrees = data.spread_degrees
+	pellets = data.pellets
 	ammo = magazine_size
+	reserve = data.reserve_ammo
+	is_reloading = false
+	_cooldown = 0.0
+	_pending_weapon = null
+	weapon_changed.emit(data)
+	ammo_changed.emit(ammo, magazine_size)
+
+
+## É a arma de sempre (revólver), e não uma pega na arena.
+func is_default() -> bool:
+	return data != null and data.id == WeaponCatalog.DEFAULT_ID
+
+
+## Tambor e reserva cheios (não vale a pena pegar de novo).
+func is_full() -> bool:
+	return data != null and ammo >= magazine_size and reserve >= data.reserve_ammo
 
 
 ## Avança a arma um passo de física, obedecendo ao comando (atirar e recarregar).
@@ -42,42 +84,75 @@ func tick(delta: float, command: CharacterCommand) -> void:
 		if _reload_timer <= 0.0:
 			_finish_reload()
 
+	# Arma da arena sem munição nenhuma: o personagem guarda e volta para o revólver, mesmo
+	# que nunca mais aperte o gatilho.
+	if ammo == 0 and reserve == 0 and not is_default():
+		_start_swap_to_default()
+
 	if command.reload:
 		start_reload()
 	if command.fire and not is_reloading and _cooldown <= 0.0:
 		if ammo > 0:
 			_fire(command)
 		else:
-			start_reload()
+			_handle_empty()
 
 
-## Começa a recarregar (se não estiver cheia nem já recarregando).
+## Começa a recarregar (se não estiver cheia, já recarregando, nem sem reserva).
 func start_reload() -> void:
-	if is_reloading or ammo >= magazine_size:
+	if is_reloading or ammo >= magazine_size or reserve == 0:
 		return
 	is_reloading = true
+	_reload_duration = reload_time
 	_reload_timer = reload_time
 	reload_started.emit()
 
 
-## Enche o tambor na hora, sem animação (respawn e testes).
+## Volta para o revólver cheio, sem animação (respawn e testes).
 func refill() -> void:
-	is_reloading = false
-	_cooldown = 0.0
-	ammo = magazine_size
-	ammo_changed.emit(ammo, magazine_size)
+	equip(WeaponCatalog.default_weapon())
 
 
 ## Quanto da recarga já passou, de 0 a 1 (usado pela animação).
 func get_reload_progress() -> float:
 	if not is_reloading:
 		return 0.0
-	return clampf(1.0 - _reload_timer / reload_time, 0.0, 1.0)
+	return clampf(1.0 - _reload_timer / _reload_duration, 0.0, 1.0)
+
+
+# Tambor vazio: recarrega, ou guarda a arma se não sobrou munição nenhuma.
+func _handle_empty() -> void:
+	if reserve == 0 and not is_default():
+		_start_swap_to_default()
+	else:
+		start_reload()
+
+
+# Acabou a munição da arma pega: o personagem guarda ela e saca o revólver (leva o tempo de
+# uma recarga, então o HUD e as mãos mostram a troca do mesmo jeito).
+func _start_swap_to_default() -> void:
+	if is_reloading:
+		return
+	_pending_weapon = WeaponCatalog.default_weapon()
+	is_reloading = true
+	_reload_duration = _pending_weapon.reload_time
+	_reload_timer = _reload_duration
+	reload_started.emit()
 
 
 func _finish_reload() -> void:
 	is_reloading = false
-	ammo = magazine_size
+	if _pending_weapon != null:
+		equip(_pending_weapon)
+		reload_finished.emit()
+		return
+	if reserve < 0:
+		ammo = magazine_size
+	else:
+		# Tira da reserva só o que cabe no tambor.
+		var taken: int = mini(magazine_size - ammo, reserve)
+		ammo += taken
+		reserve -= taken
 	reload_finished.emit()
 	ammo_changed.emit(ammo, magazine_size)
 
@@ -103,6 +178,6 @@ func _fire(command: CharacterCommand) -> void:
 		result.end_point = origin + direction * max_range
 	ammo_changed.emit(ammo, magazine_size)
 	fired.emit(result)
-	# Tambor vazio: já começa a recarregar sozinho (menos um botão para o dedão).
+	# Tambor vazio: já recarrega (ou troca de arma) sozinho, menos um botão para o dedão.
 	if ammo == 0:
-		start_reload()
+		_handle_empty()

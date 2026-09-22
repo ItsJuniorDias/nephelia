@@ -141,16 +141,37 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   `assets/models/weapons/lowpoly_wild_west/*` (FBX de origem; o jogo usa a malha assada). As peças
   soltas da cidade continuam entrando: alguns objetos (guarda-corpo, jardineira, balizador) são
   instâncias delas; os prédios usam as malhas juntadas de `levels/skyplaza/meshes/`.
-- Revólver: o FBX do pacote traz a malha 100 vezes menor, com o tamanho numa escala no nó (3 mm de
-  malha com escala 100). `tools/bake_revolver.gd` assa `assets/models/weapons/colt_revolver.res` no
-  tamanho certo, com materiais simples. Regra geral: modelo que depende de escala grande no nó
-  deve ser assado antes de entrar no jogo.
+- Armas (malhas): os FBX do pacote trazem a malha 100 vezes menor, com o tamanho numa escala no nó
+  (3 mm de malha com escala 100). `tools/bake_weapons.gd` assa revólver, repetidora e espingarda em
+  `assets/models/weapons/*.res` no tamanho certo, com materiais simples, e imprime a ponta do cano.
+  Regra geral: modelo que depende de escala grande no nó deve ser assado antes de entrar no jogo.
+- Armas (fichas): `weapons/weapon_data.gd` (WeaponData: dano, ritmo, tambor, reserva, chumbos,
+  coice, som, pegadas) e `weapons/weapon_catalog.gd` (WeaponCatalog, as três fichas em código). O
+  nó `Weapon` é sempre o mesmo: pegar arma troca a ficha (`equip`); a reserva acaba e ele volta
+  sozinho ao revólver (`refill` = revólver cheio, usado no respawn). Itens `Pickup.Kind.RIFLE` e
+  `SHOTGUN` (`Pickup.weapon_id_of`) passam pelo juiz (`MatchReferee.give_weapon`); chumbos da
+  espingarda = vários raios num `ShotResult` (`pellet_points`).
 - **Nó dentro de cena instanciada não sobrevive ao build do iOS**: a arma era um nó guardado dentro
   da cena do modelo glTF (filho do esqueleto). No Mac funcionava; no iPhone o nó simplesmente não
   existia e ninguém aparecia armado (levou uma sessão inteira para achar, com um painel de
-  depuração na tela do aparelho). Agora `characters/gun_mount.gd` cria a arma em código, com
-  `characters/bone_follower.gd` (nosso BoneAttachment3D) seguindo o osso `hand_r`. Ao pendurar algo
+  depuração na tela do aparelho). Agora `characters/gun_mount.gd` cria a arma em código, num
+  `characters/weapon_mount.gd` (nosso BoneAttachment3D) que segue o osso `hand_r`. Ao pendurar algo
   num modelo importado, montar em código.
+- Pegada das armas: as animações são todas de PISTOLA. O revólver fica na mão, como a animação
+  manda (o usuário aprovou essa versão: não mexer). Armas longas ficam apoiadas na frente do corpo
+  (`WeaponData.chest_mount`, girando com a mira em volta de `WeaponMount.CHEST_PIVOT`) e as DUAS
+  mãos vão até elas por `characters/weapon_grip_modifier.gd` (IK de dois ossos nossa; o
+  `TwoBoneIK3D` do Godot 4.7 não mexeu neste esqueleto). Pegadas descritas como mão de verdade
+  (`WeaponCatalog.hand_pose`: contato, nós dos dedos, polegar); o esqueleto é espelhado no eixo X,
+  então a esquerda usa as mesmas direções. A mão esquerda copia os dedos fechados da direita
+  (espelhados: quaternion com y e z trocados de sinal). Coice e recarga das armas longas mexem a
+  própria arma no `WeaponMount` (as mãos vão junto). O alcance foi medido de -85° a +85° de mira,
+  no chão e no ar (a pose de pulo mexe o quadril): `WeaponGripModifier.miss` mostra quanto faltou.
+- 1ª pessoa das armas longas: o `ViewModel` gira os braços em volta do olho até o cano cruzar a
+  mira a 12 m (`get_aim_error_degrees`) e ergue os braços na recarga. O revólver fica sem correção.
+- Conferir pose de arma: `tools/pose_sheet.gd` (fotos em 1ª pessoa, de frente, de lado, de costas
+  e no meio da recarga; ver o cabeçalho). Rodar com `--always-on-top`: com a janela escondida o
+  macOS para de desenhar e todas as fotos saem iguais.
 - Atenção: no arquivo `.tscn` a matriz de um `Transform3D` é escrita por LINHAS; no construtor em
   código, por COLUNAS (uma é a transposta da outra).
 - Braços em 1ª pessoa: `weapons/hands_view_model.tscn` + `weapons/view_model.gd`. É o mesmo corpo
@@ -162,6 +183,7 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   a pele com brilho de plástico, e os FBX do Wild West Guns têm cores de vértice azuladas. Sempre
   com `use_z_clip_scale` (não atravessa paredes) e `disable_receive_shadows` (senão pega a sombra
   do próprio corpo e fica azul). Coice, balanço ao andar e clarão são por cima, em código.
+  A arma no corpo visto de fora não é tingida com a cor do personagem (o aço ficava cor de pele).
 - Menus: `ui/main_menu/` (cena principal do jogo), `ui/pause_menu/` (dentro do jogador, com
   `process_mode` sempre, senão os botões não responderiam com o jogo pausado) e `ui/options_menu/`
   (usado pelos dois). As telas são montadas por `tools/make_menus.gd`. Ao montar cena em código,
@@ -256,4 +278,7 @@ Atualizar esta seção ao fim de cada sessão.
   - Tarefa 9, parte 2 (arte) feita: menus com o kit Art Déco (molduras douradas e mármore),
     controles de toque com a arte e os ícones da Kenney, botão de pausa na tela, barra de vida e
     balas desenhadas no lugar do texto. 39 + 8 + 10 + 5 + 6 testes passando.
-  - Próximo: Tarefa 8 parte 3 (armas extras) ou o que o usuário pedir.
+  - Tarefa 8, parte 3 (armas extras) feita: repetidora e espingarda como itens, munição contada,
+    duas mãos na arma (IK), coice/recarga/som por arma, bots pegam arma perto. Revólver mantido
+    como na 1ª versão, a pedido do usuário. 39 + 8 + 10 + 10 + 6 testes passando.
+  - Próximo: Tarefa 10 (áudio) ou o que o usuário pedir.

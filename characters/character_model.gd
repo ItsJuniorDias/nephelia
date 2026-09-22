@@ -41,14 +41,16 @@ var _hanging: bool = false
 var _air_amount: float = 0.0
 var _grip: RailGripModifier
 
-## Revólver na mão direita (criado em código por GunMount).
+## Arma na mão direita (criada em código por GunMount) e o suporte dela no corpo.
 var gun: MeshInstance3D
+var mount: WeaponMount
 
 @onready var skeleton: Skeleton3D = $Model/Armature/Skeleton3D
 
 
 func _ready() -> void:
-	gun = GunMount.attach(skeleton)
+	gun = GunMount.attach(skeleton, WeaponCatalog.default_weapon())
+	mount = gun.get_parent() as WeaponMount
 	_prepare_materials()
 	_apply_tint()
 	_build_tree()
@@ -57,6 +59,11 @@ func _ready() -> void:
 	_grip.influence = 0.0
 	_grip.active = false
 	skeleton.add_child(_grip)
+
+
+## Troca a arma que aparece na mão (o Character avisa quando o jogador pega outra).
+func set_weapon(data: WeaponData) -> void:
+	GunMount.set_weapon(gun, data)
 
 
 func _process(delta: float) -> void:
@@ -81,6 +88,8 @@ func update_motion(speed: float, aim_pitch: float, airborne: bool = false) -> vo
 	_airborne = airborne
 	_tree.set(&"parameters/locomotion/blend_position", speed)
 	_tree.set(&"parameters/aim/blend_position", clampf(aim_pitch / AIM_PITCH_RANGE, -1.0, 1.0))
+	# A arma longa fica apoiada no corpo: é ela que sobe e desce com a mira (e os braços vão junto).
+	mount.aim_pitch = aim_pitch
 
 
 ## Pendurado num trilho: mão esquerda no trilho e pernas soltas no ar.
@@ -136,6 +145,10 @@ func _prepare_materials() -> void:
 	for node: Node in find_children("*", "MeshInstance3D", true, false):
 		var mesh_instance := node as MeshInstance3D
 		_meshes.append(mesh_instance)
+		# A arma some junto com o corpo (jogador local), mas não é tingida: a cor do personagem
+		# deixaria o aço cor de pele. E a malha dela muda ao trocar de arma.
+		if mesh_instance == gun:
+			continue
 		for surface: int in mesh_instance.mesh.get_surface_count():
 			var source := mesh_instance.get_active_material(surface) as BaseMaterial3D
 			if source == null:

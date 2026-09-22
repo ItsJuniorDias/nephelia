@@ -10,6 +10,8 @@ var origin: Vector3 = Vector3.ZERO
 var direction: Vector3 = Vector3.FORWARD
 ## Onde o tiro terminou: o ponto atingido ou o alcance máximo.
 var end_point: Vector3 = Vector3.ZERO
+## Onde terminaram os outros chumbos (espingarda); vazio nas armas de uma bala só.
+var pellet_points: PackedVector3Array = PackedVector3Array()
 ## Acertou alguma coisa (cenário ou personagem).
 var hit: bool = false
 var hit_normal: Vector3 = Vector3.UP

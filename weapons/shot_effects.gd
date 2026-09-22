@@ -46,8 +46,16 @@ func _connect_to_referee() -> void:
 
 
 func _on_shot_resolved(result: ShotResult) -> void:
-	_spawn_tracer(_visual_origin(result), result.end_point)
-	_play_at(shot_sound, result.origin, 0.0)
+	var from: Vector3 = _visual_origin(result)
+	_spawn_tracer(from, result.end_point)
+	# Espingarda: um rastro para cada chumbo (é o que mostra o leque do tiro).
+	for point: Vector3 in result.pellet_points:
+		_spawn_tracer(from, point)
+	var data: WeaponData = result.weapon.data if result.weapon != null else null
+	if data != null:
+		_play_at(shot_sound, result.origin, data.shot_volume_db, data.shot_pitch)
+	else:
+		_play_at(shot_sound, result.origin, 0.0)
 	if not result.hit:
 		return
 	# Faíscas no próprio corpo apareceriam coladas na câmera de quem levou o tiro: pula.
@@ -66,8 +74,14 @@ func _visual_origin(result: ShotResult) -> Vector3:
 	var view_model := shooter.camera.get_node_or_null("ViewModel") as ViewModel
 	if view_model != null and view_model.is_visible_in_tree():
 		return view_model.muzzle.global_position
-	# Para os outros personagens: a ponta do cano do revólver na mão do modelo.
-	return shooter.model.gun.global_transform * ViewModel.BARREL_TIP
+	# Para os outros personagens: a ponta do cano da arma na mão do modelo.
+	return shooter.model.gun.global_transform * _barrel_tip(result)
+
+
+func _barrel_tip(result: ShotResult) -> Vector3:
+	if result.weapon != null and result.weapon.data != null:
+		return result.weapon.data.barrel_tip
+	return GunMount.BARREL_TIP
 
 
 func _spawn_tracer(from: Vector3, to: Vector3) -> void:
@@ -117,13 +131,13 @@ func _spawn_sparks(at: Vector3, normal: Vector3) -> void:
 	sparks.emitting = true
 
 
-func _play_at(stream: AudioStream, at: Vector3, volume_db: float) -> void:
+func _play_at(stream: AudioStream, at: Vector3, volume_db: float, pitch: float = 1.0) -> void:
 	if stream == null:
 		return
 	var player := AudioStreamPlayer3D.new()
 	player.stream = stream
 	player.volume_db = volume_db
-	player.pitch_scale = randf_range(0.93, 1.07)
+	player.pitch_scale = pitch * randf_range(0.93, 1.07)
 	add_child(player)
 	player.global_position = at
 	player.finished.connect(player.queue_free)

@@ -64,18 +64,25 @@ func _process(delta: float) -> void:
 	_visual.position.y = FLOAT_HEIGHT + sin(_time * 3.0) * BOB_HEIGHT
 
 
-## Texto curto do HUD para quem pegou (ex.: "+50 HP").
+## Nome da arma que este item dá ("" se o item não for arma).
+static func weapon_id_of(of_kind: Kind) -> StringName:
+	match of_kind:
+		Kind.RIFLE:
+			return &"repeater"
+		Kind.SHOTGUN:
+			return &"shotgun"
+	return &""
+
+
+## Texto curto do HUD para quem pegou (ex.: "+50 HP", "REPEATER").
 func get_hud_text() -> String:
 	match kind:
 		Kind.HEALTH:
 			return "+%d HP" % roundi(amount)
 		Kind.ENERGY:
 			return "+%d ENERGY" % roundi(amount)
-		Kind.RIFLE:
-			return "RIFLE"
-		Kind.SHOTGUN:
-			return "SHOTGUN"
-	return ""
+	var weapon: WeaponData = WeaponCatalog.get_weapon(weapon_id_of(kind))
+	return weapon.weapon_name.to_upper() if weapon != null else ""
 
 
 ## O juiz confirmou: some e começa a contar o tempo para voltar.

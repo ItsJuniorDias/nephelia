@@ -84,6 +84,19 @@ func heal(character: Character, amount: float) -> void:
 		character.set_health(character.health + amount)
 
 
+## Dá uma arma da arena ao personagem (tambor e reserva cheios). Devolve se valeu: quem já está
+## com ela cheia deixa o item lá para os outros.
+func give_weapon(character: Character, weapon_id: StringName) -> bool:
+	var weapon: Weapon = character.weapon
+	var data: WeaponData = WeaponCatalog.get_weapon(weapon_id)
+	if weapon == null or data == null:
+		return false
+	if weapon.data == data and weapon.is_full():
+		return false
+	weapon.equip(data)
+	return true
+
+
 ## `character` encostou em `pickup`: pega se o item está lá e se ele precisa (vida cheia não
 ## gasta o frasco). Devolve se pegou.
 func try_pickup(character: Character, pickup: Pickup) -> bool:
@@ -94,6 +107,9 @@ func try_pickup(character: Character, pickup: Pickup) -> bool:
 			if character.health >= character.max_health:
 				return false
 			heal(character, pickup.amount)
+		Pickup.Kind.RIFLE, Pickup.Kind.SHOTGUN:
+			if not give_weapon(character, Pickup.weapon_id_of(pickup.kind)):
+				return false
 		_:
 			return false
 	pickup.take(character)
@@ -161,20 +177,37 @@ func resolve_shot(shooter: Character, weapon: Weapon, origin: Vector3, direction
 		if target != null:
 			aim = (_chest_of(target) - origin).normalized()
 			result.assisted = true
-	aim = _apply_spread(aim, weapon.spread_degrees)
-	result.direction = aim
 
-	var hit: Dictionary = _ray(shooter, origin, origin + aim * weapon.max_range)
-	if hit.is_empty():
-		result.end_point = origin + aim * weapon.max_range
-	else:
-		result.hit = true
-		result.end_point = hit.position
-		result.hit_normal = hit.normal
-		result.victim = hit.collider as Character
-		if result.victim != null:
-			result.damage = apply_damage(result.victim, weapon.damage, shooter)
-			result.victim.receive_hit(result)
+	# A espingarda solta vários chumbos de uma vez: cada um é um raio, com a sua imprecisão.
+	var pellets: int = maxi(weapon.pellets, 1)
+	var damage_by_victim: Dictionary[Character, float] = {}
+	for pellet: int in pellets:
+		var pellet_aim: Vector3 = _apply_spread(aim, weapon.spread_degrees)
+		var end_point: Vector3 = origin + pellet_aim * weapon.max_range
+		var hit: Dictionary = _ray(shooter, origin, end_point)
+		var victim: Character = null
+		if not hit.is_empty():
+			end_point = hit.position
+			victim = hit.collider as Character
+			if pellet == 0 or not result.hit:
+				result.hit = true
+				result.hit_normal = hit.normal
+		if pellet == 0:
+			result.direction = pellet_aim
+			result.end_point = end_point
+		else:
+			result.pellet_points.append(end_point)
+		if victim != null:
+			var applied: float = apply_damage(victim, weapon.damage, shooter)
+			damage_by_victim[victim] = damage_by_victim.get(victim, 0.0) + applied
+			result.damage += applied
+
+	# Quem levou mais chumbo é "a vítima" do tiro (som do acerto, marcador do HUD).
+	for victim: Character in damage_by_victim:
+		if result.victim == null or damage_by_victim[victim] > damage_by_victim[result.victim]:
+			result.victim = victim
+	for victim: Character in damage_by_victim:
+		victim.receive_hit(result)
 
 	shot_resolved.emit(result)
 	return result

@@ -1,12 +1,15 @@
 class_name PickupVisuals
 extends RefCounted
-## Monta a aparência dos itens em código: frascos de tônico (vida vermelha, energia azul) e o
-## brilho redondo no chão, que ajuda a achar o item de longe. Materiais compartilhados entre
-## todos os itens (menos trocas de material no celular).
+## Monta a aparência dos itens em código: frascos de tônico (vida vermelha, energia azul), as
+## armas da arena (a própria malha delas, girando no ar) e o brilho redondo no chão, que ajuda
+## a achar o item de longe. Materiais compartilhados entre todos os itens (menos trocas de
+## material no celular).
 
 const HEALTH_COLOR := Color(0.95, 0.18, 0.2)
 const ENERGY_COLOR := Color(0.3, 0.7, 1.0)
 const WEAPON_COLOR := Color(1.0, 0.8, 0.4)
+## Tamanho (maior lado, em metros) da arma girando no ar: a repetidora inteira é grande demais.
+const WEAPON_DISPLAY_SIZE: float = 0.85
 
 static var _materials: Dictionary[String, Material] = {}
 
@@ -16,6 +19,8 @@ static func build(kind: Pickup.Kind) -> Node3D:
 	match kind:
 		Pickup.Kind.ENERGY:
 			return _bottle("energy", ENERGY_COLOR)
+		Pickup.Kind.RIFLE, Pickup.Kind.SHOTGUN:
+			return _weapon(kind)
 		_:
 			return _bottle("health", HEALTH_COLOR)
 
@@ -41,6 +46,26 @@ static func color_of(kind: Pickup.Kind) -> Color:
 		Pickup.Kind.ENERGY:
 			return ENERGY_COLOR
 	return WEAPON_COLOR
+
+
+# Arma da arena: a própria malha que vai para a mão, deitada e girando no meio do brilho.
+static func _weapon(kind: Pickup.Kind) -> Node3D:
+	var holder := Node3D.new()
+	holder.name = "Weapon"
+	var data: WeaponData = WeaponCatalog.get_weapon(Pickup.weapon_id_of(kind))
+	if data == null or data.mesh == null:
+		return holder
+	var instance := MeshInstance3D.new()
+	instance.mesh = data.mesh
+	instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var box: AABB = data.mesh.get_aabb()
+	var scale: float = WEAPON_DISPLAY_SIZE / maxf(box.size[box.get_longest_axis_index()], 0.01)
+	instance.scale = Vector3.ONE * scale
+	# Cano um pouco para cima e girando em volta do meio da arma (e não da ponta do cabo).
+	instance.rotation = Vector3(deg_to_rad(-18.0), 0.0, deg_to_rad(8.0))
+	instance.position = -(instance.basis * box.get_center())
+	holder.add_child(instance)
+	return holder
 
 
 # Frasco de tônico: corpo de vidro colorido que brilha, rótulo creme, gargalo e tampa de latão.

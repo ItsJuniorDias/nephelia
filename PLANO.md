@@ -87,7 +87,11 @@ aéreos, a 60 FPS no iPhone.
   o juiz decide quem pega; aviso no HUD; bots machucados vão buscar o frasco mais perto
 - Parte 2 (poderes): REMOVIDA a pedido do usuário (2026-09-22). Estava feita (energia, Faísca e
   Rajada, com testes) e saiu do projeto; está no histórico do Git se um dia voltar
-- Parte 3 (armas extras): rifle e espingarda como itens, com munição limitada
+- Parte 3 (armas extras): [x] feito. Repetidora (55 de dano, 8 tiros + 16 guardados) e
+  espingarda de dois canos (8 chumbos de 12, 2 tiros + 8 guardados) como itens nos braços leste e
+  oeste da praça (voltam em 30 s); acabou a munição, o personagem volta ao revólver. Armas longas
+  seguradas com as duas mãos (IK própria), coice e recarga próprios, som e clarão por arma;
+  bots pegam arma que esteja perto (vida antes de arma). Revólver mantido como na 1ª versão
 
 ### 9. HUD e menus
 - Parte 1 (menus): [x] feito. Menu inicial (jogar, dificuldade, opções, sair), pausa dentro da

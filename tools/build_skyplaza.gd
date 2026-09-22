@@ -261,16 +261,24 @@ func _build_items() -> void:
 	_items = Node3D.new()
 	_items.name = "SkyPlazaItems"
 	root.add_child(_items)
-	var pickup_scene: PackedScene = load("res://items/pickup.tscn")
 	var health_spots: Array[Vector3] = [Vector3(5, 0, -5), Vector3(-5, 0, 5),
 			Vector3(-34, 1, -10), Vector3(37, -1, 0)]
 	for i in health_spots.size():
-		var item: Node3D = pickup_scene.instantiate()
-		item.name = "Health%d" % (i + 1)
-		item.set(&"kind", 0)  # Pickup.Kind.HEALTH
-		item.position = health_spots[i]
-		_items.add_child(item)
-		item.owner = _items
+		_pickup("Health%d" % (i + 1), 0, health_spots[i], 20.0)  # 0 = Pickup.Kind.HEALTH
+	# As armas ficam nas ruas dos braços leste e oeste, no caminho das pontes e longe dos
+	# pontos de nascimento (ninguém nasce com uma arma melhor no colo).
+	_pickup("Rifle", 2, Vector3(15, 0, -6), 30.0)  # 2 = Pickup.Kind.RIFLE
+	_pickup("Shotgun", 3, Vector3(-15, 0, 6), 30.0)  # 3 = Pickup.Kind.SHOTGUN
+
+
+func _pickup(item_name: String, kind: int, position: Vector3, respawn_time: float) -> void:
+	var item: Node3D = load("res://items/pickup.tscn").instantiate()
+	item.name = item_name
+	item.set(&"kind", kind)
+	item.set(&"respawn_time", respawn_time)
+	item.position = position
+	_items.add_child(item)
+	item.owner = _items
 
 
 # Mar de nuvens: cada nuvem é um aglomerado de esferas achatadas (opacas, baratas no celular),
