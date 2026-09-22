@@ -1,0 +1,18 @@
+[gd_resource type="Theme" format=3]
+
+[ext_resource type="FontFile" path="res://assets/fonts/Limelight-Regular.ttf" id="1_txcw1"]
+[ext_resource type="FontFile" path="res://assets/fonts/JosefinSans-Variable.ttf" id="2_rqqbv"]
+
+[resource]
+default_font = ExtResource("2_rqqbv")
+default_font_size = 20
+Button/font_sizes/font_size = 26
+Subtitle/base_type = &"Label"
+Subtitle/font_sizes/font_size = 30
+Subtitle/fonts/font = ExtResource("1_txcw1")
+Title/base_type = &"Label"
+Title/font_sizes/font_size = 72
+Title/fonts/font = ExtResource("1_txcw1")
+TitleButton/base_type = &"Button"
+TitleButton/font_sizes/font_size = 26
+TitleButton/fonts/font = ExtResource("1_txcw1")

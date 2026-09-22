@@ -162,6 +162,10 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   a pele com brilho de plástico, e os FBX do Wild West Guns têm cores de vértice azuladas. Sempre
   com `use_z_clip_scale` (não atravessa paredes) e `disable_receive_shadows` (senão pega a sombra
   do próprio corpo e fica azul). Coice, balanço ao andar e clarão são por cima, em código.
+- Interface: o tema `ui/theme/nephelia_theme.tres` (gerado por `tools/make_theme.gd` e aplicado a
+  tudo por `gui/theme/custom`) traz as fontes: Josefin Sans na interface e Limelight (Art Déco) nos
+  títulos, pela variação de tipo "Title"/"Subtitle"/"TitleButton". Nome de classe do Godot não pode
+  virar variação de tipo (ex.: "MenuButton").
 - Capturas de tela para conferir visual: usar `--write-movie <pasta>/f.png --fixed-fps 60` com um
   script `-s`; `get_viewport().get_texture().get_image()` devolve o quadro ANTERIOR.
 - Testes: `Godot --headless --path . -s res://tests/<suíte>.gd` para `test_controls`, `test_bots`,

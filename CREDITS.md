@@ -25,6 +25,15 @@ ficam fora do projeto, em `~/Downloads/nephelia_assets/`.
 | Interface Sounds | Kenney | CC0 1.0 | https://kenney.nl/assets/interface-sounds |
 | Prototype Textures | Kenney | CC0 1.0 | https://kenney.nl/assets/prototype-textures |
 
+## Fontes
+
+| Asset | Autor | Licença | Link |
+|---|---|---|---|
+| Limelight (títulos) | Ania Kruk / Google Fonts | SIL OFL 1.1 | https://fonts.google.com/specimen/Limelight |
+| Josefin Sans (interface) | Santiago Orozco / Google Fonts | SIL OFL 1.1 | https://fonts.google.com/specimen/Josefin+Sans |
+
+As licenças vêm junto em `assets/fonts/*-OFL.txt`, como a OFL exige.
+
 ## Criados pelo projeto
 
 | Asset | Observação |
