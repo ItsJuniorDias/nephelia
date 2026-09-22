@@ -91,7 +91,23 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   de novo ao mudar o cenário). Geometria navegável = grupo `navigation_geometry`. Altura de célula
   10 cm e degrau máx. 20 cm (o personagem só sobe RAMPA, nunca degrau; a escada tem rampa invisível);
   `levels/arena_navigation.gd` ajusta o mapa para a mesma altura de célula.
-- Modelo dos personagens: `characters/character_model.tscn` (Quaternius Superhero_Male + revólver na
+- Aparência dos personagens: ficha `characters/character_look.gd` (CharacterLook: corpo homem ou
+  mulher, estampa da roupa, cabelo e cor, barba, chapéu e cor; uma por personagem em
+  `characters/looks/*.tres`, no campo `look` do Character). `characters/wardrobe.gd` (Wardrobe)
+  monta o corpo EM CÓDIGO: a roupa Peasant do Modular Character Outfits (glTF que já traz o
+  esqueleto, braços, mãos e pernas; proporção Regular, quase igual à do Superhero), a cabeça, o
+  cabelo, a barba (peças `CharacterPart` = malha + Skin por nome de osso, em
+  `assets/models/characters/parts/`) e o chapéu (coco, cartola, boina, feitos de formas simples e
+  presos ao osso da cabeça). A textura dos pelos é cinza: a cor vem da ficha. A cor do personagem
+  (`body_color`) tinge só o tecido (`Wardrobe.is_cloth`). Os braços da 1ª pessoa usam o mesmo
+  Wardrobe (manga da roupa do jogador).
+- Peças: `tools/bake_characters.gd` recorta a cabeça do corpo inteiro do Universal Base Characters
+  (a versão grátis não tem a cabeça separada; o leia-me da roupa pede só a cabeça). Ficam a cabeça,
+  o pescoço (elipse em volta do eixo dele) e um TUBO que desce da borda do pescoço para dentro da
+  gola, com o pé preso ao peito (`spine_03`): sem ele a cabeça "flutuava" acima da gola (o
+  usuário viu). Outras bordas da malha (boca, olhos) não viram tubo. Conferir com
+  `tools/character_sheet.gd` (fotos de todos lado a lado, closes do pescoço, 1ª pessoa).
+- Modelo dos personagens: `characters/character_model.tscn` (corpo montado pelo Wardrobe + arma na
   mão direita) com árvore de animação montada em código: pernas por velocidade, tronco em pose de
   mira (filtrado a partir de `spine_01`), tiro/levar tiro por cima, transição vida/morte. Animações
   extraídas do UAL para `assets/animations/quaternius_ual/character_animations.res` com
@@ -135,10 +151,13 @@ ao longo de várias sessões; o usuário testa e dá feedback.
 - Peças usadas: `assets/models/city/downtown/` (84 peças modulares) e
   `assets/models/nature/stylized/` (texturas limitadas a 1024 px no .import). Os prédios prontos do
   pacote (18 a 45 mil triângulos) ficaram de fora por desempenho: a arena usa fachadas montadas.
-  Arena inteira hoje: ~286 mil triângulos e 267 superfícies com 4 personagens (medir no iPhone).
+  Arena inteira hoje: ~286 mil triângulos e 267 superfícies com 4 personagens (medir no iPhone);
+  com roupa cada personagem tem ~21 a 24 mil triângulos e 10 a 13 superfícies (antes 14 mil e 3).
 - Exportação (preset iOS, `exclude_filter`): `tests/*`, `tools/*`,
-  `assets/animations/quaternius_ual/*.glb` (7,6 MB, só serve para extrair animações) e
-  `assets/models/weapons/lowpoly_wild_west/*` (FBX de origem; o jogo usa a malha assada). As peças
+  `assets/animations/quaternius_ual/*.glb` (7,6 MB, só serve para extrair animações),
+  `assets/models/weapons/lowpoly_wild_west/*` (FBX de origem; o jogo usa a malha assada) e os
+  glTF/bin de `quaternius_ubc/` e `quaternius_hair/` (só servem para assar as peças; as texturas
+  ficam, porque as peças usam). As peças
   soltas da cidade continuam entrando: alguns objetos (guarda-corpo, jardineira, balizador) são
   instâncias delas; os prédios usam as malhas juntadas de `levels/skyplaza/meshes/`.
 - Armas (malhas): os FBX do pacote trazem a malha 100 vezes menor, com o tamanho numa escala no nó
@@ -253,7 +272,7 @@ Atualizar esta seção ao fim de cada sessão.
   - Tarefa 3 (vida, morte e respawn) feita: 31 testes passando.
   - Tarefa 4 (partida todos contra todos) feita: 37 testes passando.
   - Tarefa 5 (bots) feita: 37 testes de controles + 8 de bots passando. Arena com 3 bots
-    (Hazel, Otis, Mabel) + jogador. Bots usam o corpo base da Quaternius (sem roupa: decisão pendente).
+    (Hazel, Otis, Mabel) + jogador.
   - Tarefa 6 (arena Sky Plaza) feita: 3 ilhas + 2 pontes, 37 + 8 + 4 testes passando.
   - Tarefa 7 (trilhos aéreos) feita: 37 + 8 + 10 testes passando. A Sky Plaza virou a cena
     principal e o Input Map ganhou `use_rail`, mudados com o editor aberto: reabrir o Godot.
@@ -282,4 +301,8 @@ Atualizar esta seção ao fim de cada sessão.
   - Tarefa 8, parte 3 (armas extras) feita: repetidora e espingarda como itens, munição contada,
     duas mãos na arma (IK), coice/recarga/som por arma, bots pegam arma perto. Revólver mantido
     como na 1ª versão, a pedido do usuário. 39 + 8 + 10 + 10 + 6 testes passando.
-  - Próximo: Tarefa 10 (áudio) ou o que o usuário pedir.
+  - Roupas dos personagens feitas: roupa de trabalhador (Peasant, Quaternius, CC0), cabeça,
+    cabelos com cor, barba e chapéus de época feitos em código. Jogador de boina, Otis de chapéu-coco
+    e barba, Hazel e Mabel com corpo feminino (Mabel de cartola). Pescoço ligado à gola.
+    39 + 8 + 12 + 10 + 6 testes passando.
+  - Próximo: Tarefa 10 (áudio, precisa aprovar downloads) ou o que o usuário pedir.

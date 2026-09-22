@@ -8,8 +8,10 @@
 [ext_resource type="PackedScene" path="res://ui/match_hud/match_hud.tscn" id="6_match_hud"]
 [ext_resource type="PackedScene" path="res://ui/match_result/match_result.tscn" id="7_match_result"]
 [ext_resource type="PackedScene" path="res://ui/pause_menu/pause_menu.tscn" id="8_pause"]
+[ext_resource type="Resource" path="res://characters/looks/player.tres" id="9_look"]
 
 [node name="Player" instance=ExtResource("1_character")]
+look = ExtResource("9_look")
 
 [node name="HumanController" type="Node" parent="."]
 script = ExtResource("2_human")

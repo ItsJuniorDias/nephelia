@@ -54,6 +54,8 @@ const RAIL_END_KEEP: float = 0.3
 @export var display_name: String = ""
 ## Cor de identificação (tinge a roupa do modelo; uma por jogador/bot).
 @export var body_color: Color = Color(0.85, 0.85, 0.8)
+## Corpo, roupa, cabelo e chapéu (vazio = o padrão da CharacterLook).
+@export var look: CharacterLook
 
 ## Para onde o corpo aponta (radianos).
 var yaw: float:

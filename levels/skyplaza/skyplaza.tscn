@@ -18,6 +18,9 @@
 [ext_resource type="PackedScene" path="res://levels/skyplaza/skyplaza_rails.tscn" id="15_rails"]
 [ext_resource type="PackedScene" path="res://levels/skyplaza/skyplaza_items.tscn" id="16_items"]
 [ext_resource type="PackedScene" path="res://levels/skyplaza/skyplaza_clouds.tscn" id="17_clouds"]
+[ext_resource type="Resource" path="res://characters/looks/hazel.tres" id="20_look_hazel"]
+[ext_resource type="Resource" path="res://characters/looks/otis.tres" id="21_look_otis"]
+[ext_resource type="Resource" path="res://characters/looks/mabel.tres" id="22_look_mabel"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_day"]
 sky_top_color = Color(0.2, 0.45, 0.85, 1)
@@ -119,11 +122,13 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 16)
 [node name="Hazel" parent="." instance=ExtResource("3_bot")]
 transform = Transform3D(0.3846, 0, -0.9231, 0, 1, 0, 0.9231, 0, 0.3846, -42, 1.1, 5)
 display_name = "Hazel"
+look = ExtResource("20_look_hazel")
 body_color = Color(0.76, 0.38, 0.24, 1)
 
 [node name="Otis" parent="." instance=ExtResource("3_bot")]
 transform = Transform3D(-0.2425, 0, 0.9701, 0, 1, 0, -0.9701, 0, -0.2425, 32, -0.9, -8)
 display_name = "Otis"
+look = ExtResource("21_look_otis")
 body_color = Color(0.22, 0.55, 0.6, 1)
 
 [node name="BotController" parent="Otis"]
@@ -132,6 +137,7 @@ random_seed = 2
 [node name="Mabel" parent="." instance=ExtResource("3_bot")]
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0.1, -16)
 display_name = "Mabel"
+look = ExtResource("22_look_mabel")
 body_color = Color(0.85, 0.68, 0.2, 1)
 
 [node name="BotController" parent="Mabel"]

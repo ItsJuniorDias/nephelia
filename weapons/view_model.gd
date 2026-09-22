@@ -9,6 +9,8 @@ extends Node3D
 
 const ANIMATIONS: AnimationLibrary = preload("res://assets/animations/quaternius_ual/character_animations.res")
 const FLASH_TEXTURE: Texture2D = preload("res://assets/vfx/kenney/star_09.png")
+## Corpo virado para a frente da câmera, com o osso da cabeça na altura do olho.
+const MODEL_OFFSET := Transform3D(Basis(Vector3.UP, PI), Vector3(0.0, -1.5, 0.0))
 
 @export_group("Coice")
 ## Quanto a arma sobe e recua a cada tiro.
@@ -55,17 +57,37 @@ var gun: MeshInstance3D
 var muzzle: Marker3D
 var flash: MeshInstance3D
 
-@onready var model: Node3D = $Model
-@onready var skeleton: Skeleton3D = $Model/Armature/Skeleton3D
+## Corpo (o mesmo do personagem, com a roupa dele), montado em código no _ready.
+var model: Node3D
+var skeleton: Skeleton3D
+
 @onready var audio: AudioStreamPlayer = $Audio
 
 
 func _ready() -> void:
 	_rest_position = position
+	_build_body()
 	_build_gun()
 	_prepare_meshes()
 	_hide_bones()
 	_build_tree()
+
+
+# O mesmo corpo do personagem dono desta câmera (a manga da camisa aparece nos braços), girado
+# para olhar para a frente da câmera e com a cabeça logo abaixo dela.
+func _build_body() -> void:
+	var look: CharacterLook = null
+	var node: Node = get_parent()
+	while node != null and look == null:
+		if node is Character:
+			look = (node as Character).look
+			break
+		node = node.get_parent()
+	model = Wardrobe.build(look if look != null else CharacterLook.new())
+	model.transform = MODEL_OFFSET
+	add_child(model)
+	move_child(model, 0)
+	skeleton = model.get_node("Armature/Skeleton3D")
 
 
 # Arma na mão, marcador da ponta do cano e o clarão do tiro.

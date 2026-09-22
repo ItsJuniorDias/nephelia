@@ -1,7 +1,6 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://weapons/view_model.gd" id="1_view_model"]
-[ext_resource type="PackedScene" path="res://assets/models/characters/quaternius_ubc/Superhero_Male_FullBody.gltf" id="2_body"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/kenney/switch_001.ogg" id="5_reload_start"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/kenney/click_001.ogg" id="6_reload_end"]
 
@@ -9,8 +8,5 @@
 script = ExtResource("1_view_model")
 reload_start_sound = ExtResource("5_reload_start")
 reload_end_sound = ExtResource("6_reload_end")
-
-[node name="Model" parent="." instance=ExtResource("2_body")]
-transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, -1.5, 0)
 
 [node name="Audio" type="AudioStreamPlayer" parent="."]

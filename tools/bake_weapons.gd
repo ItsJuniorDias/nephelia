@@ -83,8 +83,9 @@ func _material(surface_name: String) -> StandardMaterial3D:
 		material.albedo_color = DARK_STEEL
 	else:
 		material.albedo_color = STEEL
-	material.metallic = 0.0 if wood else 0.4
-	material.roughness = 0.75 if wood else 0.45
+	# Aço fosco: brilhante demais, a arma vista de fora refletia o céu e parecia branca.
+	material.metallic = 0.0 if wood else 0.2
+	material.roughness = 0.75 if wood else 0.6
 	return material
 
 

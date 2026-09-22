@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="CharacterLook" format=3]
+
+[ext_resource type="Script" path="res://characters/character_look.gd" id="1_fskbl"]
+
+[resource]
+script = ExtResource("1_fskbl")
+outfit_variant = 1
+hair_color = Color(0.1, 0.08, 0.07, 1)
+hat = 1

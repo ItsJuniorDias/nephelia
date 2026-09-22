@@ -11,6 +11,7 @@ ficam fora do projeto, em `~/Downloads/nephelia_assets/`.
 | Stylized Nature MegaKit [Standard] | Quaternius | CC0 1.0 | https://quaternius.itch.io/stylized-nature-megakit |
 | Universal Base Characters [Standard] | Quaternius | CC0 1.0 | https://quaternius.itch.io/universal-base-characters |
 | Universal Animation Library [Standard] | Quaternius | CC0 1.0 | https://quaternius.itch.io/universal-animation-library |
+| Modular Character Outfits - Fantasy [Standard] (roupa Peasant) | Quaternius | CC0 1.0 | https://quaternius.itch.io/modular-character-outfits-fantasy |
 | Low Poly Wild West Guns | LowPolyAssets | CC0 1.0 | https://lowpolyassets.itch.io/low-poly-guns |
 
 ## Interface, efeitos e sons

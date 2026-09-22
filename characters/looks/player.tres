@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="CharacterLook" format=3]
+
+[ext_resource type="Script" path="res://characters/character_look.gd" id="1_g3o40"]
+
+[resource]
+script = ExtResource("1_g3o40")
+hair_color = Color(0.2, 0.13, 0.08, 1)
+hat = 3
+hat_color = Color(0.3, 0.27, 0.23, 1)

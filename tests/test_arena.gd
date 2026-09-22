@@ -32,6 +32,8 @@ func _run() -> void:
 		bot.process_mode = Node.PROCESS_MODE_DISABLED
 	await _physics(10)
 
+	_test_characters_dressed()
+	_test_first_person_sleeves()
 	await _test_connected_and_spawns()
 	await _test_walk_across_bridge()
 	await _test_railing_holds()
@@ -267,3 +269,60 @@ func _test_bot_rides_rail() -> void:
 			and bot.global_position.y < -0.5,
 			"rode=%s dropped_at=%s arrived_east=%s pos=%s alive=%s" % [rode[0], dropped_at[0], arrived_east,
 			bot.global_position, bot.is_alive])
+
+
+# ---------------------------------------------------------------- aparência
+
+# Peças vestidas no esqueleto do modelo (nomes dos nós que o Wardrobe cria).
+func _worn(character: Character) -> PackedStringArray:
+	var names := PackedStringArray()
+	for node: Node in character.model.skeleton.get_children():
+		if node is MeshInstance3D:
+			names.append(node.name)
+	return names
+
+
+func _test_characters_dressed() -> void:
+	# Cada um veste o que a ficha dele pede, no esqueleto certo, e só o tecido leva a cor.
+	var otis: Character = _level.get_node("Otis")
+	var hazel: Character = _level.get_node("Hazel")
+	var mabel: Character = _level.get_node("Mabel")
+	var otis_parts: PackedStringArray = _worn(otis)
+	var hazel_parts: PackedStringArray = _worn(hazel)
+	var mabel_parts: PackedStringArray = _worn(mabel)
+	var player_parts: PackedStringArray = _worn(_player)
+	# A cabeça feminina fica mais baixa (corpo de outra proporção).
+	var head_male: float = otis.model.skeleton.get_bone_global_rest(otis.model.skeleton.find_bone("Head")).origin.y
+	var head_female: float = hazel.model.skeleton.get_bone_global_rest(hazel.model.skeleton.find_bone("Head")).origin.y
+	var cloth_tinted: bool = false
+	var skin_untinted: bool = true
+	for node: Node in hazel.model.skeleton.get_children():
+		var instance := node as MeshInstance3D
+		if instance == null:
+			continue
+		for surface: int in instance.mesh.get_surface_count():
+			var material := instance.get_active_material(surface) as BaseMaterial3D
+			if material == null:
+				continue
+			if material.resource_name.begins_with(Wardrobe.CLOTH_MATERIAL_PREFIX):
+				cloth_tinted = cloth_tinted or not material.albedo_color.is_equal_approx(Color.WHITE)
+			elif instance.name == "Head" and instance.mesh.surface_get_name(surface) == "Skin":
+				skin_untinted = skin_untinted and material.albedo_color.is_equal_approx(Color.WHITE)
+	var ok: bool = "Head" in otis_parts and "Beard" in otis_parts and "Hat" in otis_parts \
+			and "Hair" in hazel_parts and not "Hat" in hazel_parts and "Female_Peasant_Body" in hazel_parts \
+			and "Hat" in mabel_parts and "Male_Peasant_Body" in player_parts and "Hat" in player_parts \
+			and head_female < head_male and cloth_tinted and skin_untinted
+	_check("C1 characters wear their looks: outfit, head, hair, beard and hats; only the cloth is tinted", ok,
+			"otis=%s hazel=%s mabel=%s player=%s heads=%.2f/%.2f cloth_tinted=%s skin_untinted=%s" % [
+			otis_parts, hazel_parts, mabel_parts, player_parts, head_male, head_female, cloth_tinted, skin_untinted])
+
+
+func _test_first_person_sleeves() -> void:
+	# Os braços da 1ª pessoa vestem a roupa do jogador (a manga aparece) e escondem a cabeça.
+	var view_model := _player.camera.get_node("ViewModel") as ViewModel
+	var parts := PackedStringArray()
+	for node: Node in view_model.skeleton.get_children():
+		parts.append(node.name)
+	var ok: bool = "Male_Peasant_Arms" in parts and "Head" in parts and "HiddenBones" in parts
+	_check("C2 first-person arms wear the player's outfit and hide the head", ok, "parts=%s" % [parts])
+

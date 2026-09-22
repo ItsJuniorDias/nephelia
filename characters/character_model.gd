@@ -1,7 +1,8 @@
 class_name CharacterModel
 extends Node3D
-## Corpo 3D animado de um personagem (modelo Quaternius + animações da Universal Animation
-## Library). Só visual: o Character conta o que está acontecendo e o modelo anima.
+## Corpo 3D animado de um personagem (roupa, cabeça, cabelo e chapéu da Quaternius, montados
+## pelo Wardrobe a partir da ficha CharacterLook do personagem, + animações da Universal
+## Animation Library). Só visual: o Character conta o que está acontecendo e o modelo anima.
 ##
 ## Árvore de animação (montada por código em _build_tree):
 ##   pernas: parado / andar / correr conforme a velocidade; no ar (pulo, trilho), pose de pulo
@@ -24,7 +25,7 @@ const PROTECTION_ENERGY: float = 0.45
 const AIR_BLEND_SPEED: float = 6.0
 const GRIP_BLEND_SPEED: float = 8.0
 
-## Cor de identificação do personagem (tinge a roupa).
+## Cor de identificação do personagem (tinge o tecido da roupa).
 @export var tint: Color = Color.WHITE:
 	set(value):
 		tint = value
@@ -32,7 +33,9 @@ const GRIP_BLEND_SPEED: float = 8.0
 			_apply_tint()
 
 var _tree: AnimationTree
+## Todos os materiais do corpo (brilho do tiro e da proteção) e só os do tecido (cor).
 var _body_materials: Array[BaseMaterial3D] = []
+var _cloth_materials: Array[BaseMaterial3D] = []
 var _meshes: Array[GeometryInstance3D] = []
 var _flash_energy: float = 0.0
 var _protected: bool = false
@@ -45,10 +48,19 @@ var _grip: RailGripModifier
 var gun: MeshInstance3D
 var mount: WeaponMount
 
-@onready var skeleton: Skeleton3D = $Model/Armature/Skeleton3D
+var skeleton: Skeleton3D
 
 
 func _ready() -> void:
+	# O corpo é montado aqui, com a aparência do personagem (o Character já tem a ficha: as
+	# propriedades exportadas chegam antes do _ready dos filhos).
+	var owner_character := get_parent() as Character
+	var look: CharacterLook = owner_character.look if owner_character != null and owner_character.look != null \
+			else CharacterLook.new()
+	var body: Node3D = Wardrobe.build(look)
+	add_child(body)
+	move_child(body, 0)
+	skeleton = body.get_node("Armature/Skeleton3D")
 	gun = GunMount.attach(skeleton, WeaponCatalog.default_weapon())
 	mount = gun.get_parent() as WeaponMount
 	_prepare_materials()
@@ -159,6 +171,8 @@ func _prepare_materials() -> void:
 			material.emission_energy_multiplier = 0.0
 			mesh_instance.set_surface_override_material(surface, material)
 			_body_materials.append(material)
+			if Wardrobe.is_cloth(source):
+				_cloth_materials.append(material)
 
 
 # Troca suave das poses de "no ar" (pernas) e "pendurado" (braço esquerdo no trilho).
@@ -174,9 +188,9 @@ func _update_pose_blends(delta: float) -> void:
 
 
 func _apply_tint() -> void:
-	# Mistura com branco: tinge a roupa sem esconder a textura.
-	var color: Color = Color.WHITE.lerp(tint, 0.6)
-	for material: BaseMaterial3D in _body_materials:
+	# Mistura com branco: tinge o tecido sem esconder a estampa (pele, cabelo e chapéu não).
+	var color: Color = Color.WHITE.lerp(tint, 0.5)
+	for material: BaseMaterial3D in _cloth_materials:
 		material.albedo_color = color
 
 
