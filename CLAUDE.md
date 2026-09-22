@@ -139,9 +139,15 @@ ao longo de várias sessões; o usuário testa e dá feedback.
 - Exportação: excluir `tests/*`, `tools/*`, `assets/animations/quaternius_ual/*.glb` (7,6 MB, só
   serve para extrair animações) e `assets/models/city/downtown/*.gltf` (as peças soltas só servem
   para o build; o jogo carrega as malhas juntadas de `levels/skyplaza/meshes/`).
-- Arma em 1ª pessoa: materiais com `use_z_clip_scale` (não atravessa paredes),
-  `disable_receive_shadows` (senão fica na sombra do próprio corpo e fica azul) e sem
-  `vertex_color_use_as_albedo` (os FBX do pacote Wild West Guns têm cores de vértice azuladas).
+- Braços em 1ª pessoa: `weapons/hands_view_model.tscn` + `weapons/view_model.gd`. É o mesmo corpo
+  e as mesmas animações de pistola do personagem (parado, tiro, recarga, com a velocidade ajustada
+  ao ritmo da arma), com a cabeça e as pernas encolhidas pelo `characters/hidden_bones_modifier.gd`
+  (o efeito de um SkeletonModifier3D é temporário: não dá para conferir lendo a pose depois).
+  O nó fica dentro da câmera, com o modelo 12 cm abaixo dela (osso da cabeça ≈ altura do olho).
+  Cada superfície ganha um material novo e simples: o do personagem usa textura ORM, que deixaria
+  a pele com brilho de plástico, e os FBX do Wild West Guns têm cores de vértice azuladas. Sempre
+  com `use_z_clip_scale` (não atravessa paredes) e `disable_receive_shadows` (senão pega a sombra
+  do próprio corpo e fica azul). Coice, balanço ao andar e clarão são por cima, em código.
 - Capturas de tela para conferir visual: usar `--write-movie <pasta>/f.png --fixed-fps 60` com um
   script `-s`; `get_viewport().get_texture().get_image()` devolve o quadro ANTERIOR.
 - Testes: `Godot --headless --path . -s res://tests/<suíte>.gd` para `test_controls`, `test_bots`,
@@ -195,4 +201,7 @@ Atualizar esta seção ao fim de cada sessão.
     37 + 8 + 10 testes passando.
   - Tarefa 8, parte 1 (itens) feita: frascos de vida na arena, bots buscam quando estão
     machucados. 37 + 8 + 10 + 5 testes passando.
-  - Próximo: Tarefa 8 parte 2 (poderes) e parte 3 (armas extras).
+  - Braços em 1ª pessoa feitos: mãos segurando o revólver, com animação de parado, tiro e
+    recarga. 38 + 8 + 10 + 5 testes passando.
+  - Próximo: Tarefa 8 parte 2 (poderes; as ações `power_spark` e `power_gust` já estão no Input
+    Map) e parte 3 (armas extras).

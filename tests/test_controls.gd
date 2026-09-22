@@ -86,6 +86,7 @@ func _run() -> void:
 	await _test_play_again()
 	await _test_score_limit()
 	await _test_timer_format()
+	await _test_first_person_arms()
 
 	# Deixa rastros e faíscas terminarem antes de sair (evita aviso de recurso em uso).
 	_shots.clear()
@@ -612,6 +613,27 @@ func _test_effects_and_hud() -> void:
 	_check("26 effects, muzzle flash, hit marker and ammo label", spawned >= 2 and flash and marker and label == "5 | 6"
 			and _shots.back().victim == bot and not hud.hit_marker.visible,
 			"spawned=%d flash=%s marker=%s label=%s" % [spawned, flash, marker, label])
+
+
+# Braços em primeira pessoa: cabeça e pernas encolhidas, arma na mão direita e cano na frente
+# da câmera (é de lá que sai o rastro do tiro).
+func _test_first_person_arms() -> void:
+	var view_model: ViewModel = _player.camera.get_node("ViewModel")
+	await _physics(5)
+	await process_frame
+	var skeleton: Skeleton3D = view_model.skeleton
+	# O efeito do modificador é temporário (não dá para ler a pose depois): confere o modificador.
+	var modifier := skeleton.get_node_or_null(^"HiddenBones") as HiddenBonesModifier
+	var hidden: bool = modifier != null and modifier.active and skeleton.find_bone(&"Head") >= 0 \
+			and modifier.bones.has(&"Head")
+	var hand: int = skeleton.find_bone(&"hand_r")
+	var hand_to_gun: float = (skeleton.global_transform * skeleton.get_bone_global_pose(hand).origin) \
+			.distance_to(view_model.muzzle.global_position)
+	# O cano fica à frente da câmera (do lado de dentro da tela, não atrás do jogador).
+	var ahead: Vector3 = _player.camera.global_basis.inverse() * (view_model.muzzle.global_position - _player.camera.global_position)
+	_check("38 first-person arms: head hidden, gun in hand, muzzle ahead of the camera",
+			hidden and hand_to_gun < 0.5 and ahead.z < -0.1 and absf(ahead.x) < 0.6 and absf(ahead.y) < 0.6,
+			"hidden=%s hand_to_gun=%.2f ahead=%s" % [hidden, hand_to_gun, ahead.snappedf(0.01)])
 
 
 # ---------------------------------------------------------------- vida, morte e respawn
