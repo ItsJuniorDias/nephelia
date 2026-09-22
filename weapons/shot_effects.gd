@@ -54,7 +54,8 @@ func _on_shot_resolved(result: ShotResult) -> void:
 	# Espingarda: um rastro para cada chumbo (é o que mostra o leque do tiro).
 	for point: Vector3 in result.pellet_points:
 		_spawn_tracer(from, point)
-	# Cada arma tem o seu tiro gravado; o `shot_sound` daqui é só a reserva.
+	# O tiro é o `shot_sound` daqui (sintetizado), no tom e volume de cada arma; uma arma com
+	# tiro próprio na ficha usa o dela.
 	var data: WeaponData = result.weapon.data if result.weapon != null else null
 	if data != null:
 		var stream: AudioStream = data.shot_sound if data.shot_sound != null else shot_sound

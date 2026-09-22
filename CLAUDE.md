@@ -242,12 +242,14 @@ ao longo de várias sessões; o usuário testa e dá feedback.
 - Áudio: `audio/sounds.gd` (Sounds: todos os sons num lugar, `play_3d`/`play_2d`/`music`/
   `wire_buttons`). Canais em `default_bus_layout.tres` (feito por `tools/make_audio_buses.gd`):
   Master (limitador) → Music, SFX, UI; `Settings.volume` e `Settings.music_volume`. Arquivos
-  preparados por `tools/prepare_sounds.py` (Python puro + `afconvert` do macOS: recorta os tiros,
-  mono 44,1 kHz, normaliza, sintetiza o chiado do trilho) a partir de `~/Downloads/nephelia_assets/`.
+  preparados por `tools/prepare_sounds.py` (Python puro + `afconvert` do macOS: mono 44,1 kHz,
+  normaliza, sintetiza o chiado do trilho) a partir de `~/Downloads/nephelia_assets/`.
   `characters/character_audio.gd` (criado em código pelo Character): passos por distância andada,
   com o tipo de chão de `levels/floor_surfaces.gd` (o `build_skyplaza.gd` guarda a lista dos pisos
   como metadado da geometria: os pisos não têm colisão), pulo, aterrissagem, dano, morte, trilho e a
-  recarga dos outros. Tiro e recarga vêm da ficha da arma (`WeaponData.shot_sound/reload_sound`).
+  recarga dos outros. A recarga vem da ficha da arma (`WeaponData.reload_sound`). O TIRO é o
+  sintetizado do projeto (`revolver_shot_placeholder.wav`, no `ShotEffects`), num tom por arma
+  (`shot_pitch`): o usuário testou tiros gravados de armas reais e não gostou (2026-09-22).
   `levels/arena_ambience.gd` (criado pelo ArenaSetup): vento e música da partida. Música e sons de
   interface tocam com o jogo pausado (`PROCESS_MODE_ALWAYS`). Loops: marcar no `.import`
   (`loop=true` no OGG, `edit/loop_mode=2` no WAV).
@@ -291,7 +293,7 @@ Atualizar esta seção ao fim de cada sessão.
     Downtown City e Nature têm pasta glTF; a Animation Library tem `Unreal-Godot` (.glb);
     as armas são só FBX. Pendentes (aprovar antes de baixar): Sonniss GDC 2026 (7,5 GB),
     músicas do Kevin MacLeod (CC-BY), fontes Limelight e Josefin Sans.
-  - Tarefa 2 (revólver) feita: 26 testes passando. (O tiro sintetizado provisório saiu na Tarefa 10.)
+  - Tarefa 2 (revólver) feita: 26 testes passando.
   - Tarefa 3 (vida, morte e respawn) feita: 31 testes passando.
   - Tarefa 4 (partida todos contra todos) feita: 37 testes passando.
   - Tarefa 5 (bots) feita: 37 testes de controles + 8 de bots passando. Arena com 3 bots
@@ -329,6 +331,6 @@ Atualizar esta seção ao fim de cada sessão.
     código. Pescoço entra na gola sem vão. Por fim (pedido do usuário) os bots vestem só a roupa,
     com a mesma cabeça careca e colorida de antes; o jogador usa boina.
     39 + 8 + 12 + 10 + 6 testes passando.
-  - Tarefa 10 (áudio) feita: tiros gravados de armas da época, passos por tipo de chão, trilho,
-    vento, interface e ragtime em domínio público. 39 + 8 + 12 + 10 + 6 + 7 testes passando.
+  - Tarefa 10 (áudio) feita: passos por tipo de chão, recargas, trilho, vento, interface e
+    ragtime em domínio público. O tiro continua o sintetizado (o usuário não gostou dos gravados). 39 + 8 + 12 + 10 + 6 + 7 testes passando.
   - Próximo: Tarefa 11 (desempenho no iPhone) ou o que o usuário pedir.

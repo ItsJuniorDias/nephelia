@@ -4,9 +4,9 @@
     python3 tools/prepare_sounds.py
 
 Fontes (ver CREDITS.md): ~/Downloads/nephelia_assets/audio/ e ~/Downloads/nephelia_assets/kenney/.
-Cada tiro da Free Firearm Sound Library tem 8 a 12 s (96 kHz, 24 bits, estéreo, com eco longo):
-aqui ele é recortado no disparo, com a cauda curta e um fade no fim, vira mono (o jogo toca em 3D)
-e 44,1 kHz / 16 bits, com o pico normalizado. O chiado do trilho é sintetizado aqui mesmo.
+Recargas: sem o silêncio das pontas, mono (o jogo toca em 3D), 44,1 kHz / 16 bits, normalizadas.
+O chiado do trilho é sintetizado aqui mesmo. (`shot` recorta tiros da Free Firearm Sound Library;
+hoje não é usada: o usuário preferiu o tiro sintetizado.)
 Usa só o que vem no macOS (afconvert) e Python puro.
 """
 
@@ -133,14 +133,8 @@ def copy_from_zip(zip_path, names, folder):
 
 
 def main():
-    print("Tiros (Free Firearm Sound Library, CC0):")
-    shot(os.path.join(FIREARMS, "Smith & Wesson 642", "V_27P.wav"),
-         os.path.join(OUT_SFX, "firearms", "revolver_shot.wav"), 1.1, 0.6)
-    shot(os.path.join(FIREARMS, "Model 1894", "L_23P.wav"),
-         os.path.join(OUT_SFX, "firearms", "repeater_shot.wav"), 1.5, 0.8)
-    shot(os.path.join(FIREARMS, "Model 12", "K_22P.wav"),
-         os.path.join(OUT_SFX, "firearms", "shotgun_shot.wav"), 1.7, 0.9)
-
+    # Os tiros gravados (Free Firearm Sound Library) foram testados e o usuário preferiu o tiro
+    # sintetizado do projeto. A função `shot` fica aqui para quando quiser tentar de novo.
     print("Recargas e vento (OpenGameArt, CC0):")
     trimmed(os.path.join(OGA, "gunreload1.wav"), os.path.join(OUT_SFX, "opengameart", "revolver_reload.wav"), -3.0)
     trimmed(os.path.join(OGA, "assaultriflereload1.wav"), os.path.join(OUT_SFX, "opengameart", "repeater_reload.wav"), -3.0)

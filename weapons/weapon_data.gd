@@ -23,6 +23,7 @@ extends Resource
 @export var reserve_ammo: int = -1
 
 @export_group("Som")
+## Tiro próprio desta arma. Vazio = o tiro sintetizado do projeto (ShotEffects), no tom abaixo.
 @export var shot_sound: AudioStream
 @export var reload_sound: AudioStream
 

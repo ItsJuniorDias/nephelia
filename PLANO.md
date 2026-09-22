@@ -108,8 +108,8 @@ aéreos, a 60 FPS no iPhone.
 
 ### 10. Áudio: [x] feito
 - Canais Música / Efeitos / Interface (limitador no geral) e volume da música nas opções
-- Tiros gravados de armas da época (Free Firearm Sound Library, CC0: revólver S&W 642, Winchester
-  1894, Winchester Model 12) e recarga de cada arma; o tiro provisório sintetizado saiu
+- Recarga de cada arma (OpenGameArt, CC0). Os tiros gravados (Free Firearm Sound Library) foram
+  testados e o usuário preferiu o tiro sintetizado de antes: ele ficou, num tom por arma
 - Passos conforme o chão (pedra ou grama, pelo mapa dos pisos), pulo, aterrissagem, dano, morte,
   trilho (engate e chiado que sobe com a velocidade), vento que aumenta com a velocidade
 - Interface: clique nos botões, "tic" de acerto, aviso de abate, sino de fim de partida

@@ -30,12 +30,12 @@ ficam fora do projeto, em `~/Downloads/nephelia_assets/`.
 
 | Asset | Autor | Licença | Link |
 |---|---|---|---|
-| The Free Firearm Sound Library (usados: Smith & Wesson 642, Winchester Model 1894 e Winchester Model 12) | Ben Jaszczak, Brian Nelson, Kevin Heras, Matthew Nanney | CC0 1.0 | https://opengameart.org/content/the-free-firearm-sound-library |
+| The Free Firearm Sound Library (baixado e testado; não usado: o usuário preferiu o tiro sintetizado) | Ben Jaszczak, Brian Nelson, Kevin Heras, Matthew Nanney | CC0 1.0 | https://opengameart.org/content/the-free-firearm-sound-library |
 | Gun reload sounds | SpringySpringo | CC0 1.0 | https://opengameart.org/content/gun-reload-sounds |
 | wind whoosh loop | SketchMan3 | CC0 1.0 | https://opengameart.org/content/wind-whoosh-loop |
 | Gunshot Sounds (baixado como reserva; não usado) | OpenGameArt | CC0 1.0 | https://opengameart.org/content/gunshot-sounds |
 
-Os tiros foram recortados, convertidos para mono e normalizados por `tools/prepare_sounds.py`.
+As recargas foram convertidas para mono e normalizadas por `tools/prepare_sounds.py`.
 
 ## Música
 
@@ -65,6 +65,7 @@ As licenças vêm junto em `assets/fonts/*-OFL.txt`, como a OFL exige.
 
 | Asset | Observação |
 |---|---|
+| `assets/audio/sfx/nephelia/revolver_shot_placeholder.wav` | Tiro das três armas, sintetizado por código (sem material de terceiros); cada arma muda o tom |
 | `assets/audio/sfx/nephelia/rail_slide_loop.wav` | Chiado da roldana no trilho, sintetizado por `tools/prepare_sounds.py` (sem material de terceiros) |
 
 CC0 não exige crédito, mas agradecemos aos autores nos créditos do jogo.

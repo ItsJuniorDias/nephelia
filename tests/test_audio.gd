@@ -135,31 +135,40 @@ func _test_arena_ambience() -> void:
 
 
 func _test_weapon_sounds() -> void:
-	# Cada arma tem tiro e recarga próprios; o tiro de verdade toca no canal de efeitos.
-	var effects: Node = _level.get_node("ShotEffects")
+	# Cada arma tem a sua recarga; o tiro é o sintetizado do projeto, num tom diferente em cada
+	# arma (o usuário preferiu ele aos tiros gravados), tocando no canal de efeitos.
+	var effects: ShotEffects = _level.get_node("ShotEffects")
 	var ids: Array[StringName] = [&"revolver", &"repeater", &"shotgun"]
-	var shots: Array[AudioStream] = []
 	var reloads: Array[AudioStream] = []
+	var pitches: Array[float] = []
 	var played: Array[bool] = []
 	_place(_player, Vector3(0, 0.05, 12), Vector3(0, 1.6, -20))
 	for id: StringName in ids:
 		var data: WeaponData = WeaponCatalog.get_weapon(id)
-		shots.append(data.shot_sound)
 		reloads.append(data.reload_sound)
+		pitches.append(data.shot_pitch)
 		_referee.give_weapon(_player, id)
 		await physics_frame
+		var heard: Array[AudioStreamPlayer3D] = []
+		var listen := func(node: Node) -> void:
+			if node is AudioStreamPlayer3D and (node as AudioStreamPlayer3D).stream == effects.shot_sound:
+				heard.append(node as AudioStreamPlayer3D)
+		effects.child_entered_tree.connect(listen)
 		Input.action_press(&"fire")
 		await _physics(2)
 		Input.action_release(&"fire")
 		await _physics(2)
-		var players: Array[Node] = _players_of(effects, data.shot_sound)
-		played.append(not players.is_empty() and (players[0] as AudioStreamPlayer3D).bus == Sounds.SFX_BUS)
+		effects.child_entered_tree.disconnect(listen)
+		played.append(heard.size() >= 1 and heard[0].bus == Sounds.SFX_BUS)
 		await _physics(_seconds(data.fire_interval))
 	_player.weapon.refill()
-	var distinct: bool = shots.all(func(s: AudioStream) -> bool: return s != null and shots.count(s) == 1) \
-			and reloads.all(func(s: AudioStream) -> bool: return s != null and reloads.count(s) == 1)
-	_check("S4 each weapon has its own recorded shot and reload, played on the effects bus",
-			distinct and played == [true, true, true], "distinct=%s played=%s" % [distinct, played])
+	var synth: bool = effects.shot_sound != null \
+			and effects.shot_sound.resource_path.ends_with("revolver_shot_placeholder.wav")
+	var reloads_ok: bool = reloads.all(func(r: AudioStream) -> bool: return r != null and reloads.count(r) == 1)
+	var pitches_ok: bool = pitches[0] > pitches[1] and pitches[1] > pitches[2]
+	_check("S4 the synthesized shot plays for every weapon (lower for bigger guns); each has its own reload",
+			synth and reloads_ok and pitches_ok and played == [true, true, true],
+			"synth=%s reloads=%s pitches=%s played=%s" % [synth, reloads_ok, pitches, played])
 
 
 func _test_footsteps() -> void:
