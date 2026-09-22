@@ -26,15 +26,15 @@ _data = {
 }
 point_count = 11
 
-[node name="SkyPlazaRails" type="Node3D" unique_id=1327076796]
+[node name="SkyPlazaRails" type="Node3D" unique_id=1033029644]
 
-[node name="RailNorth" type="Path3D" parent="." unique_id=1656797215]
+[node name="RailNorth" type="Path3D" parent="." unique_id=1289702428]
 curve = SubResource("Curve3D_llmih")
 script = ExtResource("1_l7lbf")
 tube_material = SubResource("StandardMaterial3D_vcihg")
 pylon_material = SubResource("StandardMaterial3D_4r3pu")
 
-[node name="RailSouth" type="Path3D" parent="." unique_id=116826692]
+[node name="RailSouth" type="Path3D" parent="." unique_id=1588381957]
 curve = SubResource("Curve3D_voabf")
 script = ExtResource("1_l7lbf")
 tube_material = SubResource("StandardMaterial3D_vcihg")

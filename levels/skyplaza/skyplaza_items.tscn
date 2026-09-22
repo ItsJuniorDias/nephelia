@@ -3,24 +3,24 @@
 [ext_resource type="PackedScene" path="res://items/pickup.tscn" id="1_vjdyy"]
 [ext_resource type="Script" path="res://items/pickup.gd" id="2_t2mbq"]
 
-[node name="@Node3D@320" type="Node3D" unique_id=2117761856]
+[node name="SkyPlazaItems" type="Node3D" unique_id=2014907224]
 
 [node name="Health1" type="Area3D" parent="." unique_id=1687453027 instance=ExtResource("1_vjdyy")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, -5)
 monitorable = false
 script = ExtResource("2_t2mbq")
 
-[node name="Health2" type="Area3D" parent="." unique_id=1901285879 instance=ExtResource("1_vjdyy")]
+[node name="Health2" type="Area3D" parent="." unique_id=613726820 instance=ExtResource("1_vjdyy")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, 5)
 monitorable = false
 script = ExtResource("2_t2mbq")
 
-[node name="Health3" type="Area3D" parent="." unique_id=1915789463 instance=ExtResource("1_vjdyy")]
+[node name="Health3" type="Area3D" parent="." unique_id=1214831190 instance=ExtResource("1_vjdyy")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 1, -10)
 monitorable = false
 script = ExtResource("2_t2mbq")
 
-[node name="Health4" type="Area3D" parent="." unique_id=887060390 instance=ExtResource("1_vjdyy")]
+[node name="Health4" type="Area3D" parent="." unique_id=1806500927 instance=ExtResource("1_vjdyy")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 37, -1, 0)
 monitorable = false
 script = ExtResource("2_t2mbq")

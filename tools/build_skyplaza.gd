@@ -69,7 +69,6 @@ func _run() -> void:
 	_build_rails()
 	_build_items()
 	_build_clouds()
-	_build_items()
 
 	_save(_geometry, OUT_DIR + "skyplaza_geometry.tscn")
 	_save(_decor, OUT_DIR + "skyplaza_decor.tscn")

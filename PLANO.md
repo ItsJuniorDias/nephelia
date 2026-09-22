@@ -19,7 +19,7 @@ poderes. O visual é uma cidade flutuante do começo do século XX. Ordem dos mo
 - [x] Primeiro commit (`02aaa5a`)
 - [ ] Push para o GitHub: criar o repositório privado `nephelia` na conta ItsJuniorDias (remoto SSH já configurado)
 - [x] Confirmar que o jogo abre no iPhone 15
-- [ ] Colocar o filtro `tests/*` no preset iOS
+- [x] Filtros de exportação no preset iOS (`tests/*`, `tools/*`, animações e o FBX de origem)
 
 ---
 
@@ -85,7 +85,8 @@ aéreos, a 60 FPS no iPhone.
 - Pronto quando: pegar itens e usar poderes muda o rumo da partida
 - Parte 1 (itens): [x] feito. Frascos de vida (+50) que somem ao serem pegos e voltam em 20 s;
   o juiz decide quem pega; aviso no HUD; bots machucados vão buscar o frasco mais perto
-- Parte 2 (poderes): energia, Faísca (descarga) e Rajada (empurrão), frascos de energia
+- Parte 2 (poderes): REMOVIDA a pedido do usuário (2026-09-22). Estava feita (energia, Faísca e
+  Rajada, com testes) e saiu do projeto; está no histórico do Git se um dia voltar
 - Parte 3 (armas extras): rifle e espingarda como itens, com munição limitada
 
 ### 9. HUD e menus
