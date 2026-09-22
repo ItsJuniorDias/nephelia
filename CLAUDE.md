@@ -110,7 +110,8 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   lisa (vértices novos no meio das arestas). A pele debaixo da roupa passa a dobrar com os pesos da
   roupa (transferência de pesos do ponto dela mais perto) e a pele que escapa do tecido em alguma
   pose das animações (testada em 10 poses, com raios da física do Godot) sai. Tudo no esqueleto da
-  roupa. Conferir com `tools/character_sheet.gd` (fotos, closes do pescoço com e sem roupa).
+  roupa. A cabeça fica 8 cm mais baixa que no corpo original (`HEAD_DROP`, pedido do usuário: "uns
+  32 px" nas fotos de rosto); cabelo e barba descem junto e o pescoço encolhe. Conferir com `tools/character_sheet.gd` (fotos, closes do pescoço com e sem roupa).
 - Fotos de conferência (`tools/character_sheet.gd`, `tools/pose_sheet.gd`): rodar com janela e
   `-- <pasta>`; cada foto espera quadros realmente desenhados (com a janela escondida o macOS para
   de desenhar e as fotos saíam repetidas).

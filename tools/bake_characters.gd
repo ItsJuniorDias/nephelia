@@ -58,6 +58,11 @@ const NECKLINE_HALF_WIDTH: float = 0.075
 ## Abaixo disto nada do corpo fica: a camisa e o corpete cobrem (sobravam retalhos soltos).
 const NECKLINE_BOTTOM: float = 1.36
 const MAX_INFLUENCES: int = 4
+## A cabeça desce isto (pedido do usuário: "uns 32 px" nas fotos de rosto, ≈ 8 cm). Rosto,
+## olhos, cabelo e barba descem inteiros; o pescoço encolhe entre o fundo da gola e o queixo
+## (NECK_SQUASH abaixo do osso da cabeça) e o decote fica onde está.
+const HEAD_DROP: float = 0.08
+const NECK_SQUASH: float = 0.2
 ## Poses das animações do jogo em que a pele não pode escapar da roupa: [animação, instante (0 a 1)].
 ## Na pose parada a pele fica debaixo do tecido, mas na pose de tiro o tronco dobra diferente.
 ## ("Levar tiro" fica de fora: é um tranco rápido, e nele o pescoço inteiro encosta na gola.)
@@ -108,6 +113,8 @@ func _bake_body(spec: Dictionary) -> bool:
 		outfit_skin.add_named_bind(skin.get_bind_name(bind), outfit_skeleton.get_bone_global_rest(bone).affine_inverse())
 
 	var posed: Array = _to_outfit_space(body.mesh.surface_get_arrays(0), skin, outfit_skeleton)
+	var head_y: float = outfit_skeleton.get_bone_global_rest(outfit_skeleton.find_bone("Head")).origin.y
+	_lower_head(posed, head_y)
 	var under := PackedByteArray()
 	var inside: PackedFloat32Array = _choose(posed, skin, cloth.get_world_3d(), under)
 	# Para as poses e os pesos: fica quem está dentro, e também o vizinho de fora de um triângulo
@@ -126,6 +133,7 @@ func _bake_body(spec: Dictionary) -> bool:
 		for surface: int in instance.mesh.get_surface_count():
 			var extra_arrays: Array = _to_outfit_space(instance.mesh.surface_get_arrays(surface),
 					instance.skin, outfit_skeleton)
+			_lower_head(extra_arrays, head_y)
 			_rebind(extra_arrays, instance.skin, skin)
 			_add_surface(mesh, extra_arrays, instance.mesh.surface_get_material(surface), extra)
 	var head_box: AABB = _head_box(posed, skin)
@@ -138,10 +146,31 @@ func _bake_body(spec: Dictionary) -> bool:
 	return _save(spec["part"], mesh, outfit_skin, scene, head_box)
 
 
+# Cabelo e barba descem junto com a cabeça (inteiros).
 func _bake_hair(part_name: String, source: String) -> bool:
 	var scene: Node = (load(source) as PackedScene).instantiate()
 	var instance := scene.find_children("*", "MeshInstance3D", true, false)[0] as MeshInstance3D
-	return _save(part_name, instance.mesh, instance.skin.duplicate(), scene, AABB())
+	var mesh := ArrayMesh.new()
+	for surface: int in instance.mesh.get_surface_count():
+		var arrays: Array = instance.mesh.surface_get_arrays(surface)
+		var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		for vertex: int in vertices.size():
+			vertices[vertex].y -= HEAD_DROP
+		arrays[Mesh.ARRAY_VERTEX] = vertices
+		_add_surface(mesh, arrays, instance.mesh.surface_get_material(surface), instance.mesh.surface_get_name(surface))
+	return _save(part_name, mesh, instance.skin.duplicate(), scene, AABB())
+
+
+# Desce a cabeça HEAD_DROP: tudo acima do queixo desce inteiro; entre o fundo da gola e o queixo
+# o pescoço encolhe aos poucos; abaixo disso nada muda.
+func _lower_head(arrays: Array, head_y: float) -> void:
+	var top: float = head_y - 0.02
+	var bottom: float = top - NECK_SQUASH
+	var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+	for vertex: int in vertices.size():
+		var amount: float = clampf((vertices[vertex].y - bottom) / (top - bottom), 0.0, 1.0)
+		vertices[vertex].y -= HEAD_DROP * smoothstep(0.0, 1.0, amount)
+	arrays[Mesh.ARRAY_VERTEX] = vertices
 
 
 func _save(part_name: String, mesh: Mesh, skin: Skin, scene: Node, head_box: AABB) -> bool:
