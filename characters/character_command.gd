@@ -16,6 +16,10 @@ var pitch: float = 0.0
 var jump: bool = false
 ## Atirar está apertado neste passo.
 var fire: bool = false
+## Recarregar foi pedido neste passo.
+var reload: bool = false
+## Pede ajuda de mira (toque e controle; no mouse fica desligada).
+var aim_assist: bool = false
 
 
 ## Limpa os botões e o movimento (o olhar é sempre preenchido pelo controlador).
@@ -23,3 +27,5 @@ func reset() -> void:
 	move = Vector2.ZERO
 	jump = false
 	fire = false
+	reload = false
+	aim_assist = false

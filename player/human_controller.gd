@@ -7,7 +7,14 @@ extends CharacterController
 @export_range(0.01, 1.0, 0.01, "suffix:°/px") var touch_look_sensitivity: float = 0.25
 @export_range(10.0, 720.0, 1.0, "suffix:°/s") var gamepad_look_speed: float = 180.0
 
+@export_group("Mira")
+## Ajuda de mira no toque e no controle (no mouse nunca: lá a mira já é precisa).
+@export var aim_assist_enabled: bool = true
+
+var _using_gamepad: bool = false
+
 @onready var touch_controls: TouchControls = $TouchControls
+@onready var hud: Hud = $Hud
 
 
 func setup(for_character: Character) -> void:
@@ -17,12 +24,27 @@ func setup(for_character: Character) -> void:
 	character.body_mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
 	character.visor_mesh.visible = false
 	touch_controls.look_dragged.connect(_on_touch_look_dragged)
+	if character.weapon != null:
+		hud.setup(character.weapon)
+		var view_model := character.camera.get_node_or_null("ViewModel") as ViewModel
+		if view_model != null:
+			view_model.setup(character, character.weapon)
 
 
 func _exit_tree() -> void:
 	# Não deixar o mouse preso se a cena for trocada.
 	if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+
+# Só observa qual aparelho o jogador está usando (decide a mira assistida); não consome nada.
+func _input(event: InputEvent) -> void:
+	if event is InputEventJoypadButton:
+		_using_gamepad = true
+	elif event is InputEventJoypadMotion and absf((event as InputEventJoypadMotion).axis_value) > 0.3:
+		_using_gamepad = true
+	elif event is InputEventKey or event is InputEventMouseButton or event is InputEventScreenTouch:
+		_using_gamepad = false
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -60,6 +82,8 @@ func get_command(_delta: float) -> CharacterCommand:
 	# just_pressed pega toques rápidos que começam e terminam entre dois passos de física.
 	command.jump = Input.is_action_pressed("jump") or Input.is_action_just_pressed("jump")
 	command.fire = Input.is_action_pressed("fire") or Input.is_action_just_pressed("fire")
+	command.reload = Input.is_action_just_pressed("reload")
+	command.aim_assist = aim_assist_enabled and (TouchControls.is_touch_mode() or _using_gamepad)
 	command.yaw = character.yaw
 	command.pitch = character.pitch
 	return command

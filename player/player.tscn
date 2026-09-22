@@ -3,6 +3,8 @@
 [ext_resource type="PackedScene" path="res://characters/character.tscn" id="1_character"]
 [ext_resource type="Script" path="res://player/human_controller.gd" id="2_human"]
 [ext_resource type="PackedScene" path="res://ui/touch_controls/touch_controls.tscn" id="3_touch"]
+[ext_resource type="PackedScene" path="res://weapons/revolver_view_model.tscn" id="4_view_model"]
+[ext_resource type="PackedScene" path="res://ui/hud/hud.tscn" id="5_hud"]
 
 [node name="Player" instance=ExtResource("1_character")]
 
@@ -10,3 +12,7 @@
 script = ExtResource("2_human")
 
 [node name="TouchControls" parent="HumanController" instance=ExtResource("3_touch")]
+
+[node name="Hud" parent="HumanController" instance=ExtResource("5_hud")]
+
+[node name="ViewModel" parent="Head/Camera3D" instance=ExtResource("4_view_model")]

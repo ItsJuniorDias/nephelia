@@ -32,7 +32,7 @@ aéreos, a 60 FPS no iPhone.
 - A simulação do personagem não lê mais o teclado nem o toque diretamente
 - Pronto quando: tudo funciona como hoje, os 15 testes passam e um bot de teste anda sozinho
 
-### 2. Arma: revólver
+### 2. Arma: revólver: [x] feito
 - Modelo em primeira pessoa (Low Poly Wild West Guns), tiro por raio (hitscan), munição, recarga
 - Mira assistida para toque, coice e balanço por código, clarão, faíscas e sons
 - Acertos decididos por um **juiz da partida** (no futuro, esse juiz vira o servidor)
@@ -79,9 +79,13 @@ aéreos, a 60 FPS no iPhone.
 
 ### 10. Áudio
 - Tiros, passos, impactos, trilhos, poderes, vento, interface e música (se aprovada)
+- Trocar o tiro provisório (`assets/audio/sfx/nephelia/revolver_shot_placeholder.wav`, sintetizado)
+  por um som de verdade (ex.: Sonniss GDC, depois de aprovado o download)
 
 ### 11. Desempenho e ajuste no iPhone
 - 6 personagens em tela a 60 FPS estáveis; ajustar sombras, LOD, texturas
+- Pré-aquecer shaders dos efeitos (rastro, faíscas, clarão) ao carregar a arena: o primeiro tiro
+  hoje compila shaders e dá um engasgo
 - Ajustar sensibilidade e tamanho dos botões com toques reais
 
 ### 12. Fechamento do marco 1

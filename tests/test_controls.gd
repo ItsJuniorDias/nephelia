@@ -14,6 +14,8 @@ var _level: Node3D
 var _player: Character
 var _touch: TouchControls
 var _spawn: Marker3D
+var _referee: MatchReferee
+var _shots: Array[ShotResult] = []
 
 
 func _initialize() -> void:
@@ -28,6 +30,8 @@ func _run() -> void:
 	_player = _level.get_node("Player")
 	_touch = _player.get_node("HumanController/TouchControls")
 	_spawn = _level.get_node("SpawnPoint")
+	_referee = _level.get_node("MatchReferee")
+	_referee.shot_resolved.connect(func(result: ShotResult) -> void: _shots.append(result))
 	_touch.force_visible = true
 	# Bots pausados nos testes do jogador (não esbarram nele); os testes de bot religam.
 	for bot: Node in get_nodes_in_group(&"bots"):
@@ -52,7 +56,18 @@ func _run() -> void:
 	await _test_bodies_and_camera()
 	await _test_bot_reaches_target()
 	await _test_bot_wanders()
+	await _test_fire_rate_and_ammo()
+	await _test_hit_and_miss_bot()
+	await _test_aim_assist()
+	await _test_auto_reload()
+	await _test_manual_and_touch_reload()
+	await _test_wall_blocks_shot()
+	await _test_never_hits_self()
+	await _test_effects_and_hud()
 
+	# Deixa rastros e faíscas terminarem antes de sair (evita aviso de recurso em uso).
+	_shots.clear()
+	await _physics(40)
 	print("RESULT: ", "ALL PASSED" if _failures == 0 else "%d FAILED" % _failures)
 	quit(0 if _failures == 0 else 1)
 
@@ -387,3 +402,174 @@ func _test_bot_wanders() -> void:
 	_check("18 bot wanders on its own", travelled > 3.0 and bot.global_position.y > -1.0 \
 			and input_untouched and player_moved < 0.05,
 			"travelled=%.2f y=%.2f input_untouched=%s player_moved=%.3f" % [travelled, bot.global_position.y, input_untouched, player_moved])
+
+
+# ---------------------------------------------------------------- arma
+
+func _prepare_weapon_test(bot_position: Vector3 = Vector3(12, 0, 14)) -> Character:
+	await _reset()
+	var bot: Character = _level.get_node("Bot")
+	# Pausado, mas ainda "sólido": por padrão um corpo pausado sai da física e o tiro atravessa.
+	bot.disable_mode = CollisionObject3D.DISABLE_MODE_KEEP_ACTIVE
+	bot.process_mode = Node.PROCESS_MODE_DISABLED
+	bot.velocity = Vector3.ZERO
+	bot.global_position = bot_position
+	_player.weapon.refill()
+	_player.weapon.spread_degrees = 0.0
+	(_player.controller as HumanController).aim_assist_enabled = true
+	_player.apply_look(0.0, 0.0)
+	await _physics(3)
+	_shots.clear()
+	return bot
+
+
+func _aim(yaw_deg: float, pitch_deg: float) -> void:
+	_player.apply_look(deg_to_rad(yaw_deg), deg_to_rad(pitch_deg))
+
+
+func _fire_once() -> void:
+	await physics_frame
+	Input.action_press("fire")
+	await _physics(2)
+	Input.action_release("fire")
+	# Espera o intervalo entre tiros do revólver (0,35 s) para o próximo tiro poder sair.
+	await _physics(ceili(_player.weapon.fire_interval * Engine.physics_ticks_per_second) + 2)
+
+
+func _hold_fire(frames: int) -> void:
+	await physics_frame
+	Input.action_press("fire")
+	await _physics(frames)
+	Input.action_release("fire")
+	await _physics(1)
+
+
+func _test_fire_rate_and_ammo() -> void:
+	await _prepare_weapon_test()
+	# Segurar 1 s com 0,35 s entre tiros = tiros em 0, 0,35 e 0,70 s.
+	await _hold_fire(60)
+	_check("19 hold fire: rate and ammo", _shots.size() == 3 and _player.weapon.ammo == 3,
+			"shots=%d ammo=%d" % [_shots.size(), _player.weapon.ammo])
+
+
+func _test_hit_and_miss_bot() -> void:
+	var bot: Character = await _prepare_weapon_test(Vector3(0, 0, 3.5))
+	var hits: Array[ShotResult] = []
+	var on_hit := func(result: ShotResult) -> void: hits.append(result)
+	bot.hit_received.connect(on_hit)
+	await _fire_once()
+	var first: ShotResult = _shots.back() if not _shots.is_empty() else null
+	var hit_ok: bool = first != null and first.victim == bot and hits.size() == 1 and first.damage > 0.0
+	_aim(40.0, 0.0)
+	await _fire_once()
+	var second: ShotResult = _shots.back()
+	bot.hit_received.disconnect(on_hit)
+	_check("20 hits the bot, misses when aiming away", hit_ok and _shots.size() == 2 and second.victim == null,
+			"first_victim=%s signal_hits=%d second_victim=%s" % [first.victim if first else null, hits.size(), second.victim])
+
+
+func _test_aim_assist() -> void:
+	var bot: Character = await _prepare_weapon_test(Vector3(0, 0, 3.5))
+	var human := _player.controller as HumanController
+	# Mira 6° ao lado do peito: sem ajuda erra (o raio passa a ~0,47 m do bot).
+	var chest_pitch: float = rad_to_deg(atan2(1.2 - 1.6, 4.5))
+	human.aim_assist_enabled = false
+	_aim(6.0, chest_pitch)
+	await _fire_once()
+	var without: ShotResult = _shots.back()
+	human.aim_assist_enabled = true
+	_aim(6.0, chest_pitch)
+	await _fire_once()
+	var with_assist: ShotResult = _shots.back()
+	_aim(12.0, chest_pitch)
+	await _fire_once()
+	var too_far: ShotResult = _shots.back()
+	_check("21 aim assist: helps at 6°, not at 12°, off when disabled",
+			without.victim == null and with_assist.victim == bot and with_assist.assisted and too_far.victim == null,
+			"without=%s with=%s assisted=%s at12=%s" % [without.victim, with_assist.victim, with_assist.assisted, too_far.victim])
+
+
+func _test_auto_reload() -> void:
+	await _prepare_weapon_test()
+	var hud: Hud = _player.get_node("HumanController/Hud")
+	# 6 tiros levam 5 × 0,35 = 1,75 s; segurando o gatilho, a recarga começa sozinha.
+	await _hold_fire(115)
+	var shots_before: int = _shots.size()
+	var reloading: bool = _player.weapon.is_reloading
+	var label_during: String = hud.ammo_label.text
+	await _physics(100)
+	var ok: bool = shots_before == 6 and reloading and label_during == "RELOAD" \
+			and not _player.weapon.is_reloading and _player.weapon.ammo == 6 and hud.ammo_label.text == "6 | 6"
+	_check("22 auto reload when empty", ok, "shots=%d reloading=%s label=%s ammo=%d label_after=%s" % [
+			shots_before, reloading, label_during, _player.weapon.ammo, hud.ammo_label.text])
+
+
+func _test_manual_and_touch_reload() -> void:
+	await _prepare_weapon_test()
+	await _fire_once()
+	await physics_frame
+	Input.action_press("reload")
+	await _physics(2)
+	Input.action_release("reload")
+	var manual_started: bool = _player.weapon.is_reloading
+	await _physics(100)
+	var manual_done: bool = _player.weapon.ammo == 6 and not _player.weapon.is_reloading
+
+	var fire_center: Vector2 = _button_center("FireButton")
+	await _touch_event(4, fire_center, true)
+	await _physics(3)
+	await _touch_event(4, fire_center, false)
+	var touch_fired: bool = _player.weapon.ammo == 5
+	var reload_center: Vector2 = _button_center("ReloadButton")
+	await _touch_event(5, reload_center, true)
+	await _physics(3)
+	await _touch_event(5, reload_center, false)
+	var touch_reload: bool = _player.weapon.is_reloading
+	await _physics(100)
+	_check("23 manual reload (R key) and touch FIRE/R buttons", manual_started and manual_done and touch_fired and touch_reload,
+			"manual=%s/%s touch_fire=%s touch_reload=%s ammo=%d" % [manual_started, manual_done, touch_fired, touch_reload, _player.weapon.ammo])
+
+
+func _test_wall_blocks_shot() -> void:
+	# Parede em z = -10 (0,5 m de espessura, 3 m de altura); bot escondido atrás dela.
+	await _prepare_weapon_test(Vector3(0, 0, -12))
+	await _reset(Vector3(0, 0.05, -6.0))
+	_aim(0.0, 0.0)
+	await _fire_once()
+	var shot: ShotResult = _shots.back()
+	_check("24 wall blocks the shot", shot.hit and shot.victim == null and absf(shot.end_point.z - (-9.75)) < 0.05,
+			"hit=%s victim=%s end=%s" % [shot.hit, shot.victim, shot.end_point])
+
+
+func _test_never_hits_self() -> void:
+	await _prepare_weapon_test()
+	var self_hits: Array[int] = [0]
+	var on_hit := func(_result: ShotResult) -> void: self_hits[0] += 1
+	_player.hit_received.connect(on_hit)
+	_aim(0.0, -85.0)
+	await _fire_once()
+	_player.hit_received.disconnect(on_hit)
+	var shot: ShotResult = _shots.back()
+	_check("25 never hits itself (shooting at own feet)", shot.hit and shot.victim == null and self_hits[0] == 0,
+			"hit=%s victim=%s self_hits=%d" % [shot.hit, shot.victim, self_hits[0]])
+
+
+func _test_effects_and_hud() -> void:
+	var bot: Character = await _prepare_weapon_test(Vector3(0, 0, 3.5))
+	var effects: Node = _level.get_node("ShotEffects")
+	var view_model: ViewModel = _player.camera.get_node("ViewModel")
+	var hud: Hud = _player.get_node("HumanController/Hud")
+	var before: int = effects.get_child_count()
+	await physics_frame
+	Input.action_press("fire")
+	await physics_frame
+	await process_frame
+	var spawned: int = effects.get_child_count() - before
+	var flash: bool = view_model.flash.visible
+	var marker: bool = hud.hit_marker.visible
+	var label: String = hud.ammo_label.text
+	Input.action_release("fire")
+	await _physics(30)
+	_check("26 effects, muzzle flash, hit marker and ammo label", spawned >= 2 and flash and marker and label == "5 | 6"
+			and _shots.back().victim == bot and not hud.hit_marker.visible,
+			"spawned=%d flash=%s marker=%s label=%s" % [spawned, flash, marker, label])

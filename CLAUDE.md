@@ -12,6 +12,11 @@ ao longo de várias sessões; o usuário testa e dá feedback.
 ## Como trabalhar
 - Pedido do usuário (2026-09-22): rodar tudo **em primeiro plano, uma tarefa por vez**. Nada de
   workflows, agentes ou comandos em segundo plano em paralelo; terminar uma tarefa antes de começar outra.
+- Pedido do usuário (2026-09-22): ao terminar uma tarefa do `PLANO.md` (testes passando + commit),
+  **seguir direto para a próxima**, sem esperar o usuário digitar "continuar". Parar só quando
+  precisar de decisão do usuário ou de algo que só ele pode fazer (comprar, criar conta, testar no
+  celular, aprovar download).
+- Commits direto na `main` estão autorizados (um commit por tarefa concluída).
 
 ## Idioma
 - Conversar com o usuário em português do Brasil.
@@ -57,10 +62,22 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   `bots/bot_controller.gd`. Nada no Character lê Input. O HumanController chama
   `apply_look()` na hora (câmera responsiva) e o comando repete o mesmo ângulo.
   `player.tscn` e `bots/bot.tscn` herdam `characters/character.tscn`. Grupos: "characters", "bots".
+- Tiro: `weapons/weapon.gd` (Weapon: munição, ritmo, recarga; nó filho do Character) pede ao
+  `match/match_referee.gd` (MatchReferee, "juiz", grupo `match_referee`, futuro servidor) que
+  resolve o raio, a mira assistida (cone de 8° e até 1 m de desvio, só toque/controle) e a
+  imprecisão, e chama `Character.receive_hit()`. Visual separado: `weapons/shot_effects.gd`
+  (rastro, faíscas, sons de todos os tiros) e `weapons/view_model.gd` (arma em 1ª pessoa, só do
+  jogador local). HUD mínimo em `ui/hud/`.
+- Arma em 1ª pessoa: materiais com `use_z_clip_scale` (não atravessa paredes),
+  `disable_receive_shadows` (senão fica na sombra do próprio corpo e fica azul) e sem
+  `vertex_color_use_as_albedo` (os FBX do pacote Wild West Guns têm cores de vértice azuladas).
+- Capturas de tela para conferir visual: usar `--write-movie <pasta>/f.png --fixed-fps 60` com um
+  script `-s`; `get_viewport().get_texture().get_image()` devolve o quadro ANTERIOR.
 - Testes: `Godot --headless --path . -s res://tests/test_controls.gd` (saída 0 = tudo passou). Rodar
   depois de qualquer mudança no jogador/controles/fase. Ao criar presets de exportação, excluir `tests/*`.
   No headless a janela é 64x64 (viewport 1152x1152): eventos simulados precisam ser convertidos com
-  `root.get_final_transform()` (o teste já faz isso).
+  `root.get_final_transform()` (o teste já faz isso). Corpo com `process_mode` desligado sai da
+  física (`disable_mode = REMOVE`): nos testes, usar `DISABLE_MODE_KEEP_ACTIVE` para o tiro acertar.
 - Godot 4.7 tem classes nativas `VirtualJoystick` e `Logger`: não usar esses nomes em `class_name`.
   Usamos nosso `TouchJoystick` (não o nativo) porque o `TouchControls` distribui os dedos
   centralmente (joystick flutuante na esquerda, olhar no resto da tela, botões).
@@ -93,4 +110,5 @@ Atualizar esta seção ao fim de cada sessão.
     Downtown City e Nature têm pasta glTF; a Animation Library tem `Unreal-Godot` (.glb);
     as armas são só FBX. Pendentes (aprovar antes de baixar): Sonniss GDC 2026 (7,5 GB),
     músicas do Kevin MacLeod (CC-BY), fontes Limelight e Josefin Sans.
-  - Próximo: Tarefa 2 do `PLANO.md` (revólver).
+  - Tarefa 2 (revólver) feita: 26 testes passando. Som de tiro ainda provisório (sintetizado).
+  - Próximo: Tarefa 3 do `PLANO.md` (vida, morte e respawn).

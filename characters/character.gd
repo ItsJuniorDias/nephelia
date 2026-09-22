@@ -5,6 +5,9 @@ extends CharacterBody3D
 ## O personagem nunca lê teclado, toque ou IA diretamente: quem decide é o CharacterController
 ## filho dele (humano, bot ou, no futuro, rede). Assim o mesmo personagem serve para todos.
 
+## Levou um tiro (o MatchReferee decidiu). A vida e o dano entram na tarefa de vida.
+signal hit_received(result: ShotResult)
+
 @export_group("Movimento")
 @export_range(0.5, 20.0, 0.1, "suffix:m/s") var walk_speed: float = 5.0
 ## Quão rápido chega à velocidade máxima no chão. Alto = resposta imediata.
@@ -34,11 +37,14 @@ var pitch: float:
 		return head.rotation.x
 
 var controller: CharacterController
+var weapon: Weapon
 
 var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 var _coyote_timer: float = 0.0
 var _jump_buffer_timer: float = 0.0
 var _was_jump_held: bool = false
+var _body_material := StandardMaterial3D.new()
+var _flash_tween: Tween
 
 @onready var head: Node3D = $Head
 @onready var camera: Camera3D = $Head/Camera3D
@@ -48,15 +54,19 @@ var _was_jump_held: bool = false
 
 func _ready() -> void:
 	add_to_group(&"characters")
-	var material := StandardMaterial3D.new()
-	material.albedo_color = body_color
-	body_mesh.material_override = material
+	_body_material.albedo_color = body_color
+	body_mesh.material_override = _body_material
 
 	for child: Node in get_children():
-		if child is CharacterController:
+		if child is Weapon and weapon == null:
+			weapon = child as Weapon
+		elif child is CharacterController and controller == null:
 			controller = child as CharacterController
-			controller.setup(self)
-			break
+	# A arma primeiro: o controlador humano liga a mira e o contador de balas nela.
+	if weapon != null:
+		weapon.setup(self)
+	if controller != null:
+		controller.setup(self)
 
 
 func _physics_process(delta: float) -> void:
@@ -67,6 +77,8 @@ func _physics_process(delta: float) -> void:
 		apply_look(command.yaw, command.pitch)
 		move = command.move
 		jump_held = command.jump
+		if weapon != null:
+			weapon.tick(delta, command)
 
 	# O comando diz se "pular" está apertado; o pulo acontece só no instante em que aperta.
 	var jump_pressed: bool = jump_held and not _was_jump_held
@@ -99,6 +111,17 @@ func apply_look(new_yaw: float, new_pitch: float) -> void:
 	rotation.y = wrapf(new_yaw, -PI, PI)
 	var max_pitch: float = deg_to_rad(max_pitch_degrees)
 	head.rotation.x = clampf(new_pitch, -max_pitch, max_pitch)
+
+
+## Chamado pelo MatchReferee quando um tiro acerta este personagem.
+func receive_hit(result: ShotResult) -> void:
+	# Pisca em branco: resposta visual imediata de que o tiro pegou.
+	if _flash_tween != null:
+		_flash_tween.kill()
+	_body_material.albedo_color = Color.WHITE
+	_flash_tween = create_tween()
+	_flash_tween.tween_property(_body_material, "albedo_color", body_color, 0.15)
+	hit_received.emit(result)
 
 
 ## Leva o personagem até `target` (posição e direção), parado e olhando reto.

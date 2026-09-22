@@ -25,4 +25,10 @@ ficam fora do projeto, em `~/Downloads/nephelia_assets/`.
 | Interface Sounds | Kenney | CC0 1.0 | https://kenney.nl/assets/interface-sounds |
 | Prototype Textures | Kenney | CC0 1.0 | https://kenney.nl/assets/prototype-textures |
 
+## Criados pelo projeto
+
+| Asset | Observação |
+|---|---|
+| `assets/audio/sfx/nephelia/revolver_shot_placeholder.wav` | Tiro provisório sintetizado por código (sem material de terceiros) |
+
 CC0 não exige crédito, mas agradecemos aos autores nos créditos do jogo.
