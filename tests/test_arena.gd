@@ -283,25 +283,23 @@ func _worn(character: Character) -> PackedStringArray:
 
 
 func _test_characters_dressed() -> void:
-	# O jogador veste a roupa (cabeça original, boina); os bots são o corpo original sem roupa,
-	# como antes das roupas (pedido do usuário), com a cor deles tingindo o corpo todo.
+	# Todos vestem a roupa. O jogador tem boina e só o tecido leva a cor; os bots têm a mesma
+	# cabeça de antes das roupas (careca, sem chapéu, pele na cor deles: pedido do usuário).
 	var player_parts: PackedStringArray = _worn(_player)
-	var bots_plain: bool = true
-	var bots_tinted: bool = true
+	var bots_ok: bool = true
 	var details: PackedStringArray = []
 	for bot: Character in _bots:
 		var parts: PackedStringArray = _worn(bot)
-		details.append("%s=%s" % [bot.name, parts])
-		bots_plain = bots_plain and "SuperHero_Male" in parts and not "Male_Peasant_Body" in parts \
-				and not "Hair" in parts and not "Hat" in parts
-		var body_mesh := bot.model.skeleton.get_node("SuperHero_Male") as MeshInstance3D
-		var material := body_mesh.get_active_material(0) as BaseMaterial3D
-		bots_tinted = bots_tinted and not material.albedo_color.is_equal_approx(Color.WHITE)
-	var player_dressed: bool = "Male_Peasant_Body" in player_parts and "Body" in player_parts \
-			and "Hat" in player_parts
-	_check("C1 the player wears the outfit; bots are the plain original body, tinted with their color",
-			player_dressed and bots_plain and bots_tinted and _bots.size() == 3,
-			"player=%s %s tinted=%s" % [player_parts, ", ".join(details), bots_tinted])
+		var skin := (bot.model.skeleton.get_node("Body") as MeshInstance3D).get_active_material(0) as BaseMaterial3D
+		var skin_tinted: bool = not skin.albedo_color.is_equal_approx(Color.WHITE)
+		details.append("%s=%s skin_tinted=%s" % [bot.name, parts, skin_tinted])
+		bots_ok = bots_ok and "Male_Peasant_Body" in parts and "Body" in parts and not "Hair" in parts \
+				and not "Hat" in parts and skin_tinted
+	var player_skin := (_player.model.skeleton.get_node("Body") as MeshInstance3D).get_active_material(0) as BaseMaterial3D
+	var player_ok: bool = "Male_Peasant_Body" in player_parts and "Hat" in player_parts \
+			and player_skin.albedo_color.is_equal_approx(Color.WHITE)
+	_check("C1 everyone wears the outfit; bots keep the bald colored head, the player has a cap",
+			player_ok and bots_ok and _bots.size() == 3, "player=%s %s" % [player_parts, ", ".join(details)])
 
 
 func _test_first_person_sleeves() -> void:

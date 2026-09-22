@@ -49,13 +49,15 @@ var gun: MeshInstance3D
 var mount: WeaponMount
 
 var skeleton: Skeleton3D
+## A ficha de aparência usada para montar o corpo.
+var look: CharacterLook
 
 
 func _ready() -> void:
 	# O corpo é montado aqui, com a aparência do personagem (o Character já tem a ficha: as
 	# propriedades exportadas chegam antes do _ready dos filhos).
 	var owner_character := get_parent() as Character
-	var look: CharacterLook = owner_character.look if owner_character != null and owner_character.look != null \
+	look = owner_character.look if owner_character != null and owner_character.look != null \
 			else CharacterLook.new()
 	var body: Node3D = Wardrobe.build(look)
 	add_child(body)
@@ -189,8 +191,9 @@ func _update_pose_blends(delta: float) -> void:
 
 func _apply_tint() -> void:
 	# Mistura com branco: tinge o tecido sem esconder a estampa (pele, cabelo e chapéu não).
-	# Sem roupa não há tecido: tinge o corpo inteiro, como era antes das roupas.
-	if _cloth_materials.is_empty():
+	# Sem roupa não há tecido, e os bots pintam a pele também: tinge o corpo inteiro, como era
+	# antes das roupas.
+	if _cloth_materials.is_empty() or (look != null and look.tint_skin):
 		for material: BaseMaterial3D in _body_materials:
 			material.albedo_color = Color.WHITE.lerp(tint, 0.6)
 		return

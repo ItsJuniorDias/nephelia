@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1_xxvly")
-dressed = false
+tint_skin = true
 outfit_variant = 1
 hair = 0
 hair_color = Color(0.5, 0.22, 0.1, 1)

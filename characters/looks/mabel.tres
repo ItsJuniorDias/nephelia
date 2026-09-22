@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1_c7gvd")
-dressed = false
+tint_skin = true
 hair = 0
 hair_color = Color(0.8, 0.64, 0.38, 1)
 hat_color = Color(0.08, 0.08, 0.1, 1)
