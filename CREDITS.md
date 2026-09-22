@@ -25,6 +25,14 @@ ficam fora do projeto, em `~/Downloads/nephelia_assets/`.
 | Interface Sounds | Kenney | CC0 1.0 | https://kenney.nl/assets/interface-sounds |
 | Prototype Textures | Kenney | CC0 1.0 | https://kenney.nl/assets/prototype-textures |
 
+## Interface
+
+| Asset | Autor | Licença | Link |
+|---|---|---|---|
+| NEI's Art Deco UI Kit | New England Interactive | Gratuito, "livre para usar como quiser" | https://newenglandinteractive.itch.io/neis-art-deco-ui-kit |
+
+Usamos as molduras douradas dos botões e o fundo de mármore nos menus.
+
 ## Fontes
 
 | Asset | Autor | Licença | Link |

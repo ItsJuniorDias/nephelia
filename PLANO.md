@@ -93,7 +93,9 @@ aéreos, a 60 FPS no iPhone.
 - Parte 1 (menus): [x] feito. Menu inicial (jogar, dificuldade, opções, sair), pausa dentro da
   partida e opções salvas no aparelho (sensibilidade do olhar, tamanho dos botões, volume);
   fontes do jogo (Limelight e Josefin Sans) aplicadas por um tema
-- Parte 2 (arte do HUD e dos controles de toque): pendente
+- Parte 2 (arte): [x] feito. Menus com o NEI's Art Deco UI Kit (molduras douradas, mármore),
+  controles de toque com a arte e os ícones do Kenney Mobile Controls, botão de pausa na tela,
+  barra de vida e balas desenhadas
 - Arte dos controles de toque (Kenney Mobile Controls) e mira (Crosshair Pack)
 - HUD: vida, munição, energia, placar, lista de abates
 - Menu inicial (Jogar contra bots, escolha de dificuldade) e pausa com opções (sensibilidade,

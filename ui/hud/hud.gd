@@ -27,8 +27,8 @@ var _respawn_countdown: float = 0.0
 var _pickup_tween: Tween
 
 @onready var crosshair: TextureRect = $Root/Crosshair
-@onready var ammo_label: Label = $Root/AmmoLabel
-@onready var health_label: Label = $Root/HealthLabel
+@onready var ammo_pips: AmmoPips = $Root/AmmoPips
+@onready var health_bar: HealthBar = $Root/HealthBar
 @onready var protection_label: Label = $Root/ProtectionLabel
 @onready var rail_hint: Label = $Root/RailHint
 @onready var pickup_label: Label = $Root/PickupLabel
@@ -68,6 +68,8 @@ func setup(for_character: Character) -> void:
 
 
 func _process(delta: float) -> void:
+	if weapon != null and weapon.is_reloading:
+		_refresh_ammo()
 	if _hit_marker_timer > 0.0:
 		_hit_marker_timer -= delta
 		hit_marker.visible = _hit_marker_timer > 0.0
@@ -121,10 +123,7 @@ func get_damage_angles() -> Array[float]:
 
 
 func _refresh_ammo() -> void:
-	if weapon.is_reloading:
-		ammo_label.text = "RELOAD"
-	else:
-		ammo_label.text = "%d | %d" % [weapon.ammo, weapon.magazine_size]
+	ammo_pips.show_ammo(weapon.ammo, weapon.magazine_size, weapon.is_reloading, weapon.get_reload_progress())
 
 
 func _on_ammo_changed() -> void:
@@ -139,9 +138,8 @@ func _on_fired(result: ShotResult) -> void:
 		hit_marker.visible = true
 
 
-func _on_health_changed(health: float, _max_health: float) -> void:
-	health_label.text = "HP %d" % ceili(health)
-	health_label.add_theme_color_override(&"font_color", LOW_HEALTH_COLOR if health <= LOW_HEALTH else HEALTH_COLOR)
+func _on_health_changed(health: float, max_health: float) -> void:
+	health_bar.set_health(health, max_health)
 	# Perdeu vida: borda vermelha, mais forte quanto maior o dano.
 	if health < _last_health:
 		_vignette_alpha = clampf(_vignette_alpha + 0.2 + (_last_health - health) / 150.0, 0.0, 0.6)

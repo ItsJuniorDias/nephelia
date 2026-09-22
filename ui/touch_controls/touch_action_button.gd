@@ -10,14 +10,21 @@ extends Control
 
 # Folga extra no toque: dedos são imprecisos, melhor aceitar um pouco fora do círculo.
 const HIT_SLOP: float = 12.0
-const FILL_IDLE := Color(0.95, 0.91, 0.82, 0.18)
-const FILL_PRESSED := Color(0.95, 0.91, 0.82, 0.5)
-const OUTLINE_IDLE := Color(0.79, 0.64, 0.29, 0.75)
-const OUTLINE_PRESSED := Color(0.98, 0.84, 0.45, 1.0)
-const LABEL_IDLE := Color(1.0, 0.97, 0.9, 0.8)
-const LABEL_PRESSED := Color(1.0, 1.0, 1.0, 1.0)
+## Arte do pacote Kenney Mobile Controls (contorno branco, que tingimos).
+const RING: Texture2D = preload("res://assets/ui/kenney/button_circle.png")
+const TINT_IDLE := Color(1.0, 0.97, 0.9, 0.7)
+const TINT_PRESSED := Color(1.0, 0.86, 0.45, 1.0)
+## Fundo escuro por baixo do anel: sem ele o botão some contra o céu claro.
+const SHADE_IDLE := Color(0.05, 0.07, 0.1, 0.25)
+const SHADE_PRESSED := Color(0.05, 0.07, 0.1, 0.45)
+const ICON_RATIO: float = 0.9
 
 @export var action: StringName = &""
+## Desenho de dentro do botão (mira, pulo, recarga...). Sem ícone, usa o texto.
+@export var icon: Texture2D:
+	set(value):
+		icon = value
+		queue_redraw()
 @export var label: String = "":
 	set(value):
 		label = value
@@ -68,16 +75,22 @@ func is_pressed() -> bool:
 
 func _draw() -> void:
 	var center: Vector2 = size * 0.5
-	var fill: Color = FILL_PRESSED if _pressed else FILL_IDLE
-	var outline: Color = OUTLINE_PRESSED if _pressed else OUTLINE_IDLE
-	draw_circle(center, radius, fill, true, -1.0, true)
-	draw_arc(center, radius, 0.0, TAU, 64, outline, 3.0, true)
+	var tint: Color = TINT_PRESSED if _pressed else TINT_IDLE
+	draw_circle(center, radius * 0.94, SHADE_PRESSED if _pressed else SHADE_IDLE, true, -1.0, true)
+	draw_texture_rect(RING, _square(center, radius * 2.0), false, tint)
 
+	if icon != null:
+		draw_texture_rect(icon, _square(center, radius * ICON_RATIO), false, tint)
+		return
 	if label.is_empty():
 		return
 	var font: Font = ThemeDB.fallback_font
 	var font_size: int = maxi(int(radius * 0.36), 8)
 	# draw_string() posiciona pela linha de base; isto centraliza o texto na vertical.
 	var baseline_y: float = center.y + (font.get_ascent(font_size) - font.get_descent(font_size)) * 0.5
-	var label_color: Color = LABEL_PRESSED if _pressed else LABEL_IDLE
-	draw_string(font, Vector2(center.x - radius, baseline_y), label, HORIZONTAL_ALIGNMENT_CENTER, radius * 2.0, font_size, label_color)
+	draw_string(font, Vector2(center.x - radius, baseline_y), label, HORIZONTAL_ALIGNMENT_CENTER, radius * 2.0, font_size, tint)
+
+
+# Quadrado de lado `side` centrado em `center`.
+func _square(center: Vector2, side: float) -> Rect2:
+	return Rect2(center - Vector2.ONE * side * 0.5, Vector2.ONE * side)

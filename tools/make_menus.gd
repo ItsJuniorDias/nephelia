@@ -9,9 +9,13 @@ const OPTIONS_OUT := "res://ui/options_menu/options_menu.tscn"
 const MAIN_OUT := "res://ui/main_menu/main_menu.tscn"
 const PAUSE_OUT := "res://ui/pause_menu/pause_menu.tscn"
 
-const DIM := Color(0.03, 0.05, 0.08, 0.72)
+const DIM := Color(0.02, 0.03, 0.05, 0.92)
 const PANEL_COLOR := Color(0.09, 0.11, 0.15, 0.93)
 const BRASS := Color(0.85, 0.7, 0.38)
+## Arte do NEI's Art Deco UI Kit: moldura dourada dos botões e mármore do fundo.
+const BUTTON_OUTLINE := "res://assets/ui/artdeco/ButtonOutlineLong1.png"
+const BUTTON_FILL := "res://assets/ui/artdeco/ButtonFillLong1.png"
+const MARBLE := "res://assets/ui/artdeco/BackPanelBlackMarble.jpg"
 
 
 func _initialize() -> void:
@@ -35,6 +39,8 @@ func _build_options() -> Control:
 	panel.name = "Panel"
 	panel.set_anchors_preset(Control.PRESET_CENTER)
 	panel.custom_minimum_size = Vector2(620, 0)
+	# A moldura comprida do kit distorce quando esticada na vertical: o painel usa fundo sólido
+	# com borda de latão, e as molduras ficam só nos botões.
 	panel.add_theme_stylebox_override(&"panel", _panel_style())
 	_center(panel)
 	root.add_child(panel)
@@ -68,17 +74,21 @@ func _build_main_menu() -> Control:
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.set_script(load("res://ui/main_menu/main_menu.gd"))
 
-	var background := ColorRect.new()
+	# Fundo de mármore preto do kit Art Déco, escurecido para o texto ficar legível.
+	var background := TextureRect.new()
 	background.name = "Background"
 	background.set_anchors_preset(Control.PRESET_FULL_RECT)
-	background.color = Color(0.07, 0.12, 0.2)
+	background.texture = load(MARBLE)
+	background.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	background.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	background.modulate = Color(0.55, 0.55, 0.6)
 	background.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(background)
 
 	var rows := VBoxContainer.new()
 	rows.name = "Rows"
 	rows.set_anchors_preset(Control.PRESET_CENTER)
-	rows.custom_minimum_size = Vector2(460, 0)
+	rows.custom_minimum_size = Vector2(620, 0)
 	rows.add_theme_constant_override(&"separation", 16)
 	_center(rows)
 	root.add_child(rows)
@@ -131,7 +141,7 @@ func _build_pause() -> CanvasLayer:
 	var rows := VBoxContainer.new()
 	rows.name = "Rows"
 	rows.set_anchors_preset(Control.PRESET_CENTER)
-	rows.custom_minimum_size = Vector2(420, 0)
+	rows.custom_minimum_size = Vector2(620, 0)
 	rows.add_theme_constant_override(&"separation", 16)
 	_center(rows)
 	screen.add_child(rows)
@@ -203,15 +213,44 @@ func _button(button_name: String, text: String) -> Button:
 	button.name = button_name
 	button.text = text
 	button.theme_type_variation = &"TitleButton"
-	button.custom_minimum_size = Vector2(0, 62)
-	button.add_theme_color_override(&"font_color", Color(0.95, 0.93, 0.88))
-	button.add_theme_color_override(&"font_hover_color", BRASS)
-	button.add_theme_color_override(&"font_focus_color", BRASS)
-	button.add_theme_stylebox_override(&"normal", _button_style(Color(0.13, 0.16, 0.22, 0.95)))
-	button.add_theme_stylebox_override(&"hover", _button_style(Color(0.2, 0.24, 0.32, 0.97)))
-	button.add_theme_stylebox_override(&"pressed", _button_style(Color(0.26, 0.22, 0.14, 0.98)))
-	button.add_theme_stylebox_override(&"focus", _button_style(Color(0.2, 0.24, 0.32, 0.5)))
+	button.custom_minimum_size = Vector2(0, 78)
+	button.add_theme_color_override(&"font_color", Color(0.93, 0.85, 0.62))
+	button.add_theme_color_override(&"font_hover_color", Color(1.0, 0.97, 0.9))
+	button.add_theme_color_override(&"font_focus_color", Color(1.0, 0.97, 0.9))
+	button.add_theme_color_override(&"font_pressed_color", Color(0.2, 0.16, 0.1))
+	button.add_theme_stylebox_override(&"normal", _frame_style(BUTTON_OUTLINE, Color(1, 1, 1, 0.92)))
+	button.add_theme_stylebox_override(&"hover", _frame_style(BUTTON_FILL, Color(1, 1, 1, 0.98)))
+	button.add_theme_stylebox_override(&"pressed", _frame_style(BUTTON_FILL, Color(1.0, 0.92, 0.75)))
+	button.add_theme_stylebox_override(&"focus", _frame_style(BUTTON_OUTLINE, Color(1.0, 0.95, 0.8)))
 	return button
+
+
+# Moldura dourada do kit, em "nove fatias": os enfeites das pontas ficam no tamanho certo e só
+# o meio estica.
+func _frame_style(texture_path: String, tint: Color) -> StyleBoxTexture:
+	var style := StyleBoxTexture.new()
+	style.texture = load(texture_path)
+	style.modulate_color = tint
+	style.set_texture_margin(SIDE_LEFT, 120.0)
+	style.set_texture_margin(SIDE_RIGHT, 120.0)
+	style.set_texture_margin(SIDE_TOP, 30.0)
+	style.set_texture_margin(SIDE_BOTTOM, 30.0)
+	# O texto começa depois dos enfeites das pontas (senão passa por cima deles).
+	style.set_content_margin(SIDE_LEFT, 118.0)
+	style.set_content_margin(SIDE_RIGHT, 118.0)
+	style.set_content_margin(SIDE_TOP, 12.0)
+	style.set_content_margin(SIDE_BOTTOM, 12.0)
+	return style
+
+
+# Painel com a mesma moldura dourada dos botões, com sobra para o conteúdo.
+func _panel_frame() -> StyleBoxTexture:
+	var style := _frame_style(BUTTON_OUTLINE, Color(1, 1, 1, 0.97))
+	style.set_content_margin(SIDE_LEFT, 130.0)
+	style.set_content_margin(SIDE_RIGHT, 130.0)
+	style.set_content_margin(SIDE_TOP, 34.0)
+	style.set_content_margin(SIDE_BOTTOM, 34.0)
+	return style
 
 
 func _panel_style() -> StyleBoxFlat:

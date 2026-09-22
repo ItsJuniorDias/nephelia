@@ -1,5 +1,10 @@
 [gd_scene format=3]
 
+[ext_resource type="Texture2D" path="res://assets/ui/kenney/icon_crosshair.png" id="10_icon_crosshair"]
+[ext_resource type="Texture2D" path="res://assets/ui/kenney/icon_jump.png" id="11_icon_jump"]
+[ext_resource type="Texture2D" path="res://assets/ui/kenney/icon_arrow_rotate.png" id="12_icon_arrow_rotate"]
+[ext_resource type="Texture2D" path="res://assets/ui/kenney/icon_hand.png" id="13_icon_hand"]
+[ext_resource type="Texture2D" path="res://assets/ui/kenney/icon_pause.png" id="20_icon_pause"]
 [ext_resource type="Script" path="res://ui/touch_controls/touch_controls.gd" id="1_touch"]
 [ext_resource type="Script" path="res://ui/touch_controls/touch_joystick.gd" id="2_joystick"]
 [ext_resource type="Script" path="res://ui/touch_controls/touch_action_button.gd" id="3_button"]
@@ -47,6 +52,7 @@ mouse_filter = 2
 script = ExtResource("3_button")
 action = &"fire"
 label = "FIRE"
+icon = ExtResource("10_icon_crosshair")
 radius = 70.0
 
 [node name="JumpButton" type="Control" parent="Root"]
@@ -66,6 +72,7 @@ mouse_filter = 2
 script = ExtResource("3_button")
 action = &"jump"
 label = "JUMP"
+icon = ExtResource("11_icon_jump")
 radius = 50.0
 
 [node name="ReloadButton" type="Control" parent="Root"]
@@ -85,6 +92,7 @@ mouse_filter = 2
 script = ExtResource("3_button")
 action = &"reload"
 label = "R"
+icon = ExtResource("12_icon_arrow_rotate")
 radius = 36.0
 
 [node name="HookButton" type="Control" parent="Root"]
@@ -105,4 +113,21 @@ mouse_filter = 2
 script = ExtResource("3_button")
 action = &"use_rail"
 label = "HOOK"
+icon = ExtResource("13_icon_hand")
 radius = 44.0
+
+[node name="PauseButton" type="Control" parent="Root"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -92.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = 92.0
+grow_horizontal = 0
+mouse_filter = 2
+script = ExtResource("3_button")
+action = &"pause"
+icon = ExtResource("20_icon_pause")
+radius = 30.0

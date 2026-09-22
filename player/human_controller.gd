@@ -57,12 +57,7 @@ func _input(event: InputEvent) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if character == null:
 		return
-	if event.is_action_pressed("pause"):
-		pause_menu.toggle()
-		if not pause_menu.is_open() and not TouchControls.is_touch_mode():
-			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-		return
-	# Com a pausa aberta o jogo não recebe mais nada (os botões da pausa é que mandam).
+	# Com a pausa aberta o jogo não recebe mais nada (quem cuida dela é o PauseMenu).
 	if pause_menu.is_open():
 		return
 	# No modo toque o mouse nunca é capturado: o olhar vem do TouchControls.

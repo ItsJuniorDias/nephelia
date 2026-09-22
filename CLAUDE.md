@@ -172,6 +172,15 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   `user://settings.cfg`. Quem precisa reagir a mudanças compara `Settings.version` (sinal estático
   não existe). `levels/arena_setup.gd` aplica a dificuldade aos bots ao abrir a arena (com
   `call_deferred`: os bots ficam prontos depois dele).
+- Arte da interface: menus usam o **NEI's Art Deco UI Kit** (molduras douradas dos botões em
+  "nove fatias" e fundo de mármore). A moldura é comprida (1224 x 101): esticada na vertical ela
+  distorce, então painel alto usa fundo sólido com borda de latão. Controles de toque e HUD usam o
+  **Kenney Mobile Controls** (anel do botão, base do joystick e ícones de mira, pulo, recarga, mão
+  e pausa), com um fundo escuro por baixo, senão somem contra o céu claro.
+- HUD: `ui/hud/health_bar.gd` (barra dourada com o número dentro e um rastro claro do dano) e
+  `ui/hud/ammo_pips.gd` (uma bala por tiro do tambor; na recarga elas acendem no ritmo dela).
+  O botão de pausa na tela aperta a AÇÃO `pause`, e quem lê isso é o `PauseMenu` no `_process`
+  (botão de toque não manda evento de input).
 - Interface: o tema `ui/theme/nephelia_theme.tres` (gerado por `tools/make_theme.gd` e aplicado a
   tudo por `gui/theme/custom`) traz as fontes: Josefin Sans na interface e Limelight (Art Déco) nos
   títulos, pela variação de tipo "Title"/"Subtitle"/"TitleButton". Nome de classe do Godot não pode
@@ -244,5 +253,7 @@ Atualizar esta seção ao fim de cada sessão.
   - Tarefa 9, parte 1 (menus) feita: menu inicial (jogar, dificuldade, opções, sair), pausa e
     opções salvas no aparelho (sensibilidade, tamanho dos botões, volume). A cena principal
     agora é o menu. 39 + 8 + 10 + 5 + 6 testes passando.
-  - Próximo: Tarefa 9 parte 2 (arte do HUD e dos controles de toque) e depois a Tarefa 8 parte 3
-    (armas extras).
+  - Tarefa 9, parte 2 (arte) feita: menus com o kit Art Déco (molduras douradas e mármore),
+    controles de toque com a arte e os ícones da Kenney, botão de pausa na tela, barra de vida e
+    balas desenhadas no lugar do texto. 39 + 8 + 10 + 5 + 6 testes passando.
+  - Próximo: Tarefa 8 parte 3 (armas extras) ou o que o usuário pedir.

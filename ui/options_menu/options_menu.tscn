@@ -1,8 +1,10 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://ui/options_menu/options_menu.gd" id="1_3s1t0"]
+[ext_resource type="Script" path="res://ui/options_menu/options_menu.gd" id="1_utl02"]
+[ext_resource type="Texture2D" path="res://assets/ui/artdeco/ButtonOutlineLong1.png" id="2_kx268"]
+[ext_resource type="Texture2D" path="res://assets/ui/artdeco/ButtonFillLong1.png" id="3_tjtux"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8h7tm"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wakw5"]
 content_margin_left = 28.0
 content_margin_top = 28.0
 content_margin_right = 28.0
@@ -18,85 +20,69 @@ corner_radius_top_right = 10
 corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_utl02"]
-content_margin_left = 10.0
-content_margin_top = 10.0
-content_margin_right = 10.0
-content_margin_bottom = 10.0
-bg_color = Color(0.13, 0.16, 0.22, 0.95)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.85, 0.7, 0.38, 0.55)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_1ubxx"]
+content_margin_left = 118.0
+content_margin_top = 12.0
+content_margin_right = 118.0
+content_margin_bottom = 12.0
+texture = ExtResource("2_kx268")
+texture_margin_left = 120.0
+texture_margin_top = 30.0
+texture_margin_right = 120.0
+texture_margin_bottom = 30.0
+modulate_color = Color(1, 1, 1, 0.92)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kx268"]
-content_margin_left = 10.0
-content_margin_top = 10.0
-content_margin_right = 10.0
-content_margin_bottom = 10.0
-bg_color = Color(0.26, 0.22, 0.14, 0.98)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.85, 0.7, 0.38, 0.55)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_21oyd"]
+content_margin_left = 118.0
+content_margin_top = 12.0
+content_margin_right = 118.0
+content_margin_bottom = 12.0
+texture = ExtResource("3_tjtux")
+texture_margin_left = 120.0
+texture_margin_top = 30.0
+texture_margin_right = 120.0
+texture_margin_bottom = 30.0
+modulate_color = Color(1, 0.92, 0.75, 1)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tjtux"]
-content_margin_left = 10.0
-content_margin_top = 10.0
-content_margin_right = 10.0
-content_margin_bottom = 10.0
-bg_color = Color(0.2, 0.24, 0.32, 0.97)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.85, 0.7, 0.38, 0.55)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_mt34y"]
+content_margin_left = 118.0
+content_margin_top = 12.0
+content_margin_right = 118.0
+content_margin_bottom = 12.0
+texture = ExtResource("3_tjtux")
+texture_margin_left = 120.0
+texture_margin_top = 30.0
+texture_margin_right = 120.0
+texture_margin_bottom = 30.0
+modulate_color = Color(1, 1, 1, 0.98)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wakw5"]
-content_margin_left = 10.0
-content_margin_top = 10.0
-content_margin_right = 10.0
-content_margin_bottom = 10.0
-bg_color = Color(0.2, 0.24, 0.32, 0.5)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.85, 0.7, 0.38, 0.55)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_sk6u8"]
+content_margin_left = 118.0
+content_margin_top = 12.0
+content_margin_right = 118.0
+content_margin_bottom = 12.0
+texture = ExtResource("2_kx268")
+texture_margin_left = 120.0
+texture_margin_top = 30.0
+texture_margin_right = 120.0
+texture_margin_bottom = 30.0
+modulate_color = Color(1, 0.95, 0.8, 1)
 
-[node name="OptionsMenu" type="Control" unique_id=44758218]
+[node name="OptionsMenu" type="Control" unique_id=2132303469]
 visible = false
 layout_mode = 3
 anchors_preset = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
-script = ExtResource("1_3s1t0")
+script = ExtResource("1_utl02")
 
-[node name="Dim" type="ColorRect" parent="." unique_id=328617783]
+[node name="Dim" type="ColorRect" parent="." unique_id=213283484]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
-color = Color(0.03, 0.05, 0.08, 0.72)
+color = Color(0.02, 0.03, 0.05, 0.92)
 
-[node name="Panel" type="PanelContainer" parent="." unique_id=795761028]
+[node name="Panel" type="PanelContainer" parent="." unique_id=2127876765]
 custom_minimum_size = Vector2(620, 0)
 layout_mode = 0
 anchor_left = 0.5
@@ -105,29 +91,29 @@ anchor_right = 0.5
 anchor_bottom = 0.5
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_8h7tm")
+theme_override_styles/panel = SubResource("StyleBoxFlat_wakw5")
 
-[node name="Rows" type="VBoxContainer" parent="Panel" unique_id=1499236558]
+[node name="Rows" type="VBoxContainer" parent="Panel" unique_id=1900354770]
 layout_mode = 2
 theme_override_constants/separation = 18
 
-[node name="Title" type="Label" parent="Panel/Rows" unique_id=355962856]
+[node name="Title" type="Label" parent="Panel/Rows" unique_id=1331674193]
 layout_mode = 2
 theme_type_variation = &"Subtitle"
 theme_override_colors/font_color = Color(0.85, 0.7, 0.38, 1)
 text = "OPÇÕES"
 horizontal_alignment = 1
 
-[node name="Sensitivity" type="HBoxContainer" parent="Panel/Rows" unique_id=1648540713]
+[node name="Sensitivity" type="HBoxContainer" parent="Panel/Rows" unique_id=499024401]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="Label" type="Label" parent="Panel/Rows/Sensitivity" unique_id=1053795962]
+[node name="Label" type="Label" parent="Panel/Rows/Sensitivity" unique_id=2015032602]
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 text = "SENSIBILIDADE"
 
-[node name="Slider" type="HSlider" parent="Panel/Rows/Sensitivity" unique_id=2018303988]
+[node name="Slider" type="HSlider" parent="Panel/Rows/Sensitivity" unique_id=1674232938]
 custom_minimum_size = Vector2(240, 36)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -137,22 +123,22 @@ max_value = 3.0
 step = 0.05
 value = 0.3
 
-[node name="Value" type="Label" parent="Panel/Rows/Sensitivity" unique_id=1831466184]
+[node name="Value" type="Label" parent="Panel/Rows/Sensitivity" unique_id=1930784527]
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
 text = "100%"
 horizontal_alignment = 2
 
-[node name="Buttons" type="HBoxContainer" parent="Panel/Rows" unique_id=456384764]
+[node name="Buttons" type="HBoxContainer" parent="Panel/Rows" unique_id=465334802]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="Label" type="Label" parent="Panel/Rows/Buttons" unique_id=1915166215]
+[node name="Label" type="Label" parent="Panel/Rows/Buttons" unique_id=1796923396]
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 text = "TAMANHO DOS BOTÕES"
 
-[node name="Slider" type="HSlider" parent="Panel/Rows/Buttons" unique_id=565564184]
+[node name="Slider" type="HSlider" parent="Panel/Rows/Buttons" unique_id=580055165]
 custom_minimum_size = Vector2(240, 36)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -162,22 +148,22 @@ max_value = 1.6
 step = 0.05
 value = 0.7
 
-[node name="Value" type="Label" parent="Panel/Rows/Buttons" unique_id=2007199053]
+[node name="Value" type="Label" parent="Panel/Rows/Buttons" unique_id=692776050]
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
 text = "100%"
 horizontal_alignment = 2
 
-[node name="Volume" type="HBoxContainer" parent="Panel/Rows" unique_id=642471783]
+[node name="Volume" type="HBoxContainer" parent="Panel/Rows" unique_id=1976697217]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="Label" type="Label" parent="Panel/Rows/Volume" unique_id=2083919567]
+[node name="Label" type="Label" parent="Panel/Rows/Volume" unique_id=1734274796]
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 text = "VOLUME"
 
-[node name="Slider" type="HSlider" parent="Panel/Rows/Volume" unique_id=2088727886]
+[node name="Slider" type="HSlider" parent="Panel/Rows/Volume" unique_id=1611158925]
 custom_minimum_size = Vector2(240, 36)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -185,21 +171,22 @@ size_flags_vertical = 4
 max_value = 1.0
 step = 0.05
 
-[node name="Value" type="Label" parent="Panel/Rows/Volume" unique_id=876506213]
+[node name="Value" type="Label" parent="Panel/Rows/Volume" unique_id=679748844]
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
 text = "100%"
 horizontal_alignment = 2
 
-[node name="BackButton" type="Button" parent="Panel/Rows" unique_id=2072172082]
-custom_minimum_size = Vector2(0, 62)
+[node name="BackButton" type="Button" parent="Panel/Rows" unique_id=917568770]
+custom_minimum_size = Vector2(0, 78)
 layout_mode = 2
 theme_type_variation = &"TitleButton"
-theme_override_styles/normal = SubResource("StyleBoxFlat_utl02")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_kx268")
-theme_override_styles/hover = SubResource("StyleBoxFlat_tjtux")
-theme_override_styles/focus = SubResource("StyleBoxFlat_wakw5")
-theme_override_colors/font_color = Color(0.95, 0.93, 0.88, 1)
-theme_override_colors/font_focus_color = Color(0.85, 0.7, 0.38, 1)
-theme_override_colors/font_hover_color = Color(0.85, 0.7, 0.38, 1)
+theme_override_styles/normal = SubResource("StyleBoxTexture_1ubxx")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_21oyd")
+theme_override_styles/hover = SubResource("StyleBoxTexture_mt34y")
+theme_override_styles/focus = SubResource("StyleBoxTexture_sk6u8")
+theme_override_colors/font_color = Color(0.93, 0.85, 0.62, 1)
+theme_override_colors/font_focus_color = Color(1, 0.97, 0.9, 1)
+theme_override_colors/font_pressed_color = Color(0.2, 0.16, 0.1, 1)
+theme_override_colors/font_hover_color = Color(1, 0.97, 0.9, 1)
 text = "VOLTAR"

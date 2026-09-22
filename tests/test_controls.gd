@@ -537,12 +537,12 @@ func _test_auto_reload() -> void:
 	await _hold_fire(115)
 	var shots_before: int = _shots.size()
 	var reloading: bool = _player.weapon.is_reloading
-	var label_during: String = hud.ammo_label.text
+	var reloading_pips: bool = hud.ammo_pips.reloading
 	await _physics(100)
-	var ok: bool = shots_before == 6 and reloading and label_during == "RELOAD" \
-			and not _player.weapon.is_reloading and _player.weapon.ammo == 6 and hud.ammo_label.text == "6 | 6"
+	var ok: bool = shots_before == 6 and reloading and reloading_pips \
+			and not _player.weapon.is_reloading and _player.weapon.ammo == 6 and hud.ammo_pips.ammo == 6
 	_check("22 auto reload when empty", ok, "shots=%d reloading=%s label=%s ammo=%d label_after=%s" % [
-			shots_before, reloading, label_during, _player.weapon.ammo, hud.ammo_label.text])
+			shots_before, reloading, reloading_pips, _player.weapon.ammo, hud.ammo_pips.ammo])
 
 
 func _test_manual_and_touch_reload() -> void:
@@ -608,12 +608,12 @@ func _test_effects_and_hud() -> void:
 	var spawned: int = effects.get_child_count() - before
 	var flash: bool = view_model.flash.visible
 	var marker: bool = hud.hit_marker.visible
-	var label: String = hud.ammo_label.text
+	var pips: int = hud.ammo_pips.ammo
 	Input.action_release("fire")
 	await _physics(30)
-	_check("26 effects, muzzle flash, hit marker and ammo label", spawned >= 2 and flash and marker and label == "5 | 6"
+	_check("26 effects, muzzle flash, hit marker and ammo label", spawned >= 2 and flash and marker and pips == 5
 			and _shots.back().victim == bot and not hud.hit_marker.visible,
-			"spawned=%d flash=%s marker=%s label=%s" % [spawned, flash, marker, label])
+			"spawned=%d flash=%s marker=%s balas=%d" % [spawned, flash, marker, pips])
 
 
 # Braços em primeira pessoa: cabeça e pernas encolhidas, arma na mão direita e cano na frente
@@ -742,7 +742,7 @@ func _test_player_death() -> void:
 	var frozen: bool = _player.global_position.distance_to(before) < 0.01 and _player.yaw == yaw_before
 	await _physics(ceili(_referee.respawn_delay * Engine.physics_ticks_per_second))
 	var back: bool = _player.is_alive and not hud.death_panel.visible and view_model.visible \
-			and _player.camera.position == Vector3.ZERO and _player.weapon.ammo == 6 and hud.health_label.text == "HP 100"
+			and _player.camera.position == Vector3.ZERO and _player.weapon.ammo == 6 and is_equal_approx(hud.health_bar.health, 100.0)
 	_check("30 player death: eliminated screen, frozen, then respawns", dead_ui and frozen and back,
 			"dead_ui=%s label=%s frozen=%s back=%s" % [dead_ui, hud.death_label.text.replace("\n", " / "), frozen, back])
 
@@ -759,9 +759,9 @@ func _test_damage_direction() -> void:
 	await _frames(2)
 	var angles: Array[float] = hud.get_damage_angles()
 	var ok: bool = angles.size() == 1 and absf(angles[0] - 90.0) < 5.0 and hud.damage_vignette.modulate.a > 0.2 \
-			and hud.health_label.text == "HP 66"
+			and is_equal_approx(hud.health_bar.health, 66.0)
 	_check("31 damage direction indicator and red vignette", ok,
-			"angles=%s vignette=%.2f hp=%s" % [angles, hud.damage_vignette.modulate.a, hud.health_label.text])
+			"angles=%s vignette=%.2f hp=%.0f" % [angles, hud.damage_vignette.modulate.a, hud.health_bar.health])
 	_revive(_player)
 
 

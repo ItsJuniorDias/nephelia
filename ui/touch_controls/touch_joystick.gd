@@ -7,9 +7,12 @@ extends Control
 
 # @tool só para o joystick aparecer desenhado no editor e facilitar o ajuste da posição.
 
-const BASE_FILL := Color(0.95, 0.91, 0.82, 0.18)
-const BASE_OUTLINE := Color(0.79, 0.64, 0.29, 0.75)
-const KNOB_FILL := Color(0.95, 0.91, 0.82, 0.55)
+## Arte do pacote Kenney Mobile Controls (contorno branco, que tingimos).
+const PAD: Texture2D = preload("res://assets/ui/kenney/joystick_circle_pad_b.png")
+const NUB: Texture2D = preload("res://assets/ui/kenney/joystick_circle_nub_b.png")
+const TINT := Color(1.0, 0.97, 0.9, 0.85)
+## Fundo escuro por baixo: sem ele o joystick some contra o chão claro.
+const SHADE := Color(0.05, 0.07, 0.1, 0.22)
 const KNOB_RATIO: float = 0.45
 # Parado, o joystick fica mais apagado: é só uma dica de onde pôr o dedão.
 const IDLE_ALPHA: float = 0.5
@@ -84,10 +87,14 @@ func is_active() -> bool:
 func _draw() -> void:
 	var alpha: float = 1.0 if is_active() else IDLE_ALPHA
 	var knob_center: Vector2 = _base + output * radius
-	draw_circle(_base, radius, Color(BASE_FILL, BASE_FILL.a * alpha), true, -1.0, true)
-	draw_arc(_base, radius, 0.0, TAU, 64, Color(BASE_OUTLINE, BASE_OUTLINE.a * alpha), 3.0, true)
-	draw_circle(knob_center, radius * KNOB_RATIO, Color(KNOB_FILL, KNOB_FILL.a * alpha), true, -1.0, true)
-	draw_arc(knob_center, radius * KNOB_RATIO, 0.0, TAU, 48, Color(BASE_OUTLINE, BASE_OUTLINE.a * alpha), 2.0, true)
+	draw_circle(_base, radius * 0.96, Color(SHADE, SHADE.a * alpha), true, -1.0, true)
+	draw_texture_rect(PAD, _square(_base, radius * 2.0), false, Color(TINT, TINT.a * alpha))
+	draw_texture_rect(NUB, _square(knob_center, radius * KNOB_RATIO * 2.0), false, Color(TINT, alpha))
+
+
+# Quadrado de lado `side` centrado em `center`.
+func _square(center: Vector2, side: float) -> Rect2:
+	return Rect2(center - Vector2.ONE * side * 0.5, Vector2.ONE * side)
 
 
 # Valor negativo aperta a ação "negativa" (esquerda/frente) e solta a oposta.

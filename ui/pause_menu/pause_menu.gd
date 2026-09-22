@@ -26,6 +26,13 @@ func _ready() -> void:
 	options_menu.closed.connect(func() -> void: resume_button.grab_focus())
 
 
+# A ação "pause" vem da tecla (Esc), do controle e do botão de pausa na tela. Como o botão de
+# toque aperta a AÇÃO (e não manda um evento), a leitura é aqui, a cada quadro.
+func _process(_delta: float) -> void:
+	if Input.is_action_just_pressed(&"pause"):
+		toggle()
+
+
 func is_open() -> bool:
 	return screen.visible
 
@@ -48,6 +55,9 @@ func close() -> void:
 	options_menu.visible = false
 	screen.visible = false
 	get_tree().paused = false
+	# No computador o mouse volta a ficar preso na tela (no toque ele nunca é capturado).
+	if not TouchControls.is_touch_mode():
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	resumed.emit()
 
 
