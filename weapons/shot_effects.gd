@@ -50,7 +50,10 @@ func _on_shot_resolved(result: ShotResult) -> void:
 	_play_at(shot_sound, result.origin, 0.0)
 	if not result.hit:
 		return
-	_spawn_sparks(result.end_point, result.hit_normal)
+	# Faíscas no próprio corpo apareceriam coladas na câmera de quem levou o tiro: pula.
+	var hit_local_player: bool = result.victim != null and result.victim.camera.current
+	if not hit_local_player:
+		_spawn_sparks(result.end_point, result.hit_normal)
 	if result.victim != null:
 		_play_at(body_hit_sound, result.end_point, 2.0)
 	elif not world_hit_sounds.is_empty():

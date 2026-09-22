@@ -6,10 +6,21 @@ extends Node
 ## impede trapaça: o jogador só diz "atirei nesta direção"; quem decide o acerto é o juiz.
 
 signal shot_resolved(result: ShotResult)
+signal character_damaged(victim: Character, attacker: Character, amount: float)
+## `killer` é null quando foi queda ou outro acidente.
+signal character_died(victim: Character, killer: Character)
+signal character_respawned(character: Character)
 
 const GROUP: StringName = &"match_referee"
 ## Altura, a partir dos pés, do ponto que a mira assistida procura no alvo (peito).
 const CHEST_HEIGHT: float = 1.2
+
+@export_group("Vida e respawn")
+@export_range(0.0, 10.0, 0.1, "suffix:s") var respawn_delay: float = 3.0
+## Depois de nascer, o personagem não leva dano por este tempo (ou até atirar).
+@export_range(0.0, 10.0, 0.1, "suffix:s") var spawn_protection_time: float = 2.0
+## Abaixo desta altura o personagem caiu da arena e morre.
+@export var fall_limit_y: float = -30.0
 
 @export_group("Mira assistida")
 ## Ângulo máximo entre a mira e o alvo para a ajuda agir.
@@ -18,6 +29,8 @@ const CHEST_HEIGHT: float = 1.2
 @export_range(0.0, 5.0, 0.1, "suffix:m") var assist_max_offset: float = 1.0
 
 var _rng := RandomNumberGenerator.new()
+## Quem está esperando para renascer, e quanto tempo falta.
+var _respawn_timers: Dictionary[Character, float] = {}
 
 
 ## Acha o juiz da cena atual (ou null se não houver).
@@ -27,6 +40,62 @@ static func find(from: Node) -> MatchReferee:
 
 func _ready() -> void:
 	add_to_group(GROUP)
+
+
+func _physics_process(delta: float) -> void:
+	for node: Node in get_tree().get_nodes_in_group(&"characters"):
+		var character := node as Character
+		if character.is_alive and character.global_position.y < fall_limit_y:
+			kill(character, null)
+	for character: Character in _respawn_timers.keys():
+		_respawn_timers[character] -= delta
+		if _respawn_timers[character] <= 0.0:
+			respawn_now(character)
+
+
+## Tira vida de `victim`. Devolve o dano aplicado (0 se já morto ou protegido).
+func apply_damage(victim: Character, amount: float, attacker: Character) -> float:
+	if not victim.is_alive or victim.is_spawn_protected or amount <= 0.0:
+		return 0.0
+	var applied: float = minf(amount, victim.health)
+	victim.set_health(victim.health - amount)
+	character_damaged.emit(victim, attacker, applied)
+	if victim.health <= 0.0:
+		kill(victim, attacker)
+	return applied
+
+
+## Mata `victim` e agenda o respawn. `killer` null = queda ou acidente.
+func kill(victim: Character, killer: Character) -> void:
+	if not victim.is_alive:
+		return
+	victim.die(killer)
+	_respawn_timers[victim] = respawn_delay
+	character_died.emit(victim, killer)
+
+
+## Faz renascer já, no ponto mais seguro (usado pelo cronômetro e pelos testes).
+func respawn_now(character: Character) -> void:
+	_respawn_timers.erase(character)
+	character.respawn(pick_spawn_point(character), spawn_protection_time)
+	character_respawned.emit(character)
+
+
+## Ponto de nascimento (grupo "spawn_points") mais longe dos outros personagens vivos.
+func pick_spawn_point(for_character: Character) -> Transform3D:
+	var best: Transform3D = for_character.global_transform
+	var best_distance: float = -1.0
+	for point: Node in get_tree().get_nodes_in_group(&"spawn_points"):
+		var spawn := point as Node3D
+		var nearest_enemy: float = INF
+		for node: Node in get_tree().get_nodes_in_group(&"characters"):
+			var other := node as Character
+			if other != for_character and other.is_alive:
+				nearest_enemy = minf(nearest_enemy, other.global_position.distance_to(spawn.global_position))
+		if nearest_enemy > best_distance:
+			best_distance = nearest_enemy
+			best = spawn.global_transform
+	return best
 
 
 ## Resolve um tiro: aplica mira assistida e imprecisão, lança o raio e avisa quem foi atingido.
@@ -56,7 +125,7 @@ func resolve_shot(shooter: Character, weapon: Weapon, origin: Vector3, direction
 		result.hit_normal = hit.normal
 		result.victim = hit.collider as Character
 		if result.victim != null:
-			result.damage = weapon.damage
+			result.damage = apply_damage(result.victim, weapon.damage, shooter)
 			result.victim.receive_hit(result)
 
 	shot_resolved.emit(result)
@@ -69,7 +138,7 @@ func _find_assist_target(shooter: Character, origin: Vector3, aim: Vector3, max_
 	var best_angle: float = deg_to_rad(assist_max_angle)
 	for node: Node in get_tree().get_nodes_in_group(&"characters"):
 		var candidate := node as Character
-		if candidate == shooter:
+		if candidate == shooter or not candidate.is_alive:
 			continue
 		var to_target: Vector3 = _chest_of(candidate) - origin
 		var distance: float = to_target.length()

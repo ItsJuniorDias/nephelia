@@ -68,6 +68,12 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   imprecisão, e chama `Character.receive_hit()`. Visual separado: `weapons/shot_effects.gd`
   (rastro, faíscas, sons de todos os tiros) e `weapons/view_model.gd` (arma em 1ª pessoa, só do
   jogador local). HUD mínimo em `ui/hud/`.
+- Vida/morte: só o MatchReferee muda vida (`apply_damage`), mata (`kill`, também por queda abaixo de
+  `fall_limit_y`) e faz renascer (`respawn_now`, após `respawn_delay` = 3 s) no ponto do grupo
+  `spawn_points` mais longe dos inimigos vivos, com proteção de 2 s (acaba se atirar). O Character
+  só guarda o estado (`health`, `is_alive`, `is_spawn_protected`) e emite `died`/`respawned`.
+  Morto: corpo some e a colisão é desligada (`set_deferred`). HUD mostra vida, borda vermelha,
+  direção do dano e tela de eliminado; a câmera do humano "cai" ao morrer.
 - Arma em 1ª pessoa: materiais com `use_z_clip_scale` (não atravessa paredes),
   `disable_receive_shadows` (senão fica na sombra do próprio corpo e fica azul) e sem
   `vertex_color_use_as_albedo` (os FBX do pacote Wild West Guns têm cores de vértice azuladas).
@@ -111,4 +117,5 @@ Atualizar esta seção ao fim de cada sessão.
     as armas são só FBX. Pendentes (aprovar antes de baixar): Sonniss GDC 2026 (7,5 GB),
     músicas do Kevin MacLeod (CC-BY), fontes Limelight e Josefin Sans.
   - Tarefa 2 (revólver) feita: 26 testes passando. Som de tiro ainda provisório (sintetizado).
-  - Próximo: Tarefa 3 do `PLANO.md` (vida, morte e respawn).
+  - Tarefa 3 (vida, morte e respawn) feita: 31 testes passando.
+  - Próximo: Tarefa 4 do `PLANO.md` (partida todos contra todos).

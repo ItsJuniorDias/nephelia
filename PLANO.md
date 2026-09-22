@@ -38,7 +38,7 @@ aéreos, a 60 FPS no iPhone.
 - Acertos decididos por um **juiz da partida** (no futuro, esse juiz vira o servidor)
 - Pronto quando: atirar funciona no toque, no mouse e no controle, com testes
 
-### 3. Vida, morte e respawn
+### 3. Vida, morte e respawn: [x] feito
 - Vida, dano, morte e respawn rápido em pontos espalhados, com proteção curta ao nascer
 - Indicador de dano e de onde veio o tiro
 - Pronto quando: morrer e voltar é rápido e justo

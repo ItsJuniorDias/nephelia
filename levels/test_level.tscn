@@ -1,6 +1,5 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://levels/test_level.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://player/player.tscn" id="2_player"]
 [ext_resource type="PackedScene" path="res://bots/bot.tscn" id="3_bot"]
 [ext_resource type="Script" path="res://match/match_referee.gd" id="4_referee"]
@@ -64,7 +63,6 @@ albedo_color = Color(0.56, 0.38, 0.22, 1)
 points = PackedVector3Array(-1.25, 0, 0.6, 1.25, 0, 0.6, -1.25, 0, -1.2, 1.25, 0, -1.2, -1.25, 0.9, -1.2, 1.25, 0.9, -1.2)
 
 [node name="TestLevel" type="Node3D"]
-script = ExtResource("1_script")
 
 [node name="MatchReferee" type="Node" parent="."]
 script = ExtResource("4_referee")
@@ -86,8 +84,22 @@ shadow_enabled = true
 directional_shadow_mode = 1
 directional_shadow_max_distance = 60.0
 
-[node name="SpawnPoint" type="Marker3D" parent="."]
+[node name="SpawnPoint" type="Marker3D" parent="." groups=["spawn_points"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 8)
+
+[node name="SpawnPoints" type="Node3D" parent="."]
+
+[node name="SpawnWest" type="Marker3D" parent="SpawnPoints" groups=["spawn_points"]]
+transform = Transform3D(0.316, 0, -0.949, 0, 1, 0, 0.949, 0, 0.316, -12, 0.1, 4)
+
+[node name="SpawnEast" type="Marker3D" parent="SpawnPoints" groups=["spawn_points"]]
+transform = Transform3D(0.164, 0, 0.986, 0, 1, 0, -0.986, 0, 0.164, 12, 0.1, 2)
+
+[node name="SpawnNorthWest" type="Marker3D" parent="SpawnPoints" groups=["spawn_points"]]
+transform = Transform3D(-0.843, 0, -0.537, 0, 1, 0, 0.537, 0, -0.843, -7, 0.1, -11)
+
+[node name="SpawnNorthEast" type="Marker3D" parent="SpawnPoints" groups=["spawn_points"]]
+transform = Transform3D(-0.809, 0, 0.588, 0, 1, 0, -0.588, 0, -0.809, 8, 0.1, -11)
 
 [node name="Player" parent="." instance=ExtResource("2_player")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 8)

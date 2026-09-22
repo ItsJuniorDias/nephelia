@@ -64,10 +64,15 @@ func _run() -> void:
 	await _test_wall_blocks_shot()
 	await _test_never_hits_self()
 	await _test_effects_and_hud()
+	await _test_damage()
+	await _test_kill_and_respawn()
+	await _test_spawn_protection()
+	await _test_player_death()
+	await _test_damage_direction()
 
 	# Deixa rastros e faíscas terminarem antes de sair (evita aviso de recurso em uso).
 	_shots.clear()
-	await _physics(40)
+	await _physics(70)
 	print("RESULT: ", "ALL PASSED" if _failures == 0 else "%d FAILED" % _failures)
 	quit(0 if _failures == 0 else 1)
 
@@ -304,12 +309,24 @@ func _test_focus_out() -> void:
 
 
 func _test_fall_respawn() -> void:
+	# Cair da ilha mata (sem matador) e o personagem renasce num ponto de nascimento depois do atraso.
+	var deaths: Array = []
+	var on_died := func(victim: Character, killer: Character) -> void: deaths.append([victim, killer])
+	_referee.character_died.connect(on_died)
 	_player.global_position = Vector3(0, -100, 0)
 	_player.velocity = Vector3(3, -20, 0)
 	await _physics(3)
-	var dist: float = _player.global_position.distance_to(_spawn.global_position)
+	var died_ok: bool = not _player.is_alive and deaths.size() == 1 and deaths[0][0] == _player and deaths[0][1] == null
+	await _physics(ceili(_referee.respawn_delay * Engine.physics_ticks_per_second) + 5)
+	_referee.character_died.disconnect(on_died)
+	var on_spawn: bool = false
+	for point: Node in get_nodes_in_group(&"spawn_points"):
+		if _player.global_position.distance_to((point as Node3D).global_position) < 0.3:
+			on_spawn = true
 	var hv: float = Vector2(_player.velocity.x, _player.velocity.z).length()
-	_check("11 fall respawn", dist < 0.3 and hv < 0.01, "dist=%.2f hv=%.2f" % [dist, hv])
+	_check("11 falling kills, then respawn at a spawn point", died_ok and _player.is_alive and on_spawn \
+			and hv < 0.01 and _player.health == _player.max_health,
+			"died_ok=%s alive=%s on_spawn=%s pos=%s" % [died_ok, _player.is_alive, on_spawn, _player.global_position])
 
 
 func _test_canceled_touch() -> void:
@@ -409,6 +426,8 @@ func _test_bot_wanders() -> void:
 func _prepare_weapon_test(bot_position: Vector3 = Vector3(12, 0, 14)) -> Character:
 	await _reset()
 	var bot: Character = _level.get_node("Bot")
+	_revive(bot)
+	_revive(_player)
 	# Pausado, mas ainda "sólido": por padrão um corpo pausado sai da física e o tiro atravessa.
 	bot.disable_mode = CollisionObject3D.DISABLE_MODE_KEEP_ACTIVE
 	bot.process_mode = Node.PROCESS_MODE_DISABLED
@@ -573,3 +592,130 @@ func _test_effects_and_hud() -> void:
 	_check("26 effects, muzzle flash, hit marker and ammo label", spawned >= 2 and flash and marker and label == "5 | 6"
 			and _shots.back().victim == bot and not hud.hit_marker.visible,
 			"spawned=%d flash=%s marker=%s label=%s" % [spawned, flash, marker, label])
+
+
+# ---------------------------------------------------------------- vida, morte e respawn
+
+## Deixa o personagem vivo, com vida cheia e sem proteção (sem esperar o cronômetro do juiz).
+func _revive(character: Character) -> void:
+	if not character.is_alive:
+		_referee.respawn_now(character)
+	character.set_health(character.max_health)
+	character.end_spawn_protection()
+
+
+func _test_damage() -> void:
+	var bot: Character = await _prepare_weapon_test(Vector3(0, 0, 3.5))
+	var damaged: Array = []
+	var on_damaged := func(victim: Character, attacker: Character, amount: float) -> void:
+		damaged.append([victim, attacker, amount])
+	_referee.character_damaged.connect(on_damaged)
+	await _fire_once()
+	_referee.character_damaged.disconnect(on_damaged)
+	var shot: ShotResult = _shots.back()
+	_check("27 a shot takes 34 health", bot.health == 66.0 and shot.damage == 34.0 and damaged.size() == 1
+			and damaged[0][0] == bot and damaged[0][1] == _player,
+			"health=%.0f damage=%.0f signals=%d" % [bot.health, shot.damage, damaged.size()])
+
+
+func _test_kill_and_respawn() -> void:
+	var bot: Character = await _prepare_weapon_test(Vector3(0, 0, 3.5))
+	var deaths: Array = []
+	var on_died := func(victim: Character, killer: Character) -> void: deaths.append([victim, killer])
+	_referee.character_died.connect(on_died)
+	for i in 3:
+		await _fire_once()
+	var dead: bool = not bot.is_alive and not bot.body_mesh.visible
+	var killed_by_player: bool = deaths.size() == 1 and deaths[0][0] == bot and deaths[0][1] == _player
+	# Morto não colide: o 4º tiro passa por onde ele estava.
+	await _fire_once()
+	var passes_through: bool = _shots.back().victim == null
+	# O ponto esperado é o mais longe do jogador (único outro personagem vivo).
+	var expected: Node3D = null
+	for point: Node in get_nodes_in_group(&"spawn_points"):
+		var spawn := point as Node3D
+		if expected == null or spawn.global_position.distance_to(_player.global_position) \
+				> expected.global_position.distance_to(_player.global_position):
+			expected = spawn
+	await _physics(ceili(_referee.respawn_delay * Engine.physics_ticks_per_second) + 5)
+	_referee.character_died.disconnect(on_died)
+	var respawned_ok: bool = bot.is_alive and bot.health == bot.max_health and bot.is_spawn_protected \
+			and bot.body_mesh.visible and bot.global_position.distance_to(expected.global_position) < 0.3
+	_check("28 three shots kill, dead bot is not solid, respawns far away", dead and killed_by_player
+			and passes_through and respawned_ok,
+			"dead=%s killer_ok=%s passes=%s respawn=%s at=%s expected=%s" % [dead, killed_by_player,
+			passes_through, respawned_ok, bot.global_position, expected.name])
+
+
+func _test_spawn_protection() -> void:
+	var bot: Character = _level.get_node("Bot")
+	var hud: Hud = _player.get_node("HumanController/Hud")
+	# O bot acabou de renascer protegido (e está pausado, então a proteção não expira sozinha).
+	await _reset()
+	_player.weapon.refill()
+	bot.global_position = Vector3(0, 0, 3.5)
+	_aim(0.0, 0.0)
+	await _physics(3)
+	var was_protected: bool = bot.is_spawn_protected
+	await _fire_once()
+	var blocked: bool = bot.health == bot.max_health and _shots.back().damage == 0.0 and not hud.hit_marker.visible
+	bot.end_spawn_protection()
+	await _fire_once()
+	var after: bool = bot.health == 66.0
+
+	# O jogador renasce protegido; a proteção acaba sozinha em 2 s, ou na hora se ele atirar.
+	_referee.respawn_now(_player)
+	var player_protected: bool = _player.is_spawn_protected
+	# O HUD se atualiza no _process: espera dois quadros (o sinal process_frame vem antes do _process).
+	await _frames(2)
+	var label_shown: bool = hud.protection_label.visible
+	await _physics(ceili(_referee.spawn_protection_time * Engine.physics_ticks_per_second) + 3)
+	var expired: bool = not _player.is_spawn_protected
+	_referee.respawn_now(_player)
+	await _fire_once()
+	var ended_by_firing: bool = not _player.is_spawn_protected
+	_check("29 spawn protection: blocks damage, shows label, expires, ends when firing",
+			was_protected and blocked and after and player_protected and label_shown and expired and ended_by_firing,
+			"was=%s blocked=%s after=%s label=%s expired=%s by_fire=%s" % [was_protected, blocked, after,
+			label_shown, expired, ended_by_firing])
+
+
+func _test_player_death() -> void:
+	var bot: Character = await _prepare_weapon_test(Vector3(5, 0, 8))
+	var hud: Hud = _player.get_node("HumanController/Hud")
+	var view_model: ViewModel = _player.camera.get_node("ViewModel")
+	await physics_frame
+	_referee.apply_damage(_player, 200.0, bot)
+	await _physics(40)
+	var dead_ui: bool = not _player.is_alive and hud.death_panel.visible and "by Bot" in hud.death_label.text \
+			and not view_model.visible and _player.camera.position.y < -1.0
+	var before: Vector3 = _player.global_position
+	var yaw_before: float = _player.yaw
+	Input.action_press("move_forward")
+	(_player.controller as HumanController).rotate_look(45.0, 0.0)
+	await _physics(30)
+	Input.action_release("move_forward")
+	var frozen: bool = _player.global_position.distance_to(before) < 0.01 and _player.yaw == yaw_before
+	await _physics(ceili(_referee.respawn_delay * Engine.physics_ticks_per_second))
+	var back: bool = _player.is_alive and not hud.death_panel.visible and view_model.visible \
+			and _player.camera.position == Vector3.ZERO and _player.weapon.ammo == 6 and hud.health_label.text == "HP 100"
+	_check("30 player death: eliminated screen, frozen, then respawns", dead_ui and frozen and back,
+			"dead_ui=%s label=%s frozen=%s back=%s" % [dead_ui, hud.death_label.text.replace("\n", " / "), frozen, back])
+
+
+func _test_damage_direction() -> void:
+	# Bot à direita do jogador (+X) atira nele: a seta deve apontar para a direita (~ +90°).
+	var bot: Character = await _prepare_weapon_test(Vector3(5, 0, 8))
+	var hud: Hud = _player.get_node("HumanController/Hud")
+	bot.weapon.spread_degrees = 0.0
+	await physics_frame
+	var eye: Vector3 = bot.global_position + Vector3.UP * 1.6
+	var chest: Vector3 = _player.global_position + Vector3.UP * 1.2
+	_referee.resolve_shot(bot, bot.weapon, eye, chest - eye, false)
+	await _frames(2)
+	var angles: Array[float] = hud.get_damage_angles()
+	var ok: bool = angles.size() == 1 and absf(angles[0] - 90.0) < 5.0 and hud.damage_vignette.modulate.a > 0.2 \
+			and hud.health_label.text == "HP 66"
+	_check("31 damage direction indicator and red vignette", ok,
+			"angles=%s vignette=%.2f hp=%s" % [angles, hud.damage_vignette.modulate.a, hud.health_label.text])
+	_revive(_player)

@@ -28,6 +28,7 @@ var _stuck_check_position: Vector3 = Vector3.ZERO
 func setup(for_character: Character) -> void:
 	super.setup(for_character)
 	character.add_to_group(&"bots")
+	character.respawned.connect(_on_respawned)
 	_rng.seed = random_seed
 	_home = character.global_position
 	_stuck_check_position = _home
@@ -69,3 +70,11 @@ func _is_stuck(delta: float) -> bool:
 	var moved: float = character.global_position.distance_to(_stuck_check_position)
 	_stuck_check_position = character.global_position
 	return moved < STUCK_MIN_DISTANCE
+
+
+# Renasceu em outro ponto: passa a passear em volta de lá.
+func _on_respawned() -> void:
+	_home = character.global_position
+	_stuck_check_position = _home
+	_stuck_timer = 0.0
+	pick_new_target()

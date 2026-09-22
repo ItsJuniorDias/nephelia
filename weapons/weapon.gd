@@ -85,6 +85,8 @@ func _finish_reload() -> void:
 func _fire(command: CharacterCommand) -> void:
 	ammo -= 1
 	_cooldown = fire_interval
+	# Atirar tira a proteção de nascimento (não dá para atacar sendo imortal).
+	character.end_spawn_protection()
 	# O tiro sai do olho, na direção para onde a cabeça aponta (é o que a mira mostra).
 	var origin: Vector3 = character.head.global_position
 	var direction: Vector3 = -character.head.global_basis.z

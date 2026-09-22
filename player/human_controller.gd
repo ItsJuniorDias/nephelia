@@ -12,6 +12,8 @@ extends CharacterController
 @export var aim_assist_enabled: bool = true
 
 var _using_gamepad: bool = false
+var _view_model: ViewModel
+var _death_tween: Tween
 
 @onready var touch_controls: TouchControls = $TouchControls
 @onready var hud: Hud = $Hud
@@ -24,11 +26,12 @@ func setup(for_character: Character) -> void:
 	character.body_mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
 	character.visor_mesh.visible = false
 	touch_controls.look_dragged.connect(_on_touch_look_dragged)
-	if character.weapon != null:
-		hud.setup(character.weapon)
-		var view_model := character.camera.get_node_or_null("ViewModel") as ViewModel
-		if view_model != null:
-			view_model.setup(character, character.weapon)
+	character.died.connect(_on_died)
+	character.respawned.connect(_on_respawned)
+	hud.setup(character)
+	_view_model = character.camera.get_node_or_null("ViewModel") as ViewModel
+	if _view_model != null and character.weapon != null:
+		_view_model.setup(character, character.weapon)
 
 
 func _exit_tree() -> void:
@@ -92,9 +95,32 @@ func get_command(_delta: float) -> CharacterCommand:
 ## Gira o olhar na hora, sem esperar o passo de física, para a câmera responder no mesmo quadro.
 ## Positivo = virar para a ESQUERDA e olhar para CIMA.
 func rotate_look(yaw_degrees: float, pitch_degrees: float) -> void:
+	if not character.is_alive:
+		return
 	character.apply_look(character.yaw + deg_to_rad(yaw_degrees), character.pitch + deg_to_rad(pitch_degrees))
 
 
 func _on_touch_look_dragged(relative: Vector2) -> void:
 	# Arrastar para a direita vira para a direita; arrastar para cima olha para cima.
 	rotate_look(-relative.x * touch_look_sensitivity, -relative.y * touch_look_sensitivity)
+
+
+# Câmera "cai" no chão e a arma some enquanto espera o respawn.
+func _on_died(_killer: Character) -> void:
+	if _view_model != null:
+		_view_model.visible = false
+	touch_controls.release_all()
+	if _death_tween != null:
+		_death_tween.kill()
+	_death_tween = create_tween().set_parallel().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
+	_death_tween.tween_property(character.camera, "position", Vector3(0.0, -1.2, 0.0), 0.6)
+	_death_tween.tween_property(character.camera, "rotation:z", 0.4, 0.6)
+
+
+func _on_respawned() -> void:
+	if _death_tween != null:
+		_death_tween.kill()
+	character.camera.position = Vector3.ZERO
+	character.camera.rotation = Vector3.ZERO
+	if _view_model != null:
+		_view_model.visible = true
