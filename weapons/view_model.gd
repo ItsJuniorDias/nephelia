@@ -35,7 +35,7 @@ const MODEL_OFFSET := Transform3D(Basis(Vector3.UP, PI), Vector3(0.0, -1.5, 0.0)
 @export_range(2.0, 50.0, 0.5, "suffix:m") var converge_distance: float = 12.0
 ## Na recarga das armas longas a arma gira e abaixa (ver WeaponMount): em 1ª pessoa os braços
 ## sobem este tanto, senão ela sairia da tela.
-@export_range(0.0, 45.0, 0.5, "suffix:°") var reload_lift_degrees: float = 24.0
+@export_range(0.0, 45.0, 0.5, "suffix:°") var reload_lift_degrees: float = 12.0
 
 var character: Character
 var weapon: Weapon
@@ -145,13 +145,15 @@ func setup(for_character: Character, for_weapon: Weapon) -> void:
 	# O suporte faz o movimento da recarga das armas longas; o coice aqui são os braços inteiros.
 	var mount := gun.get_parent() as WeaponMount
 	mount.animate_kick = false
+	mount.follow_chest = false
 	mount.watch(weapon)
 	_show_weapon(weapon.data)
 
 
 ## Mostra a arma que o jogador está segurando agora (item pego ou munição no fim).
 func _show_weapon(data: WeaponData) -> void:
-	GunMount.set_weapon(gun, data)
+	# Arma longa em 1ª pessoa: na posição baixa (no ombro, a coronha e as mãos tapariam a tela).
+	GunMount.set_weapon(gun, data, true)
 	_style_mesh(gun)
 	muzzle.position = data.barrel_tip
 	# As animações acompanham o ritmo da arma (tiro antes do próximo, recarga no tempo dela).

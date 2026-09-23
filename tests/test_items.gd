@@ -254,10 +254,24 @@ func _test_two_handed_grip() -> void:
 		_referee.give_weapon(_player, id)
 		_referee.give_weapon(bot, id)
 		await _physics(8)
-		for skeleton: Skeleton3D in [bot.model.skeleton, view_model.skeleton]:
-			var state: Dictionary = _grip_state(skeleton)
-			ok = ok and state["active"] and state["miss"] < 0.005
-			results.append("%s active=%s miss=%.3f" % [id, state["active"], state["miss"]])
+		var state: Dictionary = _grip_state(view_model.skeleton)
+		ok = ok and state["active"] and state["miss"] < 0.005
+		results.append("%s 1ª pessoa miss=%.3f" % [id, state["miss"]])
+		# O corpo visto de fora: mirando de -85° a +85°, no ar e correndo (de frente e de lado). A
+		# arma acompanha o peito (WeaponMount), então as mãos não podem ficar longe dela.
+		var worst: float = 0.0
+		for case: Array in [[0.0, 0.0, -85.0, false], [0.0, 0.0, 0.0, false], [0.0, 0.0, 85.0, false],
+				[0.0, 0.0, 60.0, true], [5.0, 0.0, 0.0, false], [5.0, 90.0, 0.0, false]]:
+			for i in 30:
+				bot.model.update_motion(case[0], deg_to_rad(case[2]), case[3], deg_to_rad(case[1]))
+				await process_frame
+				if i >= 15:
+					state = _grip_state(bot.model.skeleton)
+					ok = ok and state["active"]
+					worst = maxf(worst, state["miss"])
+		ok = ok and worst < 0.01
+		results.append("%s de fora pior miss=%.3f" % [id, worst])
+	bot.model.update_motion(0.0, 0.0)
 	_player.weapon.refill()
 	bot.weapon.refill()
 	await _physics(3)

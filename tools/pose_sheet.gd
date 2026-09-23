@@ -63,9 +63,23 @@ func _run() -> void:
 			_shot("%s_%s" % [id, angle_name])
 		_report(id)
 		if WeaponCatalog.get_weapon(id).is_two_handed():
+			await _aim_shots(id, camera)
 			await _reload_shots(id, camera)
 	await _hold(3)
 	quit()
+
+
+# De lado, mirando para cima e para baixo (a arma longa gira em volta do ombro).
+func _aim_shots(id: StringName, camera: Camera3D) -> void:
+	camera.current = true
+	camera.global_position = SPOT + ANGLES["lado"]
+	camera.look_at(SPOT + Vector3(0.0, 1.25, 0.3))
+	for pitch: float in [40.0, -40.0]:
+		_bot.model.update_motion(0.0, deg_to_rad(pitch))
+		await _hold(12)
+		_shot("%s_mira_%s" % [id, "cima" if pitch > 0.0 else "baixo"])
+		_report("%s mira %d°" % [id, pitch])
+	_bot.model.update_motion(0.0, 0.0)
 
 
 # No meio da recarga (o movimento é o maior): em 1ª pessoa e de lado.
@@ -118,7 +132,7 @@ func _shot(shot_name: String) -> void:
 	print("SHOT ", path)
 
 
-func _report(id: StringName) -> void:
+func _report(id: String) -> void:
 	for character: Character in [_player, _bot]:
 		var skeleton: Skeleton3D = character.model.skeleton
 		var parts: PackedStringArray = []

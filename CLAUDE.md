@@ -208,8 +208,18 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   (espelhados: quaternion com y e z trocados de sinal). Coice e recarga das armas longas mexem a
   própria arma no `WeaponMount` (as mãos vão junto). O alcance foi medido de -85° a +85° de mira,
   no chão e no ar (a pose de pulo mexe o quadril): `WeaponGripModifier.miss` mostra quanto faltou.
-- 1ª pessoa das armas longas: o `ViewModel` gira os braços em volta do olho até o cano cruzar a
-  mira a 12 m (`get_aim_error_degrees`) e ergue os braços na recarga. O revólver fica sem correção.
+- Armas longas NO OMBRO (2026-09-23, aprovado pelo usuário com fotos antes/depois): a coronha
+  (`butt` na ficha) fica em `WeaponCatalog.SHOULDER_POCKET`, bem dentro do ombro direito, 8° para
+  dentro. O `WeaponMount` acompanha o peito (`spine_03`, comparado à pose de mira parada
+  `CHEST_NEUTRAL`) e gira em volta do ombro só o que falta para a mira; ele se atualiza DENTRO da
+  etapa do esqueleto (`characters/weapon_mount_sync.gd`, depois do LegsYaw e antes das mãos): no
+  `_process` lia o peito atrasado e a mão esquerda ficava até 10 cm longe correndo. O braço esquerdo
+  trabalha perto do limite: coronha mais para a frente = mão sem alcance (teste I9 varre -85° a +85°,
+  no ar e correndo).
+- 1ª pessoa das armas longas: posição PRÓPRIA (`WeaponData.view_mount`, `view_at`/`view_aim` na
+  ficha): no ombro, visto de trás, a coronha e as mãos tapavam a tela. Baixa e à direita, com as duas
+  mãos e a armação à vista; o `ViewModel` gira os braços em volta do olho até o cano cruzar a mira a
+  12 m (`get_aim_error_degrees`) e ergue os braços 12° na recarga. O revólver fica sem correção.
 - Conferir pose de arma: `tools/pose_sheet.gd` (fotos em 1ª pessoa, de frente, de lado, de costas
   e no meio da recarga; ver o cabeçalho). Rodar com `--always-on-top`: com a janela escondida o
   macOS para de desenhar e todas as fotos saem iguais.
@@ -366,6 +376,6 @@ Atualizar esta seção ao fim de cada sessão.
     (fumaça, faíscas, poeira, marcas de tiro, nuvem ao sumir, anel ao nascer, faíscas no trilho).
     Etapa 2 (aprovada pelo usuário com vídeo): cabeça, cabelo e chapéu presos ao esqueleto (antes
     ficavam parados no ar) e pernas virando para o lado da caminhada. 39 + 8 + 18 + 10 + 6 + 7
-    testes passando. Próxima (pedido do usuário): posição das armas nas mãos, com fotos de
-    depuração antes/depois para ele aprovar. Depois: começo e fim do pulo e o Nature Kit.
+    testes passando. Etapa 3 (aprovada): armas longas no ombro, 1ª pessoa própria. Próxima (pedido
+    do usuário): o revólver, com fotos antes/depois. Depois: começo e fim do pulo e o Nature Kit.
   - Próximo: seguir o polish; depois Tarefa 11 (desempenho no iPhone) ou o que o usuário pedir.

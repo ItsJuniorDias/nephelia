@@ -15,6 +15,11 @@ const DEFAULT_ID: StringName = &"revolver"
 
 ## Giro da arma na palma da mão direita, igual para as três (são modeladas do mesmo jeito).
 const HAND_BASIS := Basis(Vector3(1, 0, 0), Vector3(0, 0, 1), Vector3(0, -1, 0))
+## Armas longas: a coronha fica apoiada aqui, no "bolso" do ombro direito (espaço do esqueleto,
+## o personagem olha para +Z; medido na pose de mira: ombro em (-0,20; 1,38; -0,15), olho em
+## (-0,02; 1,57; 0,10)). Antes a arma ficava baixa na frente do peito e a coronha entrava no tronco.
+const SHOULDER_POCKET := Vector3(-0.14, 1.37, -0.13)
+
 ## Do pulso até o meio do que a mão fechada aperta (medido no revólver da animação: 0,10 m).
 const GRIP_REACH: float = 0.09
 ## O que a mão aperta fica um pouco para o lado da palma.
@@ -64,7 +69,8 @@ static func _build() -> void:
 		"hand_offset": Vector3(0.0, 0.4, -0.07), "barrel_tip": Vector3(0.0133, 0.1892, -0.6566),
 		"right_hand": [Vector3(0.014, 0.10, 0.17), Vector3(-0.5, -0.1, -0.85), Vector3(0, 1, 0)],
 		"left_hand": [Vector3(0.014, 0.155, -0.07), Vector3(0.7, 0.5, -0.5), Vector3(0, 0.2, -1)],
-		"mount_at": Vector3(-0.04, 1.24, 0.09), "aim": Vector3(-1.0, 192.0, 0.0),
+		"butt": Vector3(0.014, 0.06, 0.428), "aim": Vector3(0.0, 188.0, 0.0),
+		"view_at": Vector3(-0.12, 1.3, 0.2), "view_aim": Vector3(-1.0, 189.0, 0.0),
 		# Recarga: gira de lado para mostrar a janela de carga e a alavanca.
 		"recoil": 1.4, "shot_pitch": 0.82, "shot_volume_db": 2.0, "flash_scale": 1.3,
 		"reload_motion": Vector3(-14.0, 38.0, 0.04),
@@ -78,7 +84,8 @@ static func _build() -> void:
 		"hand_offset": Vector3(0.0, 0.38, 0.05), "barrel_tip": Vector3(-0.0002, 0.0298, -0.5613),
 		"right_hand": [Vector3(0.0, -0.035, 0.15), Vector3(-0.5, -0.1, -0.85), Vector3(0, 1, 0)],
 		"left_hand": [Vector3(0.0, -0.01, -0.07), Vector3(0.7, 0.5, -0.5), Vector3(0, 0.2, -1)],
-		"mount_at": Vector3(-0.04, 1.26, 0.09), "aim": Vector3(-1.0, 192.0, 0.0),
+		"butt": Vector3(0.0, -0.087, 0.427), "aim": Vector3(0.0, 188.0, 0.0),
+		"view_at": Vector3(-0.12, 1.3, 0.2), "view_aim": Vector3(-1.0, 189.0, 0.0),
 		# Recarga: "quebra" a arma, com o cano para baixo, para trocar os cartuchos.
 		"recoil": 1.8, "shot_pitch": 0.68, "shot_volume_db": 4.0, "flash_scale": 1.9,
 		"reload_motion": Vector3(-36.0, 8.0, 0.06),
@@ -98,14 +105,18 @@ static func _make(spec: Dictionary) -> WeaponData:
 	# mudando só o tom e o volume (o usuário preferiu ele aos tiros gravados).
 	data.reload_sound = load("res://assets/audio/sfx/opengameart/%s_reload.wav" % data.id)
 	data.in_hand = Transform3D(HAND_BASIS, spec["hand_offset"])
-	# Arma longa: apoiada na frente do peito (espaço do esqueleto, o personagem olha para +Z),
-	# apontada para onde "aim" manda, com o ponto da mão direita em "mount_at". As duas mãos
-	# vão até ela pela IK.
+	# Arma longa: coronha ("butt", o meio da chapa, no espaço da arma) apoiada no ombro
+	# (SHOULDER_POCKET), cano para onde "aim" manda (6° para dentro: converge com a mira). As
+	# duas mãos vão até ela pela IK.
 	if spec.has("right_hand"):
 		var right: Array = spec["right_hand"]
 		var left: Array = spec["left_hand"]
 		data.right_grip = hand_pose(right[0], right[1], right[2], false)
 		data.fore_grip = hand_pose(left[0], left[1], left[2], true)
 		var aim: Basis = Basis.from_euler(spec["aim"] * (PI / 180.0))
-		data.chest_mount = Transform3D(aim, spec["mount_at"] - aim * right[0])
+		data.chest_mount = Transform3D(aim, SHOULDER_POCKET - aim * (spec["butt"] as Vector3))
+		# 1ª pessoa: a mão direita em "view_at", baixa e à direita na frente do peito: aparecem as
+		# duas mãos e a armação, e o cano cruza a tela até a mira (ver ViewModel).
+		var view_aim: Basis = Basis.from_euler(spec["view_aim"] * (PI / 180.0))
+		data.view_mount = Transform3D(view_aim, spec["view_at"] - view_aim * right[0])
 	return data

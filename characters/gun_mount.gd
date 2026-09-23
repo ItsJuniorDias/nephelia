@@ -34,6 +34,11 @@ static func attach(skeleton: Skeleton3D, data: WeaponData = null) -> MeshInstanc
 	# Pontos da arma onde cada mão segura (só as armas longas usam).
 	var right_grip := _marker(gun, RIGHT_GRIP)
 	var fore_grip := _marker(gun, FORE_GRIP)
+	# O suporte se atualiza na etapa do esqueleto, antes das mãos irem até a arma.
+	var sync := WeaponMountSync.new()
+	sync.name = "WeaponMountSync"
+	sync.mount = mount
+	skeleton.add_child(sync)
 	_grip_ik(skeleton, RIGHT_ARM_IK, "r", right_grip, Vector3(-0.6, -1.0, -0.2))
 	var left_ik: WeaponGripModifier = _grip_ik(skeleton, LEFT_ARM_IK, "l", fore_grip, Vector3(0.5, -1.0, -0.3))
 	# A mão de apoio da animação de pistola é aberta: na telha ela fecha como a direita.
@@ -43,7 +48,8 @@ static func attach(skeleton: Skeleton3D, data: WeaponData = null) -> MeshInstanc
 
 
 ## Troca a arma: malha, lugar dela no corpo e as mãos no lugar certo dessa arma.
-static func set_weapon(gun: MeshInstance3D, data: WeaponData) -> void:
+## `first_person`: braços da 1ª pessoa (arma longa na posição baixa, `WeaponData.view_mount`).
+static func set_weapon(gun: MeshInstance3D, data: WeaponData, first_person: bool = false) -> void:
 	gun.mesh = data.mesh
 	var mount := gun.get_parent() as WeaponMount
 	if mount == null:
@@ -51,10 +57,12 @@ static func set_weapon(gun: MeshInstance3D, data: WeaponData) -> void:
 	var skeleton := mount.get_parent() as Skeleton3D
 	if skeleton == null:
 		return
-	# Arma longa: apoiada na frente do peito (osso nenhum), com as duas mãos indo até ela.
+	# Arma longa: apoiada no corpo (osso nenhum), com as duas mãos indo até ela.
 	if data.is_two_handed():
 		# O coice e a recarga giram a arma entre as duas mãos.
-		mount.follow(&"", data.chest_mount, (data.right_grip.origin + data.fore_grip.origin) * 0.5)
+		var at: Transform3D = data.view_mount if first_person and not data.view_mount.is_equal_approx(Transform3D.IDENTITY) \
+				else data.chest_mount
+		mount.follow(&"", at, (data.right_grip.origin + data.fore_grip.origin) * 0.5)
 	else:
 		mount.follow(HAND_BONE, data.in_hand)
 	var right_grip := gun.get_node_or_null(RIGHT_GRIP) as Marker3D

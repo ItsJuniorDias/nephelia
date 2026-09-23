@@ -56,6 +56,9 @@ extends Resource
 ## aqui a arma fica na mão direita, seguindo a animação; com um valor, ela é apoiada no peito e
 ## as duas mãos vão até ela por IK, que é como se segura um rifle.
 @export var chest_mount: Transform3D = Transform3D.IDENTITY
+## A mesma arma longa em 1ª pessoa: baixa na frente do peito, com o cano atravessando a tela até a
+## mira (no ombro, vista de trás, a coronha e as mãos tapariam a tela). Identidade = usa `chest_mount`.
+@export var view_mount: Transform3D = Transform3D.IDENTITY
 
 
 ## Arma comprida: apoiada no peito, com as duas mãos levadas até ela.
