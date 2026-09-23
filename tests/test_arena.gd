@@ -43,6 +43,7 @@ func _run() -> void:
 	await _test_hook_hidden_without_rail()
 	await _test_death_on_rail()
 	await _test_visual_effects()
+	await _test_sky_cycle()
 	await _test_bot_rides_rail()
 	await _test_bots_play_the_arena()
 
@@ -323,6 +324,46 @@ func _test_visual_effects() -> void:
 
 	effects.child_entered_tree.disconnect(collect)
 	_level.child_entered_tree.disconnect(collect)
+
+
+# Da tarde à noite conforme a partida passa: no começo sol forte e sem estrelas; no fim luar
+# azulado, estrelas, nebulosa e os postes acesos; "Play Again" volta à tarde. Nuvens giram.
+func _test_sky_cycle() -> void:
+	var cycle := _level.find_child("SkyCycle", true, false) as SkyCycle
+	var deathmatch := _level.get_node("Deathmatch") as Deathmatch
+	var clouds := get_first_node_in_group(SkyCycle.CLOUD_GROUP) as Node3D
+	var saved_time: float = deathmatch.time_left
+	deathmatch.time_left = deathmatch.duration
+	await _frames(2)
+	var start: Dictionary = cycle.state.duplicate()
+	var sun_light: float = cycle.light.light_energy
+	var start_lamps: bool = cycle.lamp_lights.any(func(lamp: OmniLight3D) -> bool: return lamp.visible)
+	var cloud_turn: float = clouds.rotation.y
+	await _physics(30)
+	var clouds_moved: bool = absf(clouds.rotation.y - cloud_turn) > 0.001
+	deathmatch.time_left = deathmatch.duration * 0.1
+	await _frames(2)
+	var night: Dictionary = cycle.state.duplicate()
+	var moon_light: Color = cycle.light.light_color
+	var lamps_on: int = cycle.lamp_lights.filter(func(lamp: OmniLight3D) -> bool: return lamp.visible and lamp.light_energy > 1.0).size()
+	var nebula: float = cycle.material.get_shader_parameter(&"nebula_amount")
+	deathmatch.time_left = deathmatch.duration
+	await _frames(2)
+	var back: bool = cycle.state["progress"] < 0.01 and not cycle.lamp_lights.any(func(lamp: OmniLight3D) -> bool: return lamp.visible)
+	deathmatch.time_left = saved_time
+	_check("V5 the sky goes from afternoon to a starry night with the moon as the match runs; lamps light up",
+			start["stars"] == 0.0 and sun_light > 0.9 and not start_lamps and night["stars"] > 0.9
+			and night["moon"] > 0.9 and nebula > 0.9 and moon_light.b > moon_light.r
+			and lamps_on == cycle.lamp_lights.size() and lamps_on >= 20 and back,
+			"sun=%.2f stars %.2f->%.2f moon=%.2f nebula=%.2f moonlight=%s lamps_on=%d/%d back=%s" % [sun_light,
+			start["stars"], night["stars"], night["moon"], nebula, moon_light, lamps_on, cycle.lamp_lights.size(), back])
+	_check("V6 the clouds drift around the city", clouds_moved, "turn=%.4f" % (clouds.rotation.y - cloud_turn))
+
+
+# O sinal process_frame vem ANTES dos nós processarem o quadro: espera `count` quadros inteiros.
+func _frames(count: int) -> void:
+	for i in count + 1:
+		await process_frame
 
 
 func _names(nodes: Array[Node]) -> PackedStringArray:

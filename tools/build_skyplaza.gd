@@ -547,6 +547,8 @@ func _build_lamp_globes() -> void:
 		globe.material_override = _materials["lamp"]
 		globe.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		globe.position = at
+		# O SkyCycle acha os postes por este grupo (acende o globo e a luz à noite).
+		globe.add_to_group(SkyCycle.LAMP_GROUP, true)
 		_decor.add_child(globe)
 		globe.owner = _decor
 

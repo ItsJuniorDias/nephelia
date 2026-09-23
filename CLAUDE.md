@@ -159,6 +159,18 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   textura na arena (nuvens, vidro, globos, frascos e armas são lisos de propósito).
 - Rodar o `build_skyplaza.gd` renumera os `unique_id` de TODAS as cenas: aplicar só as mudanças
   reais em cima das cenas antigas (ou aceitar o diff grande conscientemente).
+- Céu da tarde à noite: `levels/sky/sky_cycle.gd` (SkyCycle, criado pelo ArenaSetup) segue o
+  relógio da partida (começo = tarde dourada, 30% = pôr do sol, 44% = crepúsculo, 60%+ = noite;
+  "Play Again" volta à tarde) por quadros-chave (`KEYS`) e aplica no céu próprio
+  (`levels/sky/sky_cycle.gdshader`: degradê, clarão do pôr do sol, sol, estrelas que piscam,
+  nebulosa com veios, lua; estrelas e nebulosa GIRAM em volta de um polo inclinado e a poeira muda de
+  forma com o TIME), na luz (o mesmo DirectionalLight vira o luar azulado; nunca abaixo de 9°), no
+  ambiente (cor, não o céu), na névoa e no bloom (só à noite). Os postes (grupo `lamp_globes`)
+  acendem: globo brilhando + OmniLight sem sombra que some longe da câmera (celular). As nuvens
+  (grupo `drifting_clouds`, o nó Clouds da arena) giram devagar em volta do centro, o dia todo.
+  Reflexo do céu de 32 px, atualizado aos poucos. `forced_progress` força um momento (fotos em
+  `tools/sky_sheet.gd`; testes V5 e V6). **A luz muda durante a partida: LightmapGI (Tarefa 11) não
+  pode assar a luz do sol** (no máximo luz indireta fraca, ou nada).
 - Nuvens: o `build_skyplaza.gd` gera `skyplaza_clouds.tscn` (aglomerados de esferas achatadas
   numa malha só, sem sombra e sem colisão) por baixo e em volta dos quarteirões: a cidade flutua
   sobre um mar de nuvens e dá para cair atravessando. O "chão" do céu é claro (acima das nuvens),
@@ -407,5 +419,8 @@ Atualizar esta seção ao fim de cada sessão.
     testes passando. Etapa 3 (aprovada): armas longas no ombro, 1ª pessoa própria. Etapa 4
     (aprovada): pegada do revólver calculada (cabo no punho, indicador no gatilho) e mira calibrada.
     39 + 8 + 18 + 11 + 6 + 7 testes passando. Etapa 5 (aprovada): interface inteira com o Marble
-    and Gold UI Kit (pago, comprado pelo usuário). Próximas: começo e fim do pulo e o Nature Kit.
+    and Gold UI Kit (pago, comprado pelo usuário). Jogo só em inglês. Grama do parque pintada à mão
+    com capim e flores. Céu da tarde à noite (pôr do sol, estrelas, nebulosa, lua, postes acesos,
+    nuvens andando), aprovado pelo usuário. 39 + 8 + 20 + 11 + 6 + 7 testes passando.
+    Próximas: começo e fim do pulo; depois Tarefa 11 (desempenho no iPhone).
   - Próximo: seguir o polish; depois Tarefa 11 (desempenho no iPhone) ou o que o usuário pedir.

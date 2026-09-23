@@ -79,7 +79,7 @@ directional_shadow_max_distance = 70.0
 
 [node name="Items" parent="." instance=ExtResource("16_items")]
 
-[node name="Clouds" parent="." instance=ExtResource("17_clouds")]
+[node name="Clouds" parent="." groups=["drifting_clouds"] instance=ExtResource("17_clouds")]
 
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
 navigation_mesh = ExtResource("13_navmesh")

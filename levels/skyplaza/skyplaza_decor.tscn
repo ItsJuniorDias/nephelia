@@ -173,121 +173,121 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 42, -0.45, -10)
 [node name="@Node3D@272" type="Node3D" parent="." unique_id=785604304 instance=ExtResource("5_ybvg5")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 42, -0.45, 10)
 
-[node name="LampGlobe" type="MeshInstance3D" parent="." unique_id=58518695]
+[node name="LampGlobe" type="MeshInstance3D" parent="." unique_id=58518695 groups=["lamp_globes"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.4, 4.75, 9.4)
 material_override = SubResource("StandardMaterial3D_543bx")
 cast_shadow = 0
 mesh = SubResource("SphereMesh_as870")
 
-[node name="@MeshInstance3D@281" type="MeshInstance3D" parent="." unique_id=231473498]
+[node name="@MeshInstance3D@281" type="MeshInstance3D" parent="." unique_id=231473498 groups=["lamp_globes"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.4, 4.75, 9.4)
 material_override = SubResource("StandardMaterial3D_543bx")
 cast_shadow = 0
 mesh = SubResource("SphereMesh_as870")
 
-[node name="@MeshInstance3D@282" type="MeshInstance3D" parent="." unique_id=27304065]
+[node name="@MeshInstance3D@282" type="MeshInstance3D" parent="." unique_id=27304065 groups=["lamp_globes"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.4, 4.75, -9.4)
 material_override = SubResource("StandardMaterial3D_543bx")
 cast_shadow = 0
 mesh = SubResource("SphereMesh_as870")
 
-[node name="@MeshInstance3D@283" type="MeshInstance3D" parent="." unique_id=359683143]
+[node name="@MeshInstance3D@283" type="MeshInstance3D" parent="." unique_id=359683143 groups=["lamp_globes"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.4, 4.75, -9.4)
 material_override = SubResource("StandardMaterial3D_543bx")
 cast_shadow = 0
 mesh = SubResource("SphereMesh_as870")
 
-[node name="@MeshInstance3D@284" type="MeshInstance3D" parent="." unique_id=1911143998]
+[node name="@MeshInstance3D@284" type="MeshInstance3D" parent="." unique_id=1911143998 groups=["lamp_globes"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.4, 4.75, -16)
 material_override = SubResource("StandardMaterial3D_543bx")
 cast_shadow = 0
 mesh = SubResource("SphereMesh_as870")
 
-[node name="@MeshInstance3D@285" type="MeshInstance3D" parent="." unique_id=1024241860]
+[node name="@MeshInstance3D@285" type="MeshInstance3D" parent="." unique_id=1024241860 groups=["lamp_globes"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.4, 4.75, -16)
 material_override = SubResource("StandardMaterial3D_543bx")
 cast_shadow = 0
 mesh = SubResource("SphereMesh_as870")
 
-[node name="@MeshInstance3D@286" type="MeshInstance3D" parent="." unique_id=527645897]
+[node name="@MeshInstance3D@286" type="MeshInstance3D" parent="." unique_id=527645897 groups=["lamp_globes"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9.4, 4.75, 16)
 material_override = SubResource("StandardMaterial3D_543bx")
 cast_shadow = 0
 mesh = SubResource("SphereMesh_as870")
 
-[node name="@MeshInstance3D@287" type="MeshInstance3D" parent="." unique_id=1946876267]
+[node name="@MeshInstance3D@287" type="MeshInstance3D" parent="." unique_id=1946876267 groups=["lamp_globes"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.4, 4.75, 16)
 material_override = SubResource("StandardMaterial3D_543bx")
 cast_shadow = 0
 mesh = SubResource("SphereMesh_as870")
 
-[node name="@MeshInstance3D@288" type="MeshInstance3D" parent="." unique_id=1128005951]
+[node name="@MeshInstance3D@288" type="MeshInstance3D" parent="." unique_id=1128005951 groups=["lamp_globes"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 4.75, -9.4)
 material_override = SubResource("StandardMaterial3D_543bx")
 cast_shadow = 0
 mesh = SubResource("SphereMesh_as870")
 
-[node name="@MeshInstance3D@289" type="MeshInstance3D" parent="." unique_id=869406580]
+[node name="@MeshInstance3D@289" type="MeshInstance3D" parent="." unique_id=869406580 groups=["lamp_globes"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 4.75, 9.4)
 material_override = SubResource("StandardMaterial3D_543bx")
 cast_shadow = 0
 mesh = SubResource("SphereMesh_as870")
 
-[node name="@MeshInstance3D@290" type="MeshInstance3D" parent="." unique_id=1324027981]
+[node name="@MeshInstance3D@290" type="MeshInstance3D" parent="." unique_id=1324027981 groups=["lamp_globes"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 4.75, -9.4)
 material_override = SubResource("StandardMaterial3D_543bx")
 cast_shadow = 0
 mesh = SubResource("SphereMesh_as870")
 
-[node name="@MeshInstance3D@291" type="MeshInstance3D" parent="." unique_id=1434749038]
+[node name="@MeshInstance3D@291" type="MeshInstance3D" parent="." unique_id=1434749038 groups=["lamp_globes"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 4.75, 9.4)
 material_override = SubResource("StandardMaterial3D_543bx")
 cast_shadow = 0
 mesh = SubResource("SphereMesh_as870")
 
-[node name="@MeshInstance3D@292" type="MeshInstance3D" parent="." unique_id=707901891]
+[node name="@MeshInstance3D@292" type="MeshInstance3D" parent="." unique_id=707901891 groups=["lamp_globes"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -47.4, 5.75, -12)
 material_override = SubResource("StandardMaterial3D_543bx")
 cast_shadow = 0
 mesh = SubResource("SphereMesh_as870")
 
-[node name="@MeshInstance3D@293" type="MeshInstance3D" parent="." unique_id=1292430041]
+[node name="@MeshInstance3D@293" type="MeshInstance3D" parent="." unique_id=1292430041 groups=["lamp_globes"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -47.4, 5.75, -4)
 material_override = SubResource("StandardMaterial3D_543bx")
 cast_shadow = 0
 mesh = SubResource("SphereMesh_as870")
 
-[node name="@MeshInstance3D@294" type="MeshInstance3D" parent="." unique_id=114566309]
+[node name="@MeshInstance3D@294" type="MeshInstance3D" parent="." unique_id=114566309 groups=["lamp_globes"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -47.4, 5.75, 4)
 material_override = SubResource("StandardMaterial3D_543bx")
 cast_shadow = 0
 mesh = SubResource("SphereMesh_as870")
 
-[node name="@MeshInstance3D@295" type="MeshInstance3D" parent="." unique_id=1043267308]
+[node name="@MeshInstance3D@295" type="MeshInstance3D" parent="." unique_id=1043267308 groups=["lamp_globes"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -47.4, 5.75, 12)
 material_override = SubResource("StandardMaterial3D_543bx")
 cast_shadow = 0
 mesh = SubResource("SphereMesh_as870")
 
-[node name="@MeshInstance3D@296" type="MeshInstance3D" parent="." unique_id=737573417]
+[node name="@MeshInstance3D@296" type="MeshInstance3D" parent="." unique_id=737573417 groups=["lamp_globes"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 47.4, 3.75, -12)
 material_override = SubResource("StandardMaterial3D_543bx")
 cast_shadow = 0
 mesh = SubResource("SphereMesh_as870")
 
-[node name="@MeshInstance3D@297" type="MeshInstance3D" parent="." unique_id=44154273]
+[node name="@MeshInstance3D@297" type="MeshInstance3D" parent="." unique_id=44154273 groups=["lamp_globes"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 47.4, 3.75, -4)
 material_override = SubResource("StandardMaterial3D_543bx")
 cast_shadow = 0
 mesh = SubResource("SphereMesh_as870")
 
-[node name="@MeshInstance3D@298" type="MeshInstance3D" parent="." unique_id=1112054217]
+[node name="@MeshInstance3D@298" type="MeshInstance3D" parent="." unique_id=1112054217 groups=["lamp_globes"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 47.4, 3.75, 4)
 material_override = SubResource("StandardMaterial3D_543bx")
 cast_shadow = 0
 mesh = SubResource("SphereMesh_as870")
 
-[node name="@MeshInstance3D@299" type="MeshInstance3D" parent="." unique_id=498969283]
+[node name="@MeshInstance3D@299" type="MeshInstance3D" parent="." unique_id=498969283 groups=["lamp_globes"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 47.4, 3.75, 12)
 material_override = SubResource("StandardMaterial3D_543bx")
 cast_shadow = 0
