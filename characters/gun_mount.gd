@@ -15,6 +15,7 @@ extends RefCounted
 ## Ponta do cano do revólver, para quem ainda não tem a ficha em mãos.
 const BARREL_TIP := Vector3(0.0005, 0.1477, -0.19)
 const HAND_BONE: StringName = &"hand_r"
+const SUPPORT_HAND_BONE: StringName = &"hand_l"
 ## Nomes dos nós criados aqui (para achar de novo ao trocar de arma).
 const RIGHT_GRIP := "RightGrip"
 const FORE_GRIP := "ForeGrip"
@@ -49,7 +50,9 @@ static func attach(skeleton: Skeleton3D, data: WeaponData = null) -> MeshInstanc
 
 ## Troca a arma: malha, lugar dela no corpo e as mãos no lugar certo dessa arma.
 ## `first_person`: braços da 1ª pessoa (arma longa na posição baixa, `WeaponData.view_mount`).
-static func set_weapon(gun: MeshInstance3D, data: WeaponData, first_person: bool = false) -> void:
+## `hand_shift`: desloca o revólver (espaço do corpo) com as mãos indo junto (ver WeaponMount).
+static func set_weapon(gun: MeshInstance3D, data: WeaponData, first_person: bool = false,
+		hand_shift: Vector3 = Vector3.ZERO) -> void:
 	gun.mesh = data.mesh
 	var mount := gun.get_parent() as WeaponMount
 	if mount == null:
@@ -63,8 +66,10 @@ static func set_weapon(gun: MeshInstance3D, data: WeaponData, first_person: bool
 		var at: Transform3D = data.view_mount if first_person and not data.view_mount.is_equal_approx(Transform3D.IDENTITY) \
 				else data.chest_mount
 		mount.follow(&"", at, (data.right_grip.origin + data.fore_grip.origin) * 0.5)
+		mount.extra_shift = Vector3.ZERO
 	else:
 		mount.follow(HAND_BONE, data.in_hand)
+		mount.extra_shift = hand_shift
 	var right_grip := gun.get_node_or_null(RIGHT_GRIP) as Marker3D
 	if right_grip != null:
 		right_grip.transform = data.right_grip
@@ -72,11 +77,16 @@ static func set_weapon(gun: MeshInstance3D, data: WeaponData, first_person: bool
 	if fore_grip != null:
 		fore_grip.transform = data.fore_grip
 	# O revólver fica como a animação de pistola manda (as duas mãos juntas no cabo); só as
-	# armas longas levam os braços até a arma.
+	# armas longas levam os braços até a arma. Revólver deslocado: as mãos vão com ele, na mesma
+	# pegada (dedos da animação, cotovelo do lado em que ela o deixa).
+	var shifted: bool = not data.is_two_handed() and not hand_shift.is_zero_approx()
 	for ik_name: String in [RIGHT_ARM_IK, LEFT_ARM_IK]:
 		var ik := skeleton.get_node_or_null(ik_name) as WeaponGripModifier
 		if ik != null:
-			ik.active = data.is_two_handed()
+			ik.active = data.is_two_handed() or shifted
+			ik.keep_animation_elbow = shifted
+			if ik_name == LEFT_ARM_IK:
+				ik.copy_fingers_from = &"" if shifted else HAND_BONE
 
 
 static func _marker(gun: MeshInstance3D, marker_name: String) -> Marker3D:

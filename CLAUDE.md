@@ -198,8 +198,17 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   depuração na tela do aparelho). Agora `characters/gun_mount.gd` cria a arma em código, num
   `characters/weapon_mount.gd` (nosso BoneAttachment3D) que segue o osso `hand_r`. Ao pendurar algo
   num modelo importado, montar em código.
-- Pegada das armas: as animações são todas de PISTOLA. O revólver fica na mão, como a animação
-  manda (o usuário aprovou essa versão: não mexer). Armas longas ficam apoiadas na frente do corpo
+- Pegada das armas: as animações são todas de PISTOLA. O revólver fica na mão direita (segue o osso
+  `hand_r`) com a pegada CALCULADA pela mão da animação (2026-09-23, aprovada pelo usuário): o cabo
+  passa no centro do punho fechado (médio, anelar e mínimo em volta de (-0,034; 0,090) no espaço da
+  mão) e a face do gatilho (0; 0,075; 0,033 na arma) fica na ponta do indicador; girada 9,2°
+  (`hand_turn`) para o cabo seguir a linha dos nós dos dedos. Antes a arma ficava 3,5 cm fora do
+  punho, em cima dos dedos. Conferir com `tools/grip_closeup.gd` (close-ups da mão e do gatilho). Com
+  essa pegada a pose de mira aponta o cano 21,4° para cima: `CharacterModel.PISTOL_AIM_*` calibra a
+  pose para o cano seguir a mira (medir de novo se a pegada mudar; teste I11). Em 1ª pessoa o
+  `ViewModel` usa a correção de mira também no revólver (parada durante a animação do tiro) e sobe os
+  braços 10 cm e 4 cm para a esquerda (`pistol_view_offset`), senão o revólver caía para o pé da tela.
+  `pistol_shift` (zero hoje) desloca só a arma com as mãos indo junto por IK (`keep_animation_elbow`). Armas longas ficam apoiadas na frente do corpo
   (`WeaponData.chest_mount`, girando com a mira em volta de `WeaponMount.CHEST_PIVOT`) e as DUAS
   mãos vão até elas por `characters/weapon_grip_modifier.gd` (IK de dois ossos nossa; o
   `TwoBoneIK3D` do Godot 4.7 não mexeu neste esqueleto). Pegadas descritas como mão de verdade
@@ -376,6 +385,7 @@ Atualizar esta seção ao fim de cada sessão.
     (fumaça, faíscas, poeira, marcas de tiro, nuvem ao sumir, anel ao nascer, faíscas no trilho).
     Etapa 2 (aprovada pelo usuário com vídeo): cabeça, cabelo e chapéu presos ao esqueleto (antes
     ficavam parados no ar) e pernas virando para o lado da caminhada. 39 + 8 + 18 + 10 + 6 + 7
-    testes passando. Etapa 3 (aprovada): armas longas no ombro, 1ª pessoa própria. Próxima (pedido
-    do usuário): o revólver, com fotos antes/depois. Depois: começo e fim do pulo e o Nature Kit.
+    testes passando. Etapa 3 (aprovada): armas longas no ombro, 1ª pessoa própria. Etapa 4
+    (aprovada): pegada do revólver calculada (cabo no punho, indicador no gatilho) e mira calibrada.
+    39 + 8 + 18 + 11 + 6 + 7 testes passando. Próximas: começo e fim do pulo e o Nature Kit.
   - Próximo: seguir o polish; depois Tarefa 11 (desempenho no iPhone) ou o que o usuário pedir.

@@ -62,14 +62,15 @@ func _run() -> void:
 			await _hold(12)
 			_shot("%s_%s" % [id, angle_name])
 		_report(id)
+		await _aim_shots(id, camera)
 		if WeaponCatalog.get_weapon(id).is_two_handed():
-			await _aim_shots(id, camera)
 			await _reload_shots(id, camera)
 	await _hold(3)
 	quit()
 
 
-# De lado, mirando para cima e para baixo (a arma longa gira em volta do ombro).
+# De lado, mirando para cima e para baixo (a arma longa gira em volta do ombro; o revólver segue
+# a pose de mira calibrada).
 func _aim_shots(id: StringName, camera: Camera3D) -> void:
 	camera.current = true
 	camera.global_position = SPOT + ANGLES["lado"]

@@ -34,6 +34,10 @@ const KICK_RECOVER_SPEED: float = 10.0
 @export var animate_kick: bool = true
 ## A arma apoiada acompanha o peito (ver CHEST_BONE). Em 1ª pessoa não: lá a câmera é que mira.
 @export var follow_chest: bool = true
+## Desloca a arma que segue a mão (espaço do corpo; revólver da 1ª pessoa). As mãos vão junto pela
+## IK (GunMount liga): cada uma fica onde segurava a arma na animação, deslocada igual, então a
+## pegada continua perfeita e os braços quase não mudam.
+@export var extra_shift: Vector3 = Vector3.ZERO
 
 ## Para onde o personagem está mirando (radianos, + = para cima). Só vale para a arma apoiada:
 ## em 1ª pessoa a câmera já se inclina, então lá isto fica zerado.
@@ -92,7 +96,10 @@ func sync(delta: float) -> void:
 	if _skeleton == null:
 		return
 	if _bone >= 0:
-		transform = _skeleton.get_bone_global_pose(_bone) * offset
+		var hand: Transform3D = _skeleton.get_bone_global_pose(_bone)
+		transform = Transform3D(Basis.IDENTITY, extra_shift) * hand * offset
+		if not extra_shift.is_zero_approx():
+			_hold_where_animated(hand)
 		return
 	# Apoiada no corpo: vai junto com o peito e gira em volta do ombro o que falta para o cano
 	# apontar para a mira.
@@ -105,6 +112,22 @@ func sync(delta: float) -> void:
 	var pivot: Vector3 = body * CHEST_PIVOT
 	_kick = lerpf(_kick, 0.0, 1.0 - exp(-KICK_RECOVER_SPEED * delta))
 	transform = Transform3D(Basis(fix), pivot) * Transform3D(Basis.IDENTITY, -pivot) * body * offset * _motion()
+
+
+# Pontos das mãos na arma (espaço da arma) = onde elas estão na animação em relação a ela: a IK
+# as leva até lá depois do deslocamento. A direita é a mão que a arma segue; a esquerda, a de apoio.
+func _hold_where_animated(hand: Transform3D) -> void:
+	var gun := get_node_or_null(^"Gun") as Node3D
+	if gun == null:
+		return
+	var right := gun.get_node_or_null(GunMount.RIGHT_GRIP) as Node3D
+	var fore := gun.get_node_or_null(GunMount.FORE_GRIP) as Node3D
+	var left_bone: int = _skeleton.find_bone(GunMount.SUPPORT_HAND_BONE)
+	if right == null or fore == null or left_bone < 0:
+		return
+	var in_hand_inverse: Transform3D = offset.affine_inverse()
+	right.transform = in_hand_inverse
+	fore.transform = in_hand_inverse * hand.affine_inverse() * _skeleton.get_bone_global_pose(left_bone)
 
 
 # Coice e recarga, no espaço da arma (+Y para cima, cano para -Z), girando entre as mãos.

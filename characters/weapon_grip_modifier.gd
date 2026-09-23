@@ -22,6 +22,9 @@ extends SkeletonModifier3D
 ## Fecha os dedos copiando os da outra mão, espelhados (ex.: "hand_r"). Na animação de pistola
 ## a mão esquerda é de apoio, aberta; segurando uma telha de rifle ela precisa fechar.
 @export var copy_fingers_from: StringName = &""
+## Cotovelo para o lado em que a animação já o deixa (em vez de `elbow_direction`): para levar a
+## mão só um pouco para o lado sem mudar o jeito do braço (revólver deslocado da 1ª pessoa).
+@export var keep_animation_elbow: bool = false
 
 ## Quanto o pulso ficou longe do alvo na última vez (0 = chegou; > 0 = o braço não alcança).
 var miss: float = 0.0
@@ -68,7 +71,10 @@ func _process_modification_with_delta(_delta: float) -> void:
 			+ distance * distance) / (2.0 * distance)
 	var out: float = sqrt(maxf(upper_length * upper_length - along * along, 0.0))
 	var side: Vector3 = _flat(elbow_direction, aim)
-	if align_elbow_to_hand:
+	var animated_side: Vector3 = _flat(lower_pose.origin - shoulder, aim)
+	if keep_animation_elbow and animated_side.length_squared() > 0.0001:
+		side = animated_side
+	elif align_elbow_to_hand:
 		# Onde o cotovelo ficaria com o pulso reto: atrás da mão, na direção contrária aos dedos.
 		var straight: Vector3 = _flat(goal.origin - goal.basis.y * lower_length - shoulder, aim)
 		if straight.length_squared() > 0.0001:

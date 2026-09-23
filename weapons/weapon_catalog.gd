@@ -58,7 +58,12 @@ static func _build() -> void:
 		"id": DEFAULT_ID, "weapon_name": "Revolver", "damage": 34.0, "fire_interval": 0.35,
 		"magazine_size": 6, "reload_time": 1.6, "max_range": 80.0, "spread_degrees": 0.6,
 		"reserve_ammo": -1, "mesh": "colt_revolver",
-		"hand_offset": Vector3(0.0, 0.18, -0.05), "barrel_tip": Vector3(0.0005, 0.1477, -0.19),
+		# Pegada calculada pela mão da animação (tools/grip_closeup.gd): o cabo passa no centro do
+		# punho fechado (médio, anelar e mínimo em volta dele, em (-0,034; 0,090) no espaço da mão)
+		# e o gatilho (0; 0,075; 0,033 na arma) fica na ponta do indicador. Girada 9,2° para o cabo
+		# seguir a linha dos nós dos dedos.
+		"hand_offset": Vector3(-0.037, 0.2, -0.0398), "hand_turn": 9.2,
+		"barrel_tip": Vector3(0.0005, 0.1477, -0.19),
 	})
 	# Repetidora: bate forte e longe, mas é lenta. Dois tiros derrubam.
 	# Mão direita no punho da coronha (z 0,10 a 0,22), esquerda por baixo da telha (z -0,34 a -0,06).
@@ -104,7 +109,8 @@ static func _make(spec: Dictionary) -> WeaponData:
 	# Recarga de cada arma (OpenGameArt). O tiro é o sintetizado do projeto, igual para todas,
 	# mudando só o tom e o volume (o usuário preferiu ele aos tiros gravados).
 	data.reload_sound = load("res://assets/audio/sfx/opengameart/%s_reload.wav" % data.id)
-	data.in_hand = Transform3D(HAND_BASIS, spec["hand_offset"])
+	data.in_hand = Transform3D(Basis(Vector3.RIGHT, deg_to_rad(spec.get("hand_turn", 0.0))) * HAND_BASIS,
+			spec["hand_offset"])
 	# Arma longa: coronha ("butt", o meio da chapa, no espaço da arma) apoiada no ombro
 	# (SHOULDER_POCKET), cano para onde "aim" manda (6° para dentro: converge com a mira). As
 	# duas mãos vão até ela pela IK.

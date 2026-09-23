@@ -36,6 +36,15 @@ const MODEL_OFFSET := Transform3D(Basis(Vector3.UP, PI), Vector3(0.0, -1.5, 0.0)
 ## Na recarga das armas longas a arma gira e abaixa (ver WeaponMount): em 1ª pessoa os braços
 ## sobem este tanto, senão ela sairia da tela.
 @export_range(0.0, 45.0, 0.5, "suffix:°") var reload_lift_degrees: float = 12.0
+## Revólver em 1ª pessoa: a arma vai um pouco para a esquerda com as mãos na mesma pegada; os braços
+## quase não mudam (pedido do usuário: 4 cm). Espaço do corpo: +X é a esquerda do personagem; o
+## -Z traz a arma 1,2 cm para perto (o braço direito está quase esticado na animação: sem isso a
+## mão ficava a 6 mm do cabo).
+@export var pistol_shift: Vector3 = Vector3.ZERO
+## Revólver em 1ª pessoa: os braços inteiros (a pegada não muda) sobem e vão um pouco para a
+## esquerda (espaço da câmera). Com a pegada certa (cabo no punho) a pose parada aponta o cano para
+## cima; a correção da mira baixa os braços em volta do olho e o revólver ia parar no pé da tela.
+@export var pistol_view_offset: Vector3 = Vector3(-0.04, 0.1, 0.0)
 
 var character: Character
 var weapon: Weapon
@@ -49,6 +58,8 @@ var _flash_timer: float = 0.0
 ## Giro que faz o cano apontar para a mira, em volta da pegada (`_aim_pivot`).
 var _aim_fix := Quaternion.IDENTITY
 var _aim_pivot := Vector3.ZERO
+## Deslocamento dos braços para a arma atual (`pistol_view_offset` no revólver).
+var _view_shift := Vector3.ZERO
 ## Quadros em que a correção vai direto ao valor novo (logo depois de trocar de arma).
 var _snap_frames: int = 3
 
@@ -153,8 +164,9 @@ func setup(for_character: Character, for_weapon: Weapon) -> void:
 ## Mostra a arma que o jogador está segurando agora (item pego ou munição no fim).
 func _show_weapon(data: WeaponData) -> void:
 	# Arma longa em 1ª pessoa: na posição baixa (no ombro, a coronha e as mãos tapariam a tela).
-	GunMount.set_weapon(gun, data, true)
+	GunMount.set_weapon(gun, data, true, pistol_shift)
 	_style_mesh(gun)
+	_view_shift = Vector3.ZERO if data.is_two_handed() else pistol_view_offset
 	muzzle.position = data.barrel_tip
 	# As animações acompanham o ritmo da arma (tiro antes do próximo, recarga no tempo dela).
 	_tree.set(&"parameters/shoot_speed/scale",
@@ -183,7 +195,7 @@ func _process(delta: float) -> void:
 	var kick_turn := Basis(Vector3.RIGHT, deg_to_rad(recoil_pitch_degrees) * _kick)
 	var lift := Basis(Vector3.RIGHT, deg_to_rad(reload_lift_degrees) * _reload_lift())
 	transform = Transform3D(lift * Basis(_aim_fix), bob + recoil_offset * _kick) \
-			* Transform3D(Basis.IDENTITY, _rest_position + _aim_pivot) \
+			* Transform3D(Basis.IDENTITY, _rest_position + _view_shift + _aim_pivot) \
 			* Transform3D(kick_turn, Vector3.ZERO) * Transform3D(Basis.IDENTITY, -_aim_pivot)
 
 	if _flash_timer > 0.0:
@@ -191,9 +203,9 @@ func _process(delta: float) -> void:
 		flash.visible = _flash_timer > 0.0
 
 
-# Em 1ª pessoa a arma longa fica abaixo e ao lado do olho, apontada um pouco para dentro (senão
-# a mão esquerda não alcança a telha): do jeito que o corpo a segura ela não passaria pelo centro
-# da tela. Aqui os braços giram em volta do olho até o cano cruzar a mira a `converge_distance`. A conta
+# Em 1ª pessoa a arma fica abaixo e ao lado do olho: do jeito que o corpo a segura ela não
+# passaria pelo centro da tela (a longa aponta um pouco para dentro; o revólver, para cima). Aqui
+# os braços giram em volta do olho até o cano cruzar a mira a `converge_distance`. A conta
 # usa a arma vista deste nó, então a própria correção não entra nela. Na recarga a animação
 # mexe a arma: a correção fica parada.
 func _update_aim_fix(delta: float) -> void:
@@ -201,14 +213,12 @@ func _update_aim_fix(delta: float) -> void:
 		return
 	if weapon.is_reloading and _snap_frames <= 0:
 		return
-	# O revólver fica como a animação manda (é a versão aprovada): sem correção.
-	if not weapon.data.is_two_handed():
-		_aim_fix = Quaternion.IDENTITY
-		_aim_pivot = Vector3.ZERO
-		_snap_frames = 0
+	# Revólver: a pose parada (Pistol_Idle) aponta o cano 14° para cima e fora da mira; a correção
+	# vale para ele também, mas fica parada durante a animação do tiro (senão apagaria o coice).
+	if not weapon.data.is_two_handed() and _snap_frames <= 0 and _tree.get(&"parameters/shoot/active"):
 		return
 	var gun_local: Transform3D = global_transform.affine_inverse() * gun.global_transform
-	var tip: Vector3 = _rest_position + gun_local * weapon.data.barrel_tip
+	var tip: Vector3 = _rest_position + _view_shift + gun_local * weapon.data.barrel_tip
 	var barrel: Vector3 = (gun_local.basis * Vector3.FORWARD).normalized()
 	if barrel.length_squared() < 0.5:
 		return

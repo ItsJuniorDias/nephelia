@@ -42,6 +42,7 @@ func _run() -> void:
 	await _test_shotgun_pellets()
 	await _test_two_handed_grip()
 	await _test_first_person_aim()
+	await _test_revolver_follows_aim()
 
 	await _physics(10)
 	print("RESULT: ", "ALL PASSED" if _failures == 0 else "%d FAILED" % _failures)
@@ -275,11 +276,17 @@ func _test_two_handed_grip() -> void:
 	_player.weapon.refill()
 	bot.weapon.refill()
 	await _physics(3)
-	var revolver_idle: bool = _grip_state(bot.model.skeleton)["idle"] and _grip_state(view_model.skeleton)["idle"]
+	# O corpo segue a animação de pistola. Em 1ª pessoa, com o revólver deslocado (`pistol_shift`),
+	# as mãos vão com ele (IK ligada, chegando no lugar); sem deslocamento, IK desligada.
+	var fp_revolver: Dictionary = _grip_state(view_model.skeleton)
+	var fp_shifted: bool = not view_model.pistol_shift.is_zero_approx()
+	var revolver_idle: bool = _grip_state(bot.model.skeleton)["idle"] and fp_revolver["active"] == fp_shifted \
+			and fp_revolver["miss"] < 0.005
 	bot.set_physics_process(true)
 	bot.process_mode = Node.PROCESS_MODE_DISABLED
-	_check("I9 both hands reach the long guns; the revolver keeps the pistol animation",
-			ok and revolver_idle, "%s revolver_idle=%s" % [", ".join(results), revolver_idle])
+	_check("I9 both hands reach the long guns; the revolver keeps the pistol animation (in first person the hands follow it)",
+			ok and revolver_idle, "%s revolver_idle=%s (1ª pessoa ligada=%s miss=%.3f)" % [", ".join(results),
+			revolver_idle, fp_revolver["active"], fp_revolver["miss"]])
 
 
 func _test_first_person_aim() -> void:
@@ -292,4 +299,34 @@ func _test_first_person_aim() -> void:
 	await _physics(3)
 	_check("I10 in first person the rifle barrel crosses the crosshair",
 			rifle_error < 1.5, "error=%.2f°" % rifle_error)
+
+
+func _test_revolver_follows_aim() -> void:
+	# Revólver: visto de fora o cano segue o ângulo da mira (a pose de mira da animação ia a 81°
+	# mirando 45°, e parada apontava 12,6° para cima); em 1ª pessoa ele cruza a mira (apontava 14°
+	# para cima).
+	var bot: Character = _bots[1]
+	bot.process_mode = Node.PROCESS_MODE_INHERIT
+	bot.set_physics_process(false)
+	bot.weapon.refill()
+	var results: PackedStringArray = []
+	var ok: bool = true
+	for pitch: float in [-45.0, 0.0, 45.0]:
+		for i in 30:
+			bot.model.update_motion(0.0, deg_to_rad(pitch))
+			await process_frame
+		var skeleton: Skeleton3D = bot.model.skeleton
+		var barrel: Vector3 = (skeleton.global_transform.basis.inverse() * (bot.model.gun.global_transform.basis * Vector3.FORWARD)).normalized()
+		var barrel_pitch: float = rad_to_deg(asin(barrel.y))
+		ok = ok and absf(barrel_pitch - pitch) < 5.0
+		results.append("mira %d° -> cano %.1f°" % [pitch, barrel_pitch])
+	bot.model.update_motion(0.0, 0.0)
+	bot.set_physics_process(true)
+	bot.process_mode = Node.PROCESS_MODE_DISABLED
+	var view_model := _player.camera.get_node("ViewModel") as ViewModel
+	_player.weapon.refill()
+	await _physics(10)
+	var fp_error: float = view_model.get_aim_error_degrees()
+	_check("I11 the revolver barrel follows the aim from outside and crosses the crosshair in first person",
+			ok and fp_error < 1.5, "%s, 1ª pessoa erro=%.2f°" % [", ".join(results), fp_error])
 

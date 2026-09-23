@@ -18,8 +18,17 @@ const UPPER_BODY_ROOT: StringName = &"spine_01"
 ## Velocidades (m/s) em que as animações de andar e correr combinam com os passos.
 const WALK_SPEED: float = 2.0
 const JOG_SPEED: float = 5.0
-## Inclinação máxima da mira que a animação de "mirar para cima/baixo" representa.
+## Inclinação máxima da mira que a animação de "mirar para cima/baixo" representa (armas longas:
+## a arma segue a mira pelo WeaponMount, a pose só inclina o tronco).
 const AIM_PITCH_RANGE: float = deg_to_rad(60.0)
+## Revólver (na mão, seguindo a animação): a pose de mira não bate com o ângulo. Com a pegada
+## calculada (cabo no punho, indicador no gatilho: ver WeaponCatalog) a pose parada aponta o cano
+## 21,4° para cima; a pose "para cima" inteira sobe o cano mais 88°, a "para baixo" desce 87,5°
+## (medido no cano). Calibrado assim o cano segue a mira (de -66° a +85°; abaixo disso a pose não
+## alcança). Mudou a pegada? Medir de novo (variando `parameters/aim/blend_position`).
+const PISTOL_AIM_LEVEL: float = deg_to_rad(21.4)
+const PISTOL_AIM_UP: float = deg_to_rad(88.0)
+const PISTOL_AIM_DOWN: float = deg_to_rad(87.5)
 const HIT_FLASH_ENERGY: float = 1.6
 const PROTECTION_COLOR := Color(0.55, 0.8, 1.0)
 const PROTECTION_ENERGY: float = 0.45
@@ -60,6 +69,8 @@ var _speed: float = 0.0
 var _move_angle: float = 0.0
 var _backpedal: bool = false
 var _locomotion_scale: float = 1.0
+## Arma na mão (revólver): a pose de mira usa a calibração do revólver.
+var _pistol_aim: bool = true
 
 ## Arma na mão direita (criada em código por GunMount) e o suporte dela no corpo.
 var gun: MeshInstance3D
@@ -104,6 +115,7 @@ func _ready() -> void:
 ## Troca a arma que aparece na mão (o Character avisa quando o jogador pega outra).
 func set_weapon(data: WeaponData) -> void:
 	GunMount.set_weapon(gun, data)
+	_pistol_aim = data == null or not data.is_two_handed()
 
 
 func _process(delta: float) -> void:
@@ -130,7 +142,7 @@ func update_motion(speed: float, aim_pitch: float, airborne: bool = false, move_
 	_speed = speed
 	_move_angle = move_angle
 	_tree.set(&"parameters/locomotion/blend_position", speed)
-	_tree.set(&"parameters/aim/blend_position", clampf(aim_pitch / AIM_PITCH_RANGE, -1.0, 1.0))
+	_tree.set(&"parameters/aim/blend_position", _aim_blend(aim_pitch))
 	# A arma longa fica apoiada no corpo: é ela que sobe e desce com a mira (e os braços vão junto).
 	mount.aim_pitch = aim_pitch
 
@@ -139,6 +151,14 @@ func update_motion(speed: float, aim_pitch: float, airborne: bool = false, move_
 func set_hanging(hanging: bool, grip_height: float = 2.0) -> void:
 	_hanging = hanging
 	_grip.grip_height = grip_height
+
+
+## Posição na pose de mira (-1 = para baixo, 1 = para cima) para mirar `aim_pitch` radianos.
+func _aim_blend(aim_pitch: float) -> float:
+	if not _pistol_aim:
+		return clampf(aim_pitch / AIM_PITCH_RANGE, -1.0, 1.0)
+	var above: float = aim_pitch - PISTOL_AIM_LEVEL
+	return clampf(above / (PISTOL_AIM_UP if above > 0.0 else PISTOL_AIM_DOWN), -1.0, 1.0)
 
 
 ## Quanto o quadril está virado para o lado da caminhada agora (radianos).
