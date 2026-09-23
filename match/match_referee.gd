@@ -2,8 +2,10 @@ class_name MatchReferee
 extends Node
 ## Juiz da partida: decide se cada tiro acertou e em quem, quem pega cada item, vida e morte.
 ##
-## Hoje roda no próprio aparelho. No multiplayer só o servidor terá o juiz, e é isso que
-## impede trapaça: o jogador só diz "atirei nesta direção"; quem decide o acerto é o juiz.
+## Sozinho, roda no próprio aparelho. No multiplayer só o do anfitrião decide (`authority`), e é
+## isso que impede trapaça: o jogador só diz "atirei nesta direção"; quem decide o acerto é o juiz.
+## O juiz do cliente só calcula o tiro do próprio jogador para desenhar na hora (sem dano) e
+## repassa, pelos mesmos sinais, o que o anfitrião decidiu (o NetClient emite por ele).
 
 signal shot_resolved(result: ShotResult)
 signal character_damaged(victim: Character, attacker: Character, amount: float)
@@ -31,6 +33,12 @@ const CHEST_HEIGHT: float = 1.2
 ## Distância máxima entre a linha da mira e o alvo. Evita ajuda exagerada em alvos longe.
 @export_range(0.0, 5.0, 0.1, "suffix:m") var assist_max_offset: float = 1.0
 
+## Falso no cliente do multiplayer: não mata, não faz renascer, não dá item nem tira vida.
+var authority: bool = true
+## Multiplayer (anfitrião): chamado com (atirador, true) antes dos raios de um tiro e com
+## (atirador, false) depois. O NetHost volta os alvos para onde aquele jogador os via (atraso).
+var shot_rewinder: Callable
+
 var _rng := RandomNumberGenerator.new()
 ## Quem está esperando para renascer, e quanto tempo falta.
 var _respawn_timers: Dictionary[Character, float] = {}
@@ -48,6 +56,8 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if not authority:
+		return
 	for character: Character in _last_attackers.keys():
 		var credit: Array = _last_attackers[character]
 		credit[1] -= delta
@@ -100,7 +110,7 @@ func give_weapon(character: Character, weapon_id: StringName) -> bool:
 ## `character` encostou em `pickup`: pega se o item está lá e se ele precisa (vida cheia não
 ## gasta o frasco). Devolve se pegou.
 func try_pickup(character: Character, pickup: Pickup) -> bool:
-	if not character.is_alive or not pickup.is_available:
+	if not authority or not character.is_alive or not pickup.is_available:
 		return false
 	match pickup.kind:
 		Pickup.Kind.HEALTH:
@@ -125,6 +135,15 @@ func kill(victim: Character, killer: Character) -> void:
 	victim.die(killer)
 	_respawn_timers[victim] = respawn_delay
 	character_died.emit(victim, killer)
+
+
+## Esquece um personagem que saiu da partida (multiplayer).
+func forget(character: Character) -> void:
+	_respawn_timers.erase(character)
+	_last_attackers.erase(character)
+	for victim: Character in _last_attackers.keys():
+		if _last_attackers[victim][0] == character:
+			_last_attackers.erase(victim)
 
 
 ## Faz renascer já, no ponto mais seguro (usado pelo cronômetro e pelos testes).
@@ -163,9 +182,14 @@ func _recent_attacker(character: Character) -> Character:
 
 
 ## Resolve um tiro: aplica mira assistida e imprecisão, lança o raio e avisa quem foi atingido.
-## Precisa rodar dentro do passo de física (usa o espaço físico direto).
+## Precisa rodar dentro do passo de física (usa o espaço físico direto). `seed` >= 0 fixa o
+## sorteio da imprecisão (rede: cliente e anfitrião sorteiam igual o mesmo tiro).
 func resolve_shot(shooter: Character, weapon: Weapon, origin: Vector3, direction: Vector3,
-		aim_assist: bool) -> ShotResult:
+		aim_assist: bool, seed: int = -1) -> ShotResult:
+	if seed >= 0:
+		_rng.seed = seed
+	if shot_rewinder.is_valid():
+		shot_rewinder.call(shooter, true)
 	var result := ShotResult.new()
 	result.shooter = shooter
 	result.weapon = weapon
@@ -180,7 +204,7 @@ func resolve_shot(shooter: Character, weapon: Weapon, origin: Vector3, direction
 
 	# A espingarda solta vários chumbos de uma vez: cada um é um raio, com a sua imprecisão.
 	var pellets: int = maxi(weapon.pellets, 1)
-	var damage_by_victim: Dictionary[Character, float] = {}
+	var pellet_victims: Array[Character] = []
 	for pellet: int in pellets:
 		var pellet_aim: Vector3 = _apply_spread(aim, weapon.spread_degrees)
 		var end_point: Vector3 = origin + pellet_aim * weapon.max_range
@@ -200,16 +224,25 @@ func resolve_shot(shooter: Character, weapon: Weapon, origin: Vector3, direction
 		else:
 			result.pellet_points.append(end_point)
 		if victim != null:
-			var applied: float = apply_damage(victim, weapon.damage, shooter)
-			damage_by_victim[victim] = damage_by_victim.get(victim, 0.0) + applied
-			result.damage += applied
+			pellet_victims.append(victim)
+	# Os alvos voltam para onde estão agora antes do dano (quem morre cai no lugar certo).
+	if shot_rewinder.is_valid():
+		shot_rewinder.call(shooter, false)
+
+	var damage_by_victim: Dictionary[Character, float] = {}
+	for victim: Character in pellet_victims:
+		# O cliente só desenha: o dano (e o marcador de acerto) vem quando o anfitrião confirmar.
+		var applied: float = apply_damage(victim, weapon.damage, shooter) if authority else 0.0
+		damage_by_victim[victim] = damage_by_victim.get(victim, 0.0) + applied
+		result.damage += applied
 
 	# Quem levou mais chumbo é "a vítima" do tiro (som do acerto, marcador do HUD).
 	for victim: Character in damage_by_victim:
 		if result.victim == null or damage_by_victim[victim] > damage_by_victim[result.victim]:
 			result.victim = victim
-	for victim: Character in damage_by_victim:
-		victim.receive_hit(result)
+	if authority:
+		for victim: Character in damage_by_victim:
+			victim.receive_hit(result)
 
 	shot_resolved.emit(result)
 	return result

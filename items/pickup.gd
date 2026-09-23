@@ -44,13 +44,16 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	var referee: MatchReferee = MatchReferee.find(self)
+	# Cliente do multiplayer: o anfitrião avisa quando o item some e quando volta.
+	if referee != null and not referee.authority:
+		return
 	if not is_available:
 		_respawn_timer -= delta
 		if _respawn_timer <= 0.0:
 			restore()
 		return
 	# Confere a cada passo (e não só ao entrar): quem já estava em cima e se machucou também pega.
-	var referee: MatchReferee = MatchReferee.find(self)
 	if referee == null:
 		return
 	for body: Node3D in get_overlapping_bodies():

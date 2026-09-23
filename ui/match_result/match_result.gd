@@ -1,7 +1,8 @@
 class_name MatchResult
 extends CanvasLayer
-## Tela de fim de partida: vencedor, placar final e "jogar de novo".
+## Tela de fim de partida: vencedor, placar final, "jogar de novo" e voltar ao menu.
 ## Funciona com o jogo pausado (process_mode = sempre), porque a partida congela ao acabar.
+## No multiplayer só o anfitrião recomeça; os outros esperam por ele.
 ##
 ## Arte do Marble and Gold UI Kit: janela de "banco de dados" entre colunas de mármore, título
 ## na faixa de cobre e a linha do jogador com a barra de seleção.
@@ -12,6 +13,7 @@ const SELECTED: Texture2D = preload("res://assets/ui/marble_gold/database_window
 const COLUMN_WIDTHS: Array[float] = [48.0, 170.0, 96.0, 96.0]
 const HEADER_COLOR := Color(0.88, 0.72, 0.42)
 const ROW_FONT_SIZE := 22
+const MAIN_MENU := "res://ui/main_menu/main_menu.tscn"
 
 var character: Character
 var deathmatch: Deathmatch
@@ -20,12 +22,14 @@ var ranking_lines: PackedStringArray = []
 
 @onready var title_label: Label = $Root/Box/Rows/Title
 @onready var table: VBoxContainer = $Root/Box/Rows/Table
-@onready var play_again_button: Button = $Root/Box/Rows/PlayAgain
+@onready var play_again_button: Button = $Root/Box/Rows/Buttons/PlayAgain
+@onready var main_menu_button: Button = $Root/Box/Rows/Buttons/MainMenu
 
 
 func _ready() -> void:
 	visible = false
 	play_again_button.pressed.connect(_on_play_again_pressed)
+	main_menu_button.pressed.connect(_on_main_menu_pressed)
 	Sounds.wire_buttons(self)
 
 
@@ -57,8 +61,15 @@ func _on_match_finished(ranking: Array[Dictionary]) -> void:
 		ranking_lines.append("%d.  %s   %s   %s" % [i + 1, who, MatchHud.count_label(entry["kills"], "kill"),
 				MatchHud.count_label(entry["deaths"], "death")])
 		_add_row([str(i + 1), who, str(entry["kills"]), str(entry["deaths"])], mine, false)
+	# Multiplayer: quem recomeça é o anfitrião.
+	var waits_for_host: bool = Net.is_client()
+	play_again_button.disabled = waits_for_host
+	play_again_button.text = "WAITING FOR HOST" if waits_for_host else "PLAY AGAIN"
 	show()
-	play_again_button.grab_focus()
+	if waits_for_host:
+		main_menu_button.grab_focus()
+	else:
+		play_again_button.grab_focus()
 	# Sino de fim de partida (a tela roda com o jogo pausado; o som também).
 	Sounds.play_2d(self, Sounds.MATCH_END, -2.0)
 
@@ -100,3 +111,9 @@ func _row_style(highlight: bool) -> StyleBox:
 
 func _on_play_again_pressed() -> void:
 	deathmatch.restart()
+
+
+func _on_main_menu_pressed() -> void:
+	get_tree().paused = false
+	Net.stop()
+	get_tree().change_scene_to_file(MAIN_MENU)

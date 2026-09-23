@@ -3,7 +3,8 @@ extends CanvasLayer
 ## Menu de pausa da partida: continuar, opções e voltar ao menu inicial.
 ##
 ## Fica dentro do jogador (como o HUD). Pausa a árvore inteira, mas ele mesmo continua rodando
-## (`process_mode` sempre), senão os botões não responderiam.
+## (`process_mode` sempre), senão os botões não responderiam. No multiplayer o jogo NÃO para (os
+## outros continuam jogando): o jogador só fica parado enquanto a janela está aberta.
 
 const MAIN_MENU := "res://ui/main_menu/main_menu.tscn"
 
@@ -43,7 +44,8 @@ func open() -> void:
 	if screen.visible:
 		return
 	screen.visible = true
-	get_tree().paused = true
+	if not Net.is_online():
+		get_tree().paused = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	resume_button.grab_focus()
 	opened.emit()
@@ -55,7 +57,8 @@ func close() -> void:
 		return
 	options_menu.visible = false
 	screen.visible = false
-	get_tree().paused = false
+	if not Net.is_online():
+		get_tree().paused = false
 	# No computador o mouse volta a ficar preso na tela (no toque ele nunca é capturado).
 	if not TouchControls.is_touch_mode():
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -71,4 +74,6 @@ func toggle() -> void:
 
 func _on_main_menu() -> void:
 	get_tree().paused = false
+	# Sai da partida em rede (o anfitrião saindo acaba a partida de todos).
+	Net.stop()
 	get_tree().change_scene_to_file(MAIN_MENU)

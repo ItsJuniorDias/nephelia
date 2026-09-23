@@ -112,6 +112,9 @@ func get_command(delta: float) -> CharacterCommand:
 	command.reset()
 	command.yaw = character.yaw
 	command.pitch = character.pitch
+	# O alvo saiu da partida (multiplayer): esquece ele.
+	if target_enemy != null and not is_instance_valid(target_enemy):
+		_back_to_roam()
 	_think_timer -= delta
 	if _think_timer <= 0.0:
 		_think_timer = THINK_INTERVAL

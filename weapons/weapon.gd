@@ -10,6 +10,9 @@ extends Node
 ## sozinho para o revólver, que nunca acaba.
 
 signal fired(result: ShotResult)
+## O tiro causou dano em alguém (sozinho: na hora; no cliente do multiplayer: quando o anfitrião
+## confirma). O HUD mostra o marcador de acerto.
+signal hit_confirmed(result: ShotResult)
 signal reload_started
 signal reload_finished
 signal ammo_changed(ammo: int, magazine_size: int)
@@ -113,6 +116,13 @@ func refill() -> void:
 	equip(WeaponCatalog.default_weapon())
 
 
+## Munição vinda do anfitrião (multiplayer: corrige a previsão do cliente).
+func set_ammo(new_ammo: int, new_reserve: int) -> void:
+	ammo = clampi(new_ammo, 0, magazine_size)
+	reserve = new_reserve
+	ammo_changed.emit(ammo, magazine_size)
+
+
 ## Quanto da recarga já passou, de 0 a 1 (usado pela animação).
 func get_reload_progress() -> float:
 	if not is_reloading:
@@ -167,8 +177,11 @@ func _fire(command: CharacterCommand) -> void:
 	var direction: Vector3 = -character.head.global_basis.z
 	var referee: MatchReferee = MatchReferee.find(character)
 	var result: ShotResult
+	# Na rede o sorteio da imprecisão sai do número do comando: o cliente desenha o mesmo tiro
+	# que o anfitrião decide.
+	var seed: int = -1 if command.tick < 0 else absi(hash([character.net_id, command.tick]))
 	if referee != null:
-		result = referee.resolve_shot(character, self, origin, direction, command.aim_assist)
+		result = referee.resolve_shot(character, self, origin, direction, command.aim_assist, seed)
 	else:
 		result = ShotResult.new()
 		result.shooter = character
@@ -178,6 +191,8 @@ func _fire(command: CharacterCommand) -> void:
 		result.end_point = origin + direction * max_range
 	ammo_changed.emit(ammo, magazine_size)
 	fired.emit(result)
+	if result.victim != null and result.damage > 0.0:
+		hit_confirmed.emit(result)
 	# Tambor vazio: já recarrega (ou troca de arma) sozinho, menos um botão para o dedão.
 	if ammo == 0:
 		_handle_empty()

@@ -3,8 +3,13 @@ extends CharacterBody3D
 ## Personagem da arena: anda, pula e olha obedecendo ao comando do seu controlador.
 ##
 ## O personagem nunca lê teclado, toque ou IA diretamente: quem decide é o CharacterController
-## filho dele (humano, bot ou, no futuro, rede). Assim o mesmo personagem serve para todos.
+## filho dele (humano, bot ou rede). Assim o mesmo personagem serve para todos.
 ## Vida, morte e respawn também não são decididos aqui: quem manda é o MatchReferee (o juiz).
+##
+## Multiplayer: no anfitrião os jogadores de fora obedecem a um RemoteController (comandos que
+## chegam pela rede). No cliente, o jogador local prevê o próprio movimento (`step_movement`) e o
+## corrige quando o anfitrião discorda (`reconcile`); os outros são "marionetes" (PuppetController)
+## que só mostram o que o anfitrião mandou (`apply_puppet_state`).
 
 ## Levou um tiro (o MatchReferee decidiu).
 signal hit_received(result: ShotResult)
@@ -25,6 +30,8 @@ const RAIL_HOOK_RANGE: float = 10.0
 const RAIL_ZIP_SPEED: float = 25.0
 ## Ao chegar no fim do trilho, sai com esta fração da velocidade (não é arremessado da ilha).
 const RAIL_END_KEEP: float = 0.3
+## Números em `get_move_state` (posição, velocidade, tempos do pulo, trilho...).
+const MOVE_STATE_SIZE: int = 13
 
 @export_group("Movimento")
 @export_range(0.5, 20.0, 0.1, "suffix:m/s") var walk_speed: float = 5.0
@@ -84,6 +91,13 @@ var rail: SkylineRail
 
 var controller: CharacterController
 var weapon: Weapon
+## Número do personagem na partida em rede (0 = fora do multiplayer). Quem distribui é o anfitrião.
+var net_id: int = 0
+## Multiplayer: recebe o comando de cada passo antes de o personagem obedecer (o NetClient
+## numera, ajusta e manda para o anfitrião o comando do jogador local).
+var command_hook: Callable
+## Refazendo passos já previstos (correção da previsão no cliente): sem sons nem efeitos.
+var is_replaying: bool = false
 
 var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 var _coyote_timer: float = 0.0
@@ -98,6 +112,9 @@ var _rail_zipping: bool = false
 ## Acabou de soltar do trilho: o "está no chão" do Godot ainda é o de antes de engatar
 ## (pendurado não passa pelo move_and_slide), então vale "no ar" até o próximo movimento.
 var _left_rail: bool = false
+## "No chão" imposto de fora até o próximo movimento: -1 = usa o do Godot; 0 = no ar; 1 = no chão.
+## Estado copiado da rede (correção da previsão, marionete) não passa pelo move_and_slide.
+var _floor_override: int = -1
 
 @onready var head: Node3D = $Head
 @onready var camera: Camera3D = $Head/Camera3D
@@ -137,6 +154,12 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	simulate(delta)
+
+
+## Um passo inteiro do personagem: comando do controlador, olhar, arma e movimento. O anfitrião
+## chama de novo por fora para alcançar comandos acumulados de um jogador de fora.
+func simulate(delta: float) -> void:
 	# Morto fica caído, sem colisão, até o juiz mandar renascer.
 	if not is_alive:
 		return
@@ -144,19 +167,34 @@ func _physics_process(delta: float) -> void:
 		_protection_timer -= delta
 		if _protection_timer <= 0.0:
 			end_spawn_protection()
+	# Marionete (outro jogador, visto no cliente): quem move é o controlador, com o que chegou da rede.
+	if controller != null and controller.is_puppet():
+		controller.drive_puppet(delta)
+		return
+	# Jogador de fora cujo comando ainda não chegou: espera (o anfitrião alcança depois).
+	if controller != null and controller.is_waiting():
+		return
 
 	var move := Vector2.ZERO
 	var jump_held: bool = false
 	var rail_held: bool = false
 	if controller != null:
 		var command: CharacterCommand = controller.get_command(delta)
+		if command_hook.is_valid():
+			command_hook.call(command)
 		apply_look(command.yaw, command.pitch)
 		move = command.move
 		jump_held = command.jump
 		rail_held = command.use_rail
 		if weapon != null:
 			weapon.tick(delta, command)
+	step_movement(delta, move, jump_held, rail_held)
 
+
+## Um passo do movimento (andar, pular, pegar e andar no trilho) obedecendo a `move` e aos botões
+## de pulo e trilho (apertados ou não). Separado da arma e do controlador para a rede poder
+## refazer passos já previstos (`reconcile`).
+func step_movement(delta: float, move: Vector2, jump_held: bool, rail_held: bool) -> void:
 	# O comando diz se o botão está apertado; a ação acontece só no instante em que aperta.
 	var jump_pressed: bool = jump_held and not _was_jump_held
 	_was_jump_held = jump_held
@@ -196,6 +234,7 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 	_left_rail = false
+	_floor_override = -1
 	# Direção da caminhada em relação à frente do corpo (as pernas do modelo viram para lá).
 	var planar := Vector3(velocity.x, 0.0, velocity.z)
 	var move_angle: float = 0.0
@@ -207,7 +246,99 @@ func _physics_process(delta: float) -> void:
 
 ## Está no chão (como is_on_floor(), mas sem o valor velho logo depois de soltar do trilho).
 func is_grounded() -> bool:
+	# Pendurado nunca está no chão (o is_on_floor() fica com o valor de antes de engatar).
+	if rail != null:
+		return false
+	if _floor_override >= 0:
+		return _floor_override == 1
 	return is_on_floor() and not _left_rail
+
+
+## Estado completo do movimento em números: o anfitrião manda o dele e o cliente compara com a
+## própria previsão. `rails` = trilhos da arena na mesma ordem nos dois aparelhos.
+func get_move_state(rails: Array[SkylineRail]) -> PackedFloat32Array:
+	var flags: int = int(_was_jump_held) | int(_was_rail_held) << 1 | int(is_grounded()) << 2 \
+			| int(_left_rail) << 3 | int(_rail_zipping) << 4
+	return PackedFloat32Array([global_position.x, global_position.y, global_position.z,
+			velocity.x, velocity.y, velocity.z, _coyote_timer, _jump_buffer_timer, flags,
+			rails.find(rail) if rail != null else -1, _rail_offset, _rail_direction, _rail_current_speed])
+
+
+## Volta o movimento para um estado de `get_move_state` (sem sons nem efeitos).
+func set_move_state(state: PackedFloat32Array, rails: Array[SkylineRail]) -> void:
+	if state.size() < MOVE_STATE_SIZE:
+		return
+	global_position = Vector3(state[0], state[1], state[2])
+	velocity = Vector3(state[3], state[4], state[5])
+	_coyote_timer = state[6]
+	_jump_buffer_timer = state[7]
+	var flags: int = int(state[8])
+	_was_jump_held = flags & 1 != 0
+	_was_rail_held = flags & 2 != 0
+	_floor_override = 1 if flags & 4 != 0 else 0
+	_left_rail = flags & 8 != 0
+	_rail_zipping = flags & 16 != 0
+	var rail_index: int = int(state[9])
+	var new_rail: SkylineRail = rails[rail_index] if rail_index >= 0 and rail_index < rails.size() else null
+	if new_rail != rail:
+		model.set_hanging(new_rail != null, RAIL_HANG)
+	rail = new_rail
+	_rail_offset = state[10]
+	_rail_direction = state[11]
+	_rail_current_speed = state[12]
+
+
+## Cliente: o anfitrião disse onde o personagem estava depois de um comando (`state`); volta para
+## lá e refaz os comandos que vieram depois (`commands`, já previstos uma vez). O olhar atual fica
+## (a câmera não pula). Sons e efeitos só se o trilho mudou no fim das contas. `after_step` é
+## chamado com cada comando refeito (o cliente guarda a nova previsão dele).
+func reconcile(state: PackedFloat32Array, rails: Array[SkylineRail], commands: Array[CharacterCommand],
+		delta: float, after_step: Callable = Callable()) -> void:
+	var look_yaw: float = yaw
+	var look_pitch: float = pitch
+	var rail_before: SkylineRail = rail
+	is_replaying = true
+	set_move_state(state, rails)
+	for command: CharacterCommand in commands:
+		apply_look(command.yaw, command.pitch)
+		step_movement(delta, command.move, command.jump, command.use_rail)
+		if after_step.is_valid():
+			after_step.call(command)
+	is_replaying = false
+	apply_look(look_yaw, look_pitch)
+	if rail != rail_before:
+		if rail_before != null:
+			rail_detached.emit()
+		if rail != null:
+			rail_attached.emit(rail)
+
+
+## Cliente: mostra um personagem de fora como o anfitrião mandou (posição, olhar, velocidade,
+## trilho). Não simula nada: quem decide é o anfitrião.
+func apply_puppet_state(at: Vector3, new_velocity: Vector3, new_yaw: float, new_pitch: float,
+		airborne: bool, on_rail: SkylineRail, rail_pulling: bool) -> void:
+	global_position = at
+	velocity = new_velocity
+	apply_look(new_yaw, new_pitch)
+	_floor_override = 0 if airborne else 1
+	if on_rail != rail:
+		var was_hanging: bool = rail != null
+		rail = on_rail
+		model.set_hanging(rail != null, RAIL_HANG)
+		if was_hanging:
+			rail_detached.emit()
+		if rail != null:
+			rail_attached.emit(rail)
+	_rail_zipping = rail_pulling
+	if rail != null:
+		model.update_motion(0.0, pitch, true)
+		return
+	var planar := Vector3(velocity.x, 0.0, velocity.z)
+	var move_angle: float = 0.0
+	if planar.length() > 0.1:
+		var local: Vector3 = global_basis.inverse() * planar
+		move_angle = atan2(-local.x, -local.z)
+	model.update_motion(planar.length(), pitch, airborne, move_angle)
 
 
 ## Aponta o corpo (yaw) e a cabeça (pitch). A inclinação fica limitada a ±max_pitch_degrees.
@@ -283,6 +414,7 @@ func teleport(target: Transform3D) -> void:
 	velocity = Vector3.ZERO
 	_coyote_timer = 0.0
 	_jump_buffer_timer = 0.0
+	_floor_override = -1
 	reset_physics_interpolation()
 
 
@@ -317,7 +449,8 @@ func attach_to_rail(target: SkylineRail, offset: float) -> void:
 	_rail_zipping = true
 	velocity = Vector3.ZERO
 	model.set_hanging(true, RAIL_HANG)
-	rail_attached.emit(target)
+	if not is_replaying:
+		rail_attached.emit(target)
 
 
 ## Solta do trilho saindo com `new_velocity` (nada acontece se não estiver num trilho).
@@ -327,11 +460,13 @@ func detach_from_rail(new_velocity: Vector3) -> void:
 	rail = null
 	_rail_zipping = false
 	_left_rail = true
+	_floor_override = -1
 	velocity = new_velocity
 	_coyote_timer = 0.0
 	_jump_buffer_timer = 0.0
 	model.set_hanging(false)
-	rail_detached.emit()
+	if not is_replaying:
+		rail_detached.emit()
 
 
 func _ride_rail(delta: float, move: Vector2, jump_pressed: bool, rail_pressed: bool) -> void:

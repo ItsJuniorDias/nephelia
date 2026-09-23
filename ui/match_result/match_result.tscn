@@ -100,9 +100,19 @@ layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 4
 
-[node name="PlayAgain" type="Button" parent="Root/Box/Rows"]
-custom_minimum_size = Vector2(340, 72)
+[node name="Buttons" type="HBoxContainer" parent="Root/Box/Rows"]
 layout_mode = 2
-size_flags_horizontal = 4
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="PlayAgain" type="Button" parent="Root/Box/Rows/Buttons"]
+custom_minimum_size = Vector2(250, 72)
+layout_mode = 2
 theme_type_variation = &"TitleButton"
 text = "PLAY AGAIN"
+
+[node name="MainMenu" type="Button" parent="Root/Box/Rows/Buttons"]
+custom_minimum_size = Vector2(250, 72)
+layout_mode = 2
+theme_type_variation = &"TitleButton"
+text = "MAIN MENU"

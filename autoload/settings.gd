@@ -8,6 +8,7 @@ extends Object
 ##   sensibilidade e tamanho dos botões -> player/human_controller.gd e ui/touch_controls
 ##   volume e volume da música -> canais de áudio "Master" e "Music", aqui mesmo
 ##   dificuldade -> levels/arena_setup.gd, ao abrir a arena
+##   nome e último endereço -> sala do multiplayer (ui/lobby)
 
 const FILE := "user://settings.cfg"
 const DIFFICULTIES: Array[StringName] = [&"easy", &"medium", &"hard"]
@@ -25,6 +26,10 @@ static var volume: float = 0.8
 ## Volume da música (em cima do geral), de 0 a 1.
 static var music_volume: float = 0.6
 static var difficulty: StringName = &"medium"
+## Nome do jogador no multiplayer (placar e lista de abates dos outros).
+static var player_name: String = "Player"
+## Último endereço digitado para entrar na sala de outro aparelho.
+static var last_address: String = ""
 ## Sobe a cada mudança: quem precisa reagir (os botões de toque) compara com a versão que já aplicou.
 static var version: int = 0
 
@@ -43,6 +48,8 @@ static func load_settings() -> void:
 		music_volume = clampf(file.get_value("audio", "music_volume", music_volume), 0.0, 1.0)
 		var saved := StringName(file.get_value("game", "difficulty", difficulty))
 		difficulty = saved if saved in DIFFICULTIES else difficulty
+		player_name = clean_name(file.get_value("online", "player_name", player_name))
+		last_address = str(file.get_value("online", "last_address", last_address)).strip_edges()
 	_apply_volume()
 	version += 1
 
@@ -54,6 +61,8 @@ static func save_settings() -> void:
 	file.set_value("audio", "volume", volume)
 	file.set_value("audio", "music_volume", music_volume)
 	file.set_value("game", "difficulty", String(difficulty))
+	file.set_value("online", "player_name", player_name)
+	file.set_value("online", "last_address", last_address)
 	file.save(FILE)
 
 
@@ -72,6 +81,10 @@ static func set_option(option: StringName, value: Variant) -> void:
 			_apply_volume()
 		&"difficulty":
 			difficulty = value if value in DIFFICULTIES else difficulty
+		&"player_name":
+			player_name = clean_name(value)
+		&"last_address":
+			last_address = str(value).strip_edges()
 	version += 1
 	save_settings()
 
@@ -84,6 +97,12 @@ static func next_difficulty() -> void:
 
 static func difficulty_label() -> String:
 	return DIFFICULTY_LABELS.get(difficulty, "MEDIUM")
+
+
+## Nome aceito no multiplayer: sem espaços nas pontas, até 14 letras, nunca vazio.
+static func clean_name(value: Variant) -> String:
+	var text: String = str(value).strip_edges().left(14)
+	return text if not text.is_empty() else "Player"
 
 
 ## Recurso de dificuldade dos bots correspondente à opção escolhida.

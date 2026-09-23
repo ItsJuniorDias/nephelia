@@ -65,6 +65,7 @@ func setup(for_character: Character) -> void:
 		weapon.reload_started.connect(_refresh_ammo)
 		weapon.reload_finished.connect(_refresh_ammo)
 		weapon.fired.connect(_on_fired)
+		weapon.hit_confirmed.connect(_on_hit_confirmed)
 		_refresh_ammo()
 
 
@@ -132,14 +133,16 @@ func _on_ammo_changed() -> void:
 	_refresh_ammo()
 
 
-func _on_fired(result: ShotResult) -> void:
+func _on_fired(_result: ShotResult) -> void:
 	_refresh_ammo()
-	# Causou dano em alguém: um "X" rápido na mira (o jogador precisa saber que pegou).
-	if result.victim != null and result.damage > 0.0:
-		_hit_marker_timer = HIT_MARKER_TIME
-		hit_marker.visible = true
-		# "Tic" de acerto: o jogador sabe que pegou mesmo sem olhar a mira.
-		Sounds.play_2d(self, Sounds.HIT_CONFIRM, -6.0)
+
+
+# Causou dano em alguém: um "X" rápido na mira (o jogador precisa saber que pegou).
+func _on_hit_confirmed(_result: ShotResult) -> void:
+	_hit_marker_timer = HIT_MARKER_TIME
+	hit_marker.visible = true
+	# "Tic" de acerto: o jogador sabe que pegou mesmo sem olhar a mira.
+	Sounds.play_2d(self, Sounds.HIT_CONFIRM, -6.0)
 
 
 func _on_health_changed(health: float, max_health: float) -> void:

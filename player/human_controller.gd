@@ -92,6 +92,12 @@ func _process(delta: float) -> void:
 
 
 func get_command(_delta: float) -> CharacterCommand:
+	# Pausa aberta no multiplayer (o jogo continua): o personagem fica parado, olhando igual.
+	if pause_menu.is_open():
+		command.reset()
+		command.yaw = character.yaw
+		command.pitch = character.pitch
+		return command
 	command.move = Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	# just_pressed pega toques rápidos que começam e terminam entre dois passos de física.
 	command.jump = Input.is_action_pressed("jump") or Input.is_action_just_pressed("jump")

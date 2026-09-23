@@ -5,6 +5,10 @@ extends Node
 ##
 ## Regras: cada abate vale 1 ponto. Cair da ilha conta como morte, mas não dá ponto a ninguém.
 ## A partida acaba quando o tempo zera ou alguém chega a `score_limit` abates.
+##
+## Multiplayer: só o anfitrião decide o fim (`authority`). O cliente conta os abates que chegam
+## (lista de abates na hora), mas o placar, o relógio e o fim vêm do anfitrião (`set_stats`,
+## `finish`, `restart`). Enquanto os jogadores carregam a arena, a partida espera (`waiting`).
 
 signal score_changed
 ## Alguém morreu. `killer` é null quando foi queda.
@@ -20,6 +24,10 @@ const GROUP: StringName = &"game_mode"
 
 var time_left: float = 0.0
 var is_finished: bool = false
+## Falso no cliente do multiplayer: o fim da partida e os renascimentos vêm do anfitrião.
+var authority: bool = true
+## Esperando os outros jogadores carregarem a arena (multiplayer): o relógio não anda.
+var waiting: bool = false
 
 ## Placar por personagem: {"kills": int, "deaths": int}.
 var _stats: Dictionary[Character, Dictionary] = {}
@@ -44,10 +52,10 @@ func _connect_to_referee() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if is_finished:
+	if is_finished or waiting:
 		return
 	time_left = maxf(time_left - delta, 0.0)
-	if time_left <= 0.0:
+	if time_left <= 0.0 and authority:
 		finish()
 
 
@@ -99,20 +107,33 @@ func finish() -> void:
 	match_finished.emit(get_ranking())
 
 
-## Começa de novo: zera o placar e o tempo e faz todo mundo renascer.
+## Começa de novo: zera o placar e o tempo e faz todo mundo renascer (no cliente do multiplayer,
+## quem faz renascer e devolve os itens é o anfitrião, pela rede).
 func restart() -> void:
 	get_tree().paused = false
 	_stats.clear()
 	time_left = duration
 	is_finished = false
-	var referee: MatchReferee = MatchReferee.find(self)
-	for node: Node in get_tree().get_nodes_in_group(&"characters"):
-		if referee != null:
-			referee.respawn_now(node as Character)
-	for node: Node in get_tree().get_nodes_in_group(Pickup.GROUP):
-		(node as Pickup).restore()
+	waiting = false
+	if authority:
+		var referee: MatchReferee = MatchReferee.find(self)
+		for node: Node in get_tree().get_nodes_in_group(&"characters"):
+			if referee != null:
+				referee.respawn_now(node as Character)
+		for node: Node in get_tree().get_nodes_in_group(Pickup.GROUP):
+			(node as Pickup).restore()
 	match_started.emit()
 	score_changed.emit()
+
+
+## Placar vindo do anfitrião (multiplayer): substitui o que o cliente contou.
+func set_stats(character: Character, kills: int, deaths: int) -> void:
+	_stats[character] = {"kills": kills, "deaths": deaths}
+
+
+## Tira do placar quem saiu da partida.
+func forget(character: Character) -> void:
+	_stats.erase(character)
 
 
 func _on_character_died(victim: Character, killer: Character) -> void:
@@ -123,7 +144,7 @@ func _on_character_died(victim: Character, killer: Character) -> void:
 		_stats_of(killer)["kills"] += 1
 	kill_happened.emit(killer, victim)
 	score_changed.emit()
-	if killer != null and get_kills(killer) >= score_limit:
+	if authority and killer != null and get_kills(killer) >= score_limit:
 		finish()
 
 

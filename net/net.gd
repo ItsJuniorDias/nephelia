@@ -1,0 +1,106 @@
+class_name Net
+extends Object
+## Sessão do multiplayer: se este aparelho joga sozinho, hospeda ou entrou na partida de outro, a
+## conexão aberta (`transport`) e quem está na sala (`roster`).
+##
+## Classe só de membros estáticos (como `Settings`): sobrevive à troca de cena do menu para a
+## arena, e os testes (`-s`) enxergam o nome. Quem cuida da partida em si é o `NetGame` (criado
+## pela arena: `NetHost` no anfitrião, `NetClient` nos outros).
+
+enum Mode { OFFLINE, HOST, CLIENT }
+
+## Jogadores humanos por partida (o anfitrião conta). Bots completam até `MIN_CHARACTERS`.
+const MAX_PLAYERS: int = 6
+const MIN_CHARACTERS: int = 4
+
+static var mode: Mode = Mode.OFFLINE
+static var transport: NetTransport
+## Quem está na sala: {id do aparelho: nome}. O anfitrião é `NetTransport.HOST_ID`.
+static var roster: Dictionary[int, String] = {}
+## Por que a última partida em rede acabou ("" = saiu por vontade própria). O menu mostra.
+static var last_error: String = ""
+
+
+static func is_online() -> bool:
+	return mode != Mode.OFFLINE and transport != null
+
+
+static func is_host() -> bool:
+	return mode == Mode.HOST and transport != null
+
+
+static func is_client() -> bool:
+	return mode == Mode.CLIENT and transport != null
+
+
+## Id deste aparelho na partida (0 = offline).
+static func local_id() -> int:
+	return transport.local_id if transport != null else 0
+
+
+## Abre uma sala no Wi-Fi local (este aparelho vira o anfitrião).
+static func host_lan(player_name: String, port: int = NetMessage.PORT) -> Error:
+	stop()
+	var enet := EnetTransport.new()
+	var err: Error = enet.host(port, MAX_PLAYERS - 1)
+	if err != OK:
+		return err
+	transport = enet
+	mode = Mode.HOST
+	roster = {NetTransport.HOST_ID: player_name}
+	last_error = ""
+	return OK
+
+
+## Entra na sala de outro aparelho pelo endereço dele (ex.: "192.168.0.12").
+static func join_lan(address: String, port: int = NetMessage.PORT) -> Error:
+	stop()
+	var enet := EnetTransport.new()
+	var err: Error = enet.join(address, port)
+	if err != OK:
+		return err
+	transport = enet
+	mode = Mode.CLIENT
+	roster = {}
+	last_error = ""
+	return OK
+
+
+## Fecha a conexão e volta a jogar sozinho. `reason` fica em `last_error` para o menu mostrar.
+static func stop(reason: String = "") -> void:
+	if transport != null:
+		if transport.is_open():
+			transport.send(0, NetMessage.pack(NetMessage.Type.LEAVE), true)
+		var old: NetTransport = transport
+		transport = null
+		old.close()
+	mode = Mode.OFFLINE
+	roster = {}
+	last_error = reason
+
+
+## Anfitrião: confere o HELLO de quem quer entrar. Devolve o motivo da recusa ("" = pode entrar).
+static func check_hello(data: Array, players_now: int) -> String:
+	if data.size() < 2 or not data[0] is int or not data[1] is String:
+		return "invalid request"
+	if data[0] != NetMessage.VERSION:
+		return "different game version"
+	if players_now >= MAX_PLAYERS:
+		return "the match is full"
+	return ""
+
+
+## Endereços deste aparelho na rede local (para o anfitrião dizer aos amigos onde entrar).
+static func local_addresses() -> PackedStringArray:
+	var found := PackedStringArray()
+	for address: String in IP.get_local_addresses():
+		if address.begins_with("192.168.") or address.begins_with("10.") or _is_private_172(address):
+			found.append(address)
+	return found
+
+
+static func _is_private_172(address: String) -> bool:
+	if not address.begins_with("172."):
+		return false
+	var parts: PackedStringArray = address.split(".")
+	return parts.size() == 4 and parts[1].to_int() >= 16 and parts[1].to_int() <= 31
