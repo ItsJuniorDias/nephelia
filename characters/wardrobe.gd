@@ -72,7 +72,11 @@ static func _wear(skeleton: Skeleton3D, part_name: String, part: CharacterPart) 
 	instance.name = part_name
 	instance.mesh = part.mesh
 	instance.skin = part.skin
-	# Filho do esqueleto: o caminho padrão ("..") já liga a malha a ele.
+	# Filho do esqueleto, ligado a ele. O caminho PRECISA ser dado: numa malha criada em código
+	# ele vem vazio (não ".."), e aí a malha fica parada na pose de descanso. A cabeça, o cabelo e
+	# o chapéu ficaram assim um tempo: parado não aparecia, mas correndo o corpo balançava e a
+	# cabeça ficava no ar (visto pelo usuário no vídeo do bot).
+	instance.skeleton = NodePath("..")
 	skeleton.add_child(instance)
 	return instance
 
@@ -146,6 +150,7 @@ static func _wear_hat(skeleton: Skeleton3D, look: CharacterLook, head_box: AABB)
 	var head_bone: int = skeleton.find_bone("Head")
 	skin.add_named_bind("Head", skeleton.get_bone_global_rest(head_bone).affine_inverse())
 	instance.skin = skin
+	instance.skeleton = NodePath("..")
 	skeleton.add_child(instance)
 
 

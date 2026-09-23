@@ -34,6 +34,8 @@ func _run() -> void:
 
 	_test_characters_dressed()
 	_test_first_person_sleeves()
+	_test_parts_follow_skeleton()
+	await _test_legs_turn_to_walk()
 	await _test_connected_and_spawns()
 	await _test_walk_across_bridge()
 	await _test_railing_holds()
@@ -408,6 +410,45 @@ func _test_characters_dressed() -> void:
 			and player_skin.albedo_color.is_equal_approx(Color.WHITE)
 	_check("C1 everyone wears the outfit; bots keep the bald colored head, the player has a cap",
 			player_ok and bots_ok and _bots.size() == 3, "player=%s %s" % [player_parts, ", ".join(details)])
+
+
+func _test_parts_follow_skeleton() -> void:
+	# Toda malha do corpo (roupa, cabeça, cabelo, chapéu) está ligada ao esqueleto. Malha criada em
+	# código vem com o caminho do esqueleto VAZIO: ficava parada na pose de descanso e, correndo, a
+	# cabeça ficava no ar enquanto o corpo balançava (visto pelo usuário no vídeo do bot).
+	var loose := PackedStringArray()
+	for character: Character in [_player] + _bots:
+		for node: Node in character.model.skeleton.get_children():
+			var mesh := node as MeshInstance3D
+			if mesh != null and mesh.skin != null and mesh.get_node_or_null(mesh.skeleton) != character.model.skeleton:
+				loose.append("%s/%s" % [character.name, mesh.name])
+	_check("C3 head, hair, hat and clothes all follow the skeleton (nothing stuck in the rest pose)",
+			loose.is_empty(), "loose=%s" % [loose])
+
+
+func _test_legs_turn_to_walk() -> void:
+	# Andando de lado, o quadril vira para o lado da caminhada (as pernas não "patinam") e o tronco
+	# continua na mira; de costas, a corrida toca ao contrário com as pernas para a frente.
+	# O bot fica parado (física desligada), mas com o modelo animando.
+	var bot: Character = _bots[0]
+	bot.process_mode = Node.PROCESS_MODE_INHERIT
+	bot.set_physics_process(false)
+	var model: CharacterModel = bot.model
+	var results: Array[String] = []
+	var ok: bool = true
+	for case: Array in [[90.0, 1.0, false], [-90.0, -1.0, false], [180.0, 0.0, true], [0.0, 0.0, false]]:
+		for i in 45:
+			model.update_motion(5.0, 0.0, false, deg_to_rad(case[0]))
+			await process_frame
+		var yaw: float = rad_to_deg(model.get_legs_yaw())
+		var side_ok: bool = absf(yaw) < 10.0 if case[1] == 0.0 else yaw * case[1] > 50.0
+		var torso_ok: bool = model.get_legs_modifier().torso_error < 0.01
+		ok = ok and side_ok and torso_ok and model.is_backpedaling() == case[2]
+		results.append("%d°: legs=%.0f° back=%s torso_err=%.3f" % [case[0], yaw, model.is_backpedaling(), model.get_legs_modifier().torso_error])
+	model.update_motion(0.0, 0.0, false, 0.0)
+	bot.set_physics_process(true)
+	bot.process_mode = Node.PROCESS_MODE_DISABLED
+	_check("C4 hips turn toward the walk (strafe/backpedal) while the torso keeps aiming", ok, ", ".join(results))
 
 
 func _test_first_person_sleeves() -> void:

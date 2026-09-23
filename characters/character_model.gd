@@ -9,6 +9,8 @@ extends Node3D
 ##   tronco e braços: pose de mirar a pistola, inclinada conforme o olhar (cima/baixo)
 ##   por cima: tiro e "levou tiro" (só no tronco); morte troca tudo pela queda.
 ## Pendurado no trilho, o RailGripModifier levanta o braço esquerdo até o trilho.
+## Andando de lado ou de costas, o LegsYawModifier vira o quadril para onde ele vai (e a corrida
+## toca ao contrário de costas): as pernas não "patinam" e o tronco continua na mira.
 
 const ANIMATIONS: AnimationLibrary = preload("res://assets/animations/quaternius_ual/character_animations.res")
 ## Deste osso para cima o corpo segue a pose de mira (as pernas continuam andando).
@@ -24,6 +26,16 @@ const PROTECTION_ENERGY: float = 0.45
 ## Rapidez (por segundo) das trocas de pose: pernas de pulo e braço no trilho.
 const AIR_BLEND_SPEED: float = 6.0
 const GRIP_BLEND_SPEED: float = 8.0
+## Quanto o quadril pode girar para o lado da caminhada (mais que isso torceria demais a cintura).
+const LEGS_MAX_YAW: float = deg_to_rad(70.0)
+## Rapidez com que o quadril acompanha a direção (por segundo).
+const LEGS_TURN_SPEED: float = 10.0
+## Abaixo disso (m/s) as pernas voltam para a frente.
+const LEGS_MIN_SPEED: float = 0.8
+## Andar "de costas" começa passando deste ângulo e acaba abaixo do outro (sem ficar trocando
+## a cada passo quando anda bem de lado).
+const BACKPEDAL_ENTER: float = deg_to_rad(110.0)
+const BACKPEDAL_LEAVE: float = deg_to_rad(70.0)
 
 ## Cor de identificação do personagem (tinge o tecido da roupa).
 @export var tint: Color = Color.WHITE:
@@ -43,6 +55,11 @@ var _airborne: bool = false
 var _hanging: bool = false
 var _air_amount: float = 0.0
 var _grip: RailGripModifier
+var _legs: LegsYawModifier
+var _speed: float = 0.0
+var _move_angle: float = 0.0
+var _backpedal: bool = false
+var _locomotion_scale: float = 1.0
 
 ## Arma na mão direita (criada em código por GunMount) e o suporte dela no corpo.
 var gun: MeshInstance3D
@@ -73,6 +90,15 @@ func _ready() -> void:
 	_grip.influence = 0.0
 	_grip.active = false
 	skeleton.add_child(_grip)
+	# O quadril gira ANTES das pegadas da arma e do trilho (os braços vão para onde o tronco está).
+	_legs = LegsYawModifier.new()
+	_legs.name = "LegsYaw"
+	_legs.active = false
+	skeleton.add_child(_legs)
+	for child: Node in skeleton.get_children():
+		if child is SkeletonModifier3D and child != _legs:
+			skeleton.move_child(_legs, child.get_index())
+			break
 
 
 ## Troca a arma que aparece na mão (o Character avisa quando o jogador pega outra).
@@ -97,9 +123,12 @@ func _process(delta: float) -> void:
 
 
 ## Atualiza pernas e mira. `speed` em m/s (horizontal); `aim_pitch` em radianos (+ = cima);
-## `airborne` = fora do chão (pernas na pose de pulo).
-func update_motion(speed: float, aim_pitch: float, airborne: bool = false) -> void:
+## `airborne` = fora do chão (pernas na pose de pulo); `move_angle` = para onde ele anda em relação
+## à frente dele (radianos em volta do eixo vertical: 0 = frente, +90° = esquerda, 180° = costas).
+func update_motion(speed: float, aim_pitch: float, airborne: bool = false, move_angle: float = 0.0) -> void:
 	_airborne = airborne
+	_speed = speed
+	_move_angle = move_angle
 	_tree.set(&"parameters/locomotion/blend_position", speed)
 	_tree.set(&"parameters/aim/blend_position", clampf(aim_pitch / AIM_PITCH_RANGE, -1.0, 1.0))
 	# A arma longa fica apoiada no corpo: é ela que sobe e desce com a mira (e os braços vão junto).
@@ -110,6 +139,20 @@ func update_motion(speed: float, aim_pitch: float, airborne: bool = false) -> vo
 func set_hanging(hanging: bool, grip_height: float = 2.0) -> void:
 	_hanging = hanging
 	_grip.grip_height = grip_height
+
+
+## Quanto o quadril está virado para o lado da caminhada agora (radianos).
+func get_legs_yaw() -> float:
+	return _legs.yaw
+
+
+## Andando de costas (corrida tocada ao contrário).
+func is_backpedaling() -> bool:
+	return _backpedal
+
+
+func get_legs_modifier() -> LegsYawModifier:
+	return _legs
 
 
 func is_hanging_pose() -> bool:
@@ -183,10 +226,30 @@ func _update_pose_blends(delta: float) -> void:
 	if _air_amount != air_goal:
 		_air_amount = move_toward(_air_amount, air_goal, delta * AIR_BLEND_SPEED)
 		_tree.set(&"parameters/air/blend_amount", _air_amount)
+	_update_legs(delta)
 	var grip_goal: float = 1.0 if _hanging else 0.0
 	if _grip.influence != grip_goal:
 		_grip.influence = move_toward(_grip.influence, grip_goal, delta * GRIP_BLEND_SPEED)
 		_grip.active = _grip.influence > 0.0
+
+
+# Quadril virado para onde ele anda (de costas: para a frente, com a corrida ao contrário).
+func _update_legs(delta: float) -> void:
+	var target: float = 0.0
+	if _speed >= LEGS_MIN_SPEED and not _airborne and not _hanging:
+		_backpedal = absf(_move_angle) > (BACKPEDAL_LEAVE if _backpedal else BACKPEDAL_ENTER)
+		var angle: float = wrapf(_move_angle + PI, -PI, PI) if _backpedal else _move_angle
+		target = clampf(angle, -LEGS_MAX_YAW, LEGS_MAX_YAW)
+	else:
+		_backpedal = false
+	_legs.yaw = lerp_angle(_legs.yaw, target, 1.0 - exp(-LEGS_TURN_SPEED * delta))
+	if absf(_legs.yaw) < 0.001 and is_zero_approx(target):
+		_legs.yaw = 0.0
+	_legs.active = _legs.yaw != 0.0
+	var scale: float = -1.0 if _backpedal else 1.0
+	if scale != _locomotion_scale:
+		_locomotion_scale = scale
+		_tree.set(&"parameters/locomotion_speed/scale", scale)
 
 
 func _apply_tint() -> void:
@@ -234,6 +297,8 @@ func _build_tree() -> void:
 
 	var blend_tree := AnimationNodeBlendTree.new()
 	blend_tree.add_node(&"locomotion", locomotion)
+	# De costas a corrida toca ao contrário (escala -1).
+	blend_tree.add_node(&"locomotion_speed", AnimationNodeTimeScale.new())
 	blend_tree.add_node(&"air_clip", _clip(&"Jump"))
 	blend_tree.add_node(&"air", AnimationNodeBlend2.new())
 	blend_tree.add_node(&"aim", aim)
@@ -244,7 +309,8 @@ func _build_tree() -> void:
 	blend_tree.add_node(&"hit", hit)
 	blend_tree.add_node(&"death_clip", _clip(&"Death01"))
 	blend_tree.add_node(&"life", life)
-	blend_tree.connect_node(&"air", 0, &"locomotion")
+	blend_tree.connect_node(&"locomotion_speed", 0, &"locomotion")
+	blend_tree.connect_node(&"air", 0, &"locomotion_speed")
 	blend_tree.connect_node(&"air", 1, &"air_clip")
 	blend_tree.connect_node(&"upper", 0, &"air")
 	blend_tree.connect_node(&"upper", 1, &"aim")

@@ -118,6 +118,17 @@ ao longo de várias sessões; o usuário testa e dá feedback.
 - Fotos de conferência (`tools/character_sheet.gd`, `tools/pose_sheet.gd`): rodar com janela e
   `-- <pasta>`; cada foto espera quadros realmente desenhados (com a janela escondida o macOS para
   de desenhar e as fotos saíam repetidas).
+- **Malha skinned criada em código precisa de `skeleton = NodePath("..")`**: o padrão de um
+  `MeshInstance3D.new()` é VAZIO. A cabeça, o cabelo e o chapéu (Wardrobe) ficaram assim até
+  2026-09-23: presos na pose de descanso, sem seguir animação nenhuma. Parado não aparecia; correndo,
+  o corpo balançava e a cabeça ficava no ar (o usuário viu no vídeo do bot). Teste C3 confere.
+- Pernas: `characters/legs_yaw_modifier.gd` (LegsYawModifier, primeiro modificador do esqueleto) vira
+  o quadril até 70° para o lado da caminhada e destorce `spine_01` na mesma medida (tronco na mira);
+  de costas a corrida toca ao contrário (`locomotion_speed` = -1 na árvore). O Character passa o
+  ângulo da caminhada em `update_motion`. As animações do UAL grátis só têm corrida para a frente.
+- Vídeo de conferência: `tools/motion_video.gd` grava um bot andando em todas as direções
+  (`--write-movie`, ver o cabeçalho). Não há ffmpeg: para mostrar ao usuário, juntar os quadros
+  num GIF (quadros crus pelo Godot + codificador GIF em Python puro).
 - Modelo dos personagens: `characters/character_model.tscn` (corpo montado pelo Wardrobe + arma na
   mão direita) com árvore de animação montada em código: pernas por velocidade, tronco em pose de
   mira (filtrado a partir de `spine_01`), tiro/levar tiro por cima, transição vida/morte. Animações
@@ -353,6 +364,8 @@ Atualizar esta seção ao fim de cada sessão.
   - Ícone do jogo (emblema Art Déco, gerado com `tools/make_icon.py`) aplicado.
   - Polish com o que é grátis (pedido do usuário, 2026-09-23), etapa 1 feita: efeitos visuais
     (fumaça, faíscas, poeira, marcas de tiro, nuvem ao sumir, anel ao nascer, faíscas no trilho).
-    39 + 8 + 16 + 10 + 6 + 7 testes passando. Próximas etapas: animações que sobram no UAL
-    (corrida, começo e fim do pulo, tiro na cabeça, dança) e enfeitar a arena com o Nature Kit.
+    Etapa 2 (aprovada pelo usuário com vídeo): cabeça, cabelo e chapéu presos ao esqueleto (antes
+    ficavam parados no ar) e pernas virando para o lado da caminhada. 39 + 8 + 18 + 10 + 6 + 7
+    testes passando. Próxima (pedido do usuário): posição das armas nas mãos, com fotos de
+    depuração antes/depois para ele aprovar. Depois: começo e fim do pulo e o Nature Kit.
   - Próximo: seguir o polish; depois Tarefa 11 (desempenho no iPhone) ou o que o usuário pedir.

@@ -196,7 +196,13 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 	_left_rail = false
-	model.update_motion(Vector2(velocity.x, velocity.z).length(), pitch, not is_on_floor())
+	# Direção da caminhada em relação à frente do corpo (as pernas do modelo viram para lá).
+	var planar := Vector3(velocity.x, 0.0, velocity.z)
+	var move_angle: float = 0.0
+	if planar.length() > 0.1:
+		var local: Vector3 = global_basis.inverse() * planar
+		move_angle = atan2(-local.x, -local.z)
+	model.update_motion(planar.length(), pitch, not is_on_floor(), move_angle)
 
 
 ## Está no chão (como is_on_floor(), mas sem o valor velho logo depois de soltar do trilho).
