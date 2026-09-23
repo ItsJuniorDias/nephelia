@@ -13,7 +13,7 @@ const FILE := "user://settings.cfg"
 const DIFFICULTIES: Array[StringName] = [&"easy", &"medium", &"hard"]
 ## Nome de cada dificuldade na tela.
 const DIFFICULTY_LABELS: Dictionary = {
-	&"easy": "FÁCIL", &"medium": "MÉDIO", &"hard": "DIFÍCIL",
+	&"easy": "EASY", &"medium": "MEDIUM", &"hard": "HARD",
 }
 
 ## Multiplicador da sensibilidade do olhar (1 = o que o jogo traz de fábrica).
@@ -83,7 +83,7 @@ static func next_difficulty() -> void:
 
 
 static func difficulty_label() -> String:
-	return DIFFICULTY_LABELS.get(difficulty, "MÉDIO")
+	return DIFFICULTY_LABELS.get(difficulty, "MEDIUM")
 
 
 ## Recurso de dificuldade dos bots correspondente à opção escolhida.

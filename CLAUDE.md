@@ -21,6 +21,8 @@ ao longo de várias sessões; o usuário testa e dá feedback.
 ## Idioma
 - Conversar com o usuário em português do Brasil.
 - Código, arquivos, nós, variáveis e ações do Input Map em inglês.
+- Textos do JOGO (tudo que o jogador vê) só em inglês, sem opção de idioma (pedido do usuário,
+  2026-09-23). Os comentários do código continuam em português.
 
 ## Tecnologia
 - Godot 4.7.2 (versão padrão, sem .NET), GDScript com tipagem estática.

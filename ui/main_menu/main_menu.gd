@@ -50,4 +50,4 @@ func _on_quit() -> void:
 
 
 func _refresh_difficulty() -> void:
-	difficulty_button.text = "DIFICULDADE: %s" % Settings.difficulty_label()
+	difficulty_button.text = "DIFFICULTY: %s" % Settings.difficulty_label()

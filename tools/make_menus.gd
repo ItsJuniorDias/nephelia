@@ -49,14 +49,14 @@ func _build_options() -> Control:
 	rows.name = "Rows"
 	rows.add_theme_constant_override(&"separation", 18)
 	panel.add_child(rows)
-	_heading(rows, "OPÇÕES")
+	_heading(rows, "OPTIONS")
 
-	_slider_row(rows, "Sensitivity", "SENSIBILIDADE", 0.3, 3.0, 0.05)
-	_slider_row(rows, "Buttons", "TAMANHO DOS BOTÕES", 0.7, 1.6, 0.05)
+	_slider_row(rows, "Sensitivity", "SENSITIVITY", 0.3, 3.0, 0.05)
+	_slider_row(rows, "Buttons", "BUTTON SIZE", 0.7, 1.6, 0.05)
 	_slider_row(rows, "Volume", "VOLUME", 0.0, 1.0, 0.05)
-	_slider_row(rows, "Music", "MÚSICA", 0.0, 1.0, 0.05)
+	_slider_row(rows, "Music", "MUSIC", 0.0, 1.0, 0.05)
 
-	var back := _button("BackButton", "VOLTAR")
+	var back := _button("BackButton", "BACK")
 	rows.add_child(back)
 	_own(root, root)
 	return root
@@ -107,7 +107,7 @@ func _build_main_menu() -> Control:
 
 	var subtitle := Label.new()
 	subtitle.name = "Subtitle"
-	subtitle.text = "ARENA NAS NUVENS"
+	subtitle.text = "ARENA IN THE CLOUDS"
 	subtitle.add_theme_font_size_override(&"font_size", 14)
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	subtitle.add_theme_color_override(&"font_color", Color(0.75, 0.85, 0.82))
@@ -118,9 +118,9 @@ func _build_main_menu() -> Control:
 	spacer.custom_minimum_size = Vector2(0, 14)
 	rows.add_child(spacer)
 
-	var items: Array[Button] = [_menu_item("PlayButton", "JOGAR"),
-			_menu_item("DifficultyButton", "DIFICULDADE: MÉDIO"), _menu_item("OptionsButton", "OPÇÕES"),
-			_menu_item("QuitButton", "SAIR")]
+	var items: Array[Button] = [_menu_item("PlayButton", "PLAY"),
+			_menu_item("DifficultyButton", "DIFFICULTY: MEDIUM"), _menu_item("OptionsButton", "OPTIONS"),
+			_menu_item("QuitButton", "QUIT")]
 	for i: int in items.size():
 		rows.add_child(_separator("Separator%d" % i))
 		rows.add_child(items[i])
@@ -158,11 +158,11 @@ func _build_pause() -> CanvasLayer:
 	rows.name = "Rows"
 	rows.add_theme_constant_override(&"separation", 16)
 	frame.add_child(rows)
-	_heading(rows, "PAUSA")
+	_heading(rows, "PAUSED")
 
-	rows.add_child(_button("ResumeButton", "CONTINUAR"))
-	rows.add_child(_button("OptionsButton", "OPÇÕES"))
-	rows.add_child(_button("MenuButton", "MENU PRINCIPAL"))
+	rows.add_child(_button("ResumeButton", "RESUME"))
+	rows.add_child(_button("OptionsButton", "OPTIONS"))
+	rows.add_child(_button("MenuButton", "MAIN MENU"))
 
 	var options: Node = (load(OPTIONS_OUT) as PackedScene).instantiate()
 	options.name = "OptionsMenu"

@@ -61,8 +61,8 @@ func _test_menu_buttons() -> void:
 		if child is Button:
 			buttons.append((child as Button).text)
 	_check("M1 the main menu shows play, difficulty, options and quit", buttons.size() == 4
-			and buttons[0] == "JOGAR" and buttons[1].begins_with("DIFICULDADE")
-			and buttons[2] == "OPÇÕES" and buttons[3] == "SAIR", "botões=%s" % [buttons])
+			and buttons[0] == "PLAY" and buttons[1].begins_with("DIFFICULTY")
+			and buttons[2] == "OPTIONS" and buttons[3] == "QUIT", "botões=%s" % [buttons])
 	await _close(menu)
 
 
@@ -78,7 +78,7 @@ func _test_difficulty_saves() -> void:
 	Settings.difficulty = &"medium"
 	Settings.load_settings()
 	_check("M2 the difficulty button cycles and the choice is saved",
-			before.ends_with("FÁCIL") and chosen == &"medium" and Settings.difficulty == chosen,
+			before.ends_with("EASY") and chosen == &"medium" and Settings.difficulty == chosen,
 			"antes=%s escolhida=%s salva=%s" % [before, chosen, Settings.difficulty])
 	await _close(menu)
 
