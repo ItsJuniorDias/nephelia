@@ -253,6 +253,17 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   `levels/arena_ambience.gd` (criado pelo ArenaSetup): vento e música da partida. Música e sons de
   interface tocam com o jogo pausado (`PROCESS_MODE_ALWAYS`). Loops: marcar no `.import`
   (`loop=true` no OGG, `edit/loop_mode=2` no WAV).
+- Efeitos visuais: `vfx/vfx.gd` (Vfx, funções estáticas: fumaça e clarão do cano, faíscas, poeira e
+  marca do tiro, nuvem no corpo atingido, poeira da aterrissagem, fumaça do corpo que some, anel de
+  quem renasce, faíscas do gancho) com imagens do Kenney Particle Pack em `assets/vfx/kenney/` (256 px,
+  com mipmaps). O `ShotEffects` usa por raio (`ShotResult.ray_normals`/`ray_hit_character`; a
+  espingarda deixa uma marca por chumbo, até `MAX_MARKS`); `characters/character_effects.gd`
+  (CharacterEffects, criado em código pelo Character) cuida do trilho, da queda, da morte e do
+  renascimento. **`CPUParticles3D` criado em código nasce com `emitting = true`** e solta tudo ao
+  entrar na cena, ainda na origem do mapa (dentro do monumento da praça): criar DESLIGADO, posicionar
+  e chamar `restart()`. Por isso as faíscas antigas do tiro nunca apareceram (e usavam uma imagem de
+  raio elétrico). Brilho somado (`BLEND_MODE_ADD`) some contra o céu claro: faíscas do trilho usam
+  mistura normal. Conferir com `tools/effects_sheet.gd` (fotos; ver o cabeçalho).
 - Ícone: `ui/icon/app_icon.png` (1024 x 1024, sem transparência), em `config/icon` e no iOS
   `icons/icon_1024x1024` (os outros tamanhos vazios do preset usam o `config/icon`, o mesmo arquivo). Feito por IA com `tools/make_icon.py` (Python:
   OpenRouter + Nano Banana `google/gemini-2.5-flash-image`; chave em `.env`, fora do Git): `generate`
@@ -339,4 +350,9 @@ Atualizar esta seção ao fim de cada sessão.
     39 + 8 + 12 + 10 + 6 testes passando.
   - Tarefa 10 (áudio) feita: passos por tipo de chão, recargas, trilho, vento, interface e
     ragtime em domínio público. O tiro continua o sintetizado (o usuário não gostou dos gravados). 39 + 8 + 12 + 10 + 6 + 7 testes passando.
-  - Próximo: Tarefa 11 (desempenho no iPhone) ou o que o usuário pedir.
+  - Ícone do jogo (emblema Art Déco, gerado com `tools/make_icon.py`) aplicado.
+  - Polish com o que é grátis (pedido do usuário, 2026-09-23), etapa 1 feita: efeitos visuais
+    (fumaça, faíscas, poeira, marcas de tiro, nuvem ao sumir, anel ao nascer, faíscas no trilho).
+    39 + 8 + 16 + 10 + 6 + 7 testes passando. Próximas etapas: animações que sobram no UAL
+    (corrida, começo e fim do pulo, tiro na cabeça, dança) e enfeitar a arena com o Nature Kit.
+  - Próximo: seguir o polish; depois Tarefa 11 (desempenho no iPhone) ou o que o usuário pedir.

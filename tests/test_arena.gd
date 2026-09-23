@@ -40,6 +40,7 @@ func _run() -> void:
 	await _test_hook_and_ride_rail()
 	await _test_hook_hidden_without_rail()
 	await _test_death_on_rail()
+	await _test_visual_effects()
 	await _test_bot_rides_rail()
 	await _test_bots_play_the_arena()
 
@@ -183,14 +184,16 @@ func _test_hook_and_ride_rail() -> void:
 	var start_offset: float = rail.closest_offset(_player.global_position)
 	await _physics(_seconds(1.0))
 	var travelled: float = absf(rail.closest_offset(_player.global_position) - start_offset)
+	var sparking: bool = (_player.get_node("CharacterEffects") as CharacterEffects).is_sparking()
 	# Atirar pendurado funciona.
 	var ammo_before: int = _player.weapon.ammo
 	await _press(&"fire")
 	var fired: bool = _player.weapon.ammo == ammo_before - 1
 	_check("R1 HOOK shows near a rail, hooks the player and hangs him below it", hint_shown and hanging and grip_pose,
 			"hint=%s hanging=%s grip_pose=%s pos=%s" % [hint_shown, hanging, grip_pose, _player.global_position])
-	_check("R2 rides along the rail (> 8 m/s) and can shoot while hanging", travelled > 8.0 and fired,
-			"travelled=%.1f m/s fired=%s" % [travelled, fired])
+	_check("R2 rides along the rail (> 8 m/s), can shoot while hanging and the hook throws sparks",
+			travelled > 8.0 and fired and sparking,
+			"travelled=%.1f m/s fired=%s sparking=%s" % [travelled, fired, sparking])
 	# Deixa ir até o fim (sobre a ilha leste): sai freado e cai em pé na ilha.
 	for i in _seconds(6.0):
 		await physics_frame
@@ -236,6 +239,111 @@ func _test_death_on_rail() -> void:
 	await _physics(5)
 	_check("R5 dying while hanging drops the rail", was_on_rail and detached and _player.is_alive and not _player.is_on_rail,
 			"was_on_rail=%s detached=%s" % [was_on_rail, detached])
+
+
+# Efeitos visuais (Vfx) nascem onde aconteceram: um CPUParticles3D criado ligado soltava tudo na
+# origem do mapa, escondido dentro do monumento da praça, e nada aparecia (nem as faíscas antigas).
+func _test_visual_effects() -> void:
+	var effects: ShotEffects = _level.get_node("ShotEffects")
+	var spawned: Array[Node] = []
+	var collect := func(node: Node) -> void: spawned.append(node)
+	effects.child_entered_tree.connect(collect)
+	_level.child_entered_tree.connect(collect)
+
+	# Um bot (visto de fora) atira na parede da rua leste: clarão, fumaça, faíscas, poeira e marca.
+	var shooter: Character = _bots[0]
+	shooter.teleport(Transform3D(Basis(Vector3.UP, deg_to_rad(-90.0)), Vector3(4.0, 0.05, -14.0)))
+	_place(_player, Vector3(16, 0.05, 8), Vector3(16, 0, 0))
+	await _physics(3)
+	var marks_before: int = effects.get_mark_count()
+	var origin: Vector3 = shooter.head.global_position
+	var wall_shot: ShotResult = _referee.resolve_shot(shooter, shooter.weapon, origin,
+			(Vector3(10.0, 1.4, -14.0) - origin).normalized(), false)
+	await process_frame
+	await process_frame
+	var names: PackedStringArray = _names(spawned)
+	var dust := _first(spawned, "ImpactDust") as CPUParticles3D
+	var dust_gap: float = _particles_center(dust).distance_to(wall_shot.end_point) if dust != null else INF
+	_check("V1 a shot at a wall shows muzzle flash and smoke, sparks, dust (at the wall) and a mark",
+			wall_shot.hit and wall_shot.victim == null and "MuzzleFlash" in names and "MuzzleSmoke" in names
+			and "ImpactSparks" in names and dust_gap < 1.0 and effects.get_mark_count() == marks_before + 1,
+			"spawned=%s dust_gap=%.2f marks=%d->%d" % [names, dust_gap, marks_before, effects.get_mark_count()])
+
+	# O jogador (1ª pessoa) acerta um bot: nuvem no corpo, sem marca e sem o clarão de fora.
+	var target: Character = _bots[1]
+	target.disable_mode = CollisionObject3D.DISABLE_MODE_KEEP_ACTIVE
+	target.teleport(Transform3D(Basis.IDENTITY, Vector3(16, 0.05, 3)))
+	await _physics(3)
+	spawned.clear()
+	marks_before = effects.get_mark_count()
+	var eye: Vector3 = _player.head.global_position
+	var body_shot: ShotResult = _referee.resolve_shot(_player, _player.weapon, eye,
+			(target.global_position + Vector3.UP * 1.2 - eye).normalized(), false)
+	await process_frame
+	await process_frame
+	names = _names(spawned)
+	target.set_health(target.max_health)
+	target.disable_mode = CollisionObject3D.DISABLE_MODE_REMOVE
+	_check("V2 hitting someone makes a small puff on the body (no wall mark, no outside flash in first person)",
+			body_shot.victim == target and "BodyPuff" in names and "MuzzleSmoke" in names
+			and not "MuzzleFlash" in names and effects.get_mark_count() == marks_before,
+			"victim=%s spawned=%s" % [body_shot.victim.name if body_shot.victim else "none", names])
+
+	# Morreu e renasceu: o corpo some numa nuvem onde estava e um anel aparece onde ele nasce.
+	var victim: Character = _bots[2]
+	victim.teleport(Transform3D(Basis.IDENTITY, Vector3(-16, 0.05, 4)))
+	await physics_frame
+	var body_at: Vector3 = victim.global_position
+	_referee.kill(victim, null)
+	await physics_frame
+	spawned.clear()
+	_referee.respawn_now(victim)
+	await process_frame
+	var poof := _first(spawned, "DeathPoof") as CPUParticles3D
+	var ring := _first(spawned, "SpawnRing") as Node3D
+	var poof_gap: float = _particles_center(poof).distance_to(body_at) if poof != null else INF
+	var ring_gap: float = ring.global_position.distance_to(victim.global_position) if ring != null else INF
+	_check("V3 the dead body vanishes in a puff where it lay and a golden ring marks the respawn",
+			poof_gap < 2.0 and ring_gap < 0.5, "poof_gap=%.2f ring_gap=%.2f" % [poof_gap, ring_gap])
+
+	# Cair de uma altura levanta poeira nos pés.
+	spawned.clear()
+	_player.teleport(Transform3D(Basis.IDENTITY, Vector3(16, 8, -4)))
+	# O "está no chão" logo depois do teletransporte ainda é o de antes: espera chegar embaixo.
+	for i in _seconds(3.0):
+		await physics_frame
+		if _player.is_grounded() and _player.global_position.y < 1.0:
+			break
+	await _physics(2)
+	var landing := _first(spawned, "LandingDust") as Node3D
+	var landing_gap: float = landing.global_position.distance_to(_player.global_position) if landing != null else INF
+	_check("V4 landing from a height raises dust at the feet", landing_gap < 1.0, "gap=%.2f" % landing_gap)
+
+	effects.child_entered_tree.disconnect(collect)
+	_level.child_entered_tree.disconnect(collect)
+
+
+func _names(nodes: Array[Node]) -> PackedStringArray:
+	var names := PackedStringArray()
+	for node: Node in nodes:
+		if is_instance_valid(node):
+			# Nomes repetidos ganham número no fim ("ImpactDust2"): fica só o nome do efeito.
+			names.append(String(node.name).rstrip("0123456789"))
+	return names
+
+
+func _first(nodes: Array[Node], effect_name: String) -> Node:
+	for node: Node in nodes:
+		if is_instance_valid(node) and String(node.name).rstrip("0123456789") == effect_name:
+			return node
+	return null
+
+
+# Centro das partículas vivas, no mundo.
+func _particles_center(particles: CPUParticles3D) -> Vector3:
+	if particles == null:
+		return Vector3.INF
+	return particles.global_transform * particles.capture_aabb().get_center()
 
 
 func _test_bot_rides_rail() -> void:

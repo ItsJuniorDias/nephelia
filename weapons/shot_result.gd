@@ -12,6 +12,10 @@ var direction: Vector3 = Vector3.FORWARD
 var end_point: Vector3 = Vector3.ZERO
 ## Onde terminaram os outros chumbos (espingarda); vazio nas armas de uma bala só.
 var pellet_points: PackedVector3Array = PackedVector3Array()
+## Para cada raio (o 1º termina no `end_point`, os outros nos `pellet_points`): a normal da
+## superfície atingida (ZERO = não acertou nada) e se o que ele acertou foi um personagem.
+var ray_normals: PackedVector3Array = PackedVector3Array()
+var ray_hit_character: Array[bool] = []
 ## Acertou alguma coisa (cenário ou personagem).
 var hit: bool = false
 var hit_normal: Vector3 = Vector3.UP

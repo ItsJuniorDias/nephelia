@@ -7,7 +7,6 @@
 [ext_resource type="NavigationMesh" path="res://levels/test_level_navmesh.tres" id="12_navmesh"]
 [ext_resource type="Script" path="res://levels/arena_navigation.gd" id="13_navigation"]
 [ext_resource type="Script" path="res://weapons/shot_effects.gd" id="5_effects"]
-[ext_resource type="Texture2D" path="res://assets/vfx/kenney/spark_01.png" id="6_spark"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/nephelia/revolver_shot_placeholder.wav" id="7_shot"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/kenney/impactGeneric_light_000.ogg" id="8_body_hit"]
 [ext_resource type="AudioStream" path="res://assets/audio/sfx/kenney/impactMetal_light_000.ogg" id="9_hit_metal"]
@@ -75,7 +74,6 @@ script = ExtResource("11_deathmatch")
 
 [node name="ShotEffects" type="Node3D" parent="."]
 script = ExtResource("5_effects")
-spark_texture = ExtResource("6_spark")
 shot_sound = ExtResource("7_shot")
 body_hit_sound = ExtResource("8_body_hit")
 world_hit_sounds = Array[AudioStream]([ExtResource("9_hit_metal"), ExtResource("10_hit_wood")])

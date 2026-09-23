@@ -130,6 +130,10 @@ func _ready() -> void:
 	var sounds := CharacterAudio.new()
 	add_child(sounds)
 	sounds.setup(self)
+	# Efeitos visuais (faíscas no trilho, poeira, fumaça ao sumir, brilho ao nascer), idem.
+	var effects := CharacterEffects.new()
+	add_child(effects)
+	effects.setup(self)
 
 
 func _physics_process(delta: float) -> void:

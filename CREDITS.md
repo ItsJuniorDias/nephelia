@@ -21,7 +21,7 @@ ficam fora do projeto, em `~/Downloads/nephelia_assets/`.
 | Mobile Controls | Kenney | CC0 1.0 | https://kenney.nl/assets/mobile-controls |
 | Crosshair Pack | Kenney | CC0 1.0 | https://kenney.nl/assets/crosshair-pack |
 | UI Pack | Kenney | CC0 1.0 | https://kenney.nl/assets/ui-pack |
-| Particle Pack | Kenney | CC0 1.0 | https://kenney.nl/assets/particle-pack |
+| Particle Pack (fumaça, poeira, brilhos, anel e clarão dos efeitos) | Kenney | CC0 1.0 | https://kenney.nl/assets/particle-pack |
 | Impact Sounds | Kenney | CC0 1.0 | https://kenney.nl/assets/impact-sounds |
 | Interface Sounds | Kenney | CC0 1.0 | https://kenney.nl/assets/interface-sounds |
 | Prototype Textures | Kenney | CC0 1.0 | https://kenney.nl/assets/prototype-textures |

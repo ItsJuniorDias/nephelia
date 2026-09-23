@@ -192,6 +192,8 @@ func resolve_shot(shooter: Character, weapon: Weapon, origin: Vector3, direction
 			if pellet == 0 or not result.hit:
 				result.hit = true
 				result.hit_normal = hit.normal
+		result.ray_normals.append(Vector3.ZERO if hit.is_empty() else hit.normal)
+		result.ray_hit_character.append(victim != null)
 		if pellet == 0:
 			result.direction = pellet_aim
 			result.end_point = end_point

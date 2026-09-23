@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dqs2vyttl57gi"
-path="res://.godot/imported/spark_01.png-66ce08f74e38f0472bea6afa350a580a.ctex"
+uid="uid://cw4k7lo0t8g2f"
+path="res://.godot/imported/smoke_07.png-c2285a2992098c570d5111edf62d6559.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/vfx/kenney/spark_01.png"
-dest_files=["res://.godot/imported/spark_01.png-66ce08f74e38f0472bea6afa350a580a.ctex"]
+source_file="res://assets/vfx/kenney/smoke_07.png"
+dest_files=["res://.godot/imported/smoke_07.png-c2285a2992098c570d5111edf62d6559.ctex"]
 
 [params]
 
@@ -23,7 +23,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=false
+mipmaps/generate=true
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
