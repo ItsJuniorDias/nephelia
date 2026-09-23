@@ -24,6 +24,8 @@
 [ext_resource type="ArrayMesh" path="res://levels/skyplaza/meshes/east_shop_2.res" id="22_o7rsa"]
 [ext_resource type="ArrayMesh" path="res://levels/skyplaza/meshes/east_shop_3.res" id="23_5tt5d"]
 [ext_resource type="ArrayMesh" path="res://levels/skyplaza/meshes/east_props.res" id="24_xt36d"]
+[ext_resource type="Texture2D" path="res://assets/textures/juliovii/grass_01_basecolor.jpg" id="grass_albedo"]
+[ext_resource type="Texture2D" path="res://assets/textures/juliovii/grass_01_normal.jpg" id="grass_normal"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_3556c"]
 albedo_color = Color(0.86, 0.8, 0.7, 1)
@@ -415,7 +417,14 @@ size = Vector2(3, 32)
 size = Vector2(7, 32)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6cj4j"]
-albedo_color = Color(0.42, 0.62, 0.3, 1)
+albedo_color = Color(0.72, 0.86, 0.72, 1)
+albedo_texture = ExtResource("grass_albedo")
+normal_enabled = true
+normal_scale = 0.6
+normal_texture = ExtResource("grass_normal")
+uv1_scale = Vector3(0.25, 0.25, 0.25)
+uv1_triplanar = true
+uv1_world_triplanar = true
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_pf1ab"]
 size = Vector2(8, 32)

@@ -21,6 +21,17 @@ extends SceneTree
 
 const CITY := "res://assets/models/city/downtown/"
 const NATURE := "res://assets/models/nature/stylized/"
+## Texturas de chão pintadas à mão (Stylized Grass & Dirt, JulioVII, CC-BY: ver CREDITS.md).
+const GROUND := "res://assets/textures/juliovii/"
+## Tufos de capim e flores soltas espalhados pelo gramado: [modelo, quantos a cada m², escala mín., máx.].
+## O "capim curto" do Nature Kit tem 1,3 m de altura: aqui fica entre 45 e 65 cm.
+const LAWN_PLANTS: Array = [
+	["Grass_Common_Short", 0.55, 0.35, 0.5],
+	["Grass_Common_Tall", 0.12, 0.35, 0.45],
+	["Flower_3_Single", 0.05, 0.35, 0.45],
+]
+## O capim some a partir desta distância da câmera (é só enfeite: de longe a textura basta).
+const LAWN_VISIBLE_RANGE: float = 40.0
 const OUT_DIR := "res://levels/skyplaza/"
 const MESH_DIR := "res://levels/skyplaza/meshes/"
 
@@ -190,6 +201,18 @@ func _build_west_quarter() -> void:
 	for z: float in [-12.0, -4.0, 4.0, 12.0]:
 		_lamp(Vector3(street_x + 0.6, c.y, c.z + z))
 	_commit_props(quarter, "WestProps")
+	# Capim e flores soltas no gramado, longe do caminho, das pedras, das árvores e dos canteiros.
+	var avoid: Array = [
+		[park_c + Vector3(-1, 0, -6), 1.8], [park_c + Vector3(2, 0, 7), 1.8], [park_c + Vector3(-3, 0, 11), 1.8],
+		[park_c + Vector3(3, 0, -11), 1.8], [park_c + Vector3(1.5, 0, -3.5), 1.1], [park_c + Vector3(-3, 0, 3), 1.1],
+		[park_c + Vector3(-3.5, 0, 13), 1.1]]
+	for spot: Vector3 in [Vector3(-3, 0, -3), Vector3(3, 0, 3), Vector3(-2, 0, -13), Vector3(3, 0, 10)]:
+		avoid.append([park_c + spot, 1.0])
+	for spot: Vector3 in [Vector3(2, 0, -8), Vector3(-3, 0, 8), Vector3(0, 0, -14), Vector3(-1, 0, 14)]:
+		avoid.append([park_c + spot, 0.9])
+		avoid.append([park_c + spot + Vector3(1.2, 0, 0.5), 0.8])
+	var lawn := Rect2(Vector2(park_x0, c.z - half.y), Vector2(park_x1 - park_x0, half.y * 2.0))
+	_lawn_plants(lawn, c.y + 0.01, [Rect2(Vector2(park_x0, c.z - 1.9), Vector2(park_x1 - park_x0, 3.8))], avoid)
 
 
 func _build_east_quarter() -> void:
@@ -387,6 +410,66 @@ func _building(parent: Node3D, building_name: String, at: Vector3, rotation_y: f
 
 
 # Piso plano (só visual, 1 cm acima da plataforma): textura em coordenadas do mundo, sem emendas.
+# Espalha LAWN_PLANTS no gramado `lawn` (x, z), fora dos retângulos `skip` e dos círculos
+# `avoid` ([centro, raio]). Cada planta vira um LawnPlants (MultiMesh) por faixa do gramado: uma
+# chamada de desenho cada, que some de longe, sem sombra e sem colisão.
+func _lawn_plants(lawn: Rect2, height: float, skip: Array, avoid: Array) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 20260923
+	var bands: int = 4
+	for plant: Array in LAWN_PLANTS:
+		var mesh: Mesh = _plant_mesh(plant[0])
+		var per_band: Array[Array] = []
+		for b in bands:
+			per_band.append([])
+		var wanted: int = roundi(lawn.get_area() * float(plant[1]))
+		var tries: int = 0
+		var placed: int = 0
+		while placed < wanted and tries < wanted * 20:
+			tries += 1
+			var at := Vector2(rng.randf_range(lawn.position.x + 0.3, lawn.end.x - 0.3),
+					rng.randf_range(lawn.position.y + 0.3, lawn.end.y - 0.3))
+			if skip.any(func(area: Rect2) -> bool: return area.has_point(at)):
+				continue
+			if avoid.any(func(circle: Array) -> bool: return Vector2(circle[0].x, circle[0].z).distance_to(at) < circle[1]):
+				continue
+			var scale: float = rng.randf_range(plant[2], plant[3])
+			var basis := Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3.ONE * scale)
+			var band: int = clampi(int((at.y - lawn.position.y) / lawn.size.y * bands), 0, bands - 1)
+			per_band[band].append(Transform3D(basis, Vector3(at.x, height, at.y)))
+			placed += 1
+		for b in bands:
+			if per_band[b].is_empty():
+				continue
+			# O MultiMesh é montado ao abrir a arena (LawnPlants): gerado aqui, sem janela, o Godot
+			# não guardaria as posições.
+			var instance := LawnPlants.new()
+			instance.name = "%s%d" % [plant[0].replace("_", ""), b]
+			instance.plant_mesh = mesh
+			instance.transforms = LawnPlants.pack(per_band[b])
+			instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			instance.visibility_range_end = LAWN_VISIBLE_RANGE
+			instance.visibility_range_end_margin = 4.0
+			instance.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+			_decor.add_child(instance)
+			# Ao entrar na árvore ele já montou o MultiMesh (vazio, sem janela): não vai para a cena.
+			instance.multimesh = null
+			instance.owner = _decor
+
+
+# Malha da planta tirada do glTF do Nature Kit e salva em meshes/ (a cena de enfeites só aponta
+# para ela).
+func _plant_mesh(model: String) -> Mesh:
+	var path: String = MESH_DIR + model.to_snake_case() + ".res"
+	var scene: Node = (load(NATURE + model + ".gltf") as PackedScene).instantiate()
+	var source := scene.find_children("*", "MeshInstance3D", true, false)[0] as MeshInstance3D
+	var mesh: Mesh = source.mesh.duplicate()
+	scene.free()
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(MESH_DIR))
+	ResourceSaver.save(mesh, path)
+	return load(path)
+
+
 func _floor(parent: Node3D, material_key: String, center: Vector3, size: Vector2) -> void:
 	# Lista dos pisos, para o som dos passos (ver levels/floor_surfaces.gd).
 	_surfaces.append([material_key, center + Vector3.UP * 0.01, size])
@@ -574,7 +657,19 @@ func _place(parent: Node3D, path: String, at: Vector3, rotation_degrees: float, 
 
 
 func _make_materials() -> void:
-	_materials["grass"] = _flat_material(Color(0.42, 0.62, 0.3))
+	# Grama pintada à mão (antes era um verde liso), com relevo; um tile a cada 4 m.
+	var grass := StandardMaterial3D.new()
+	grass.albedo_texture = load(GROUND + "grass_01_basecolor.jpg")
+	# A textura é verde-limão: puxada para o verde das folhas das árvores.
+	grass.albedo_color = Color(0.72, 0.86, 0.72)
+	grass.normal_enabled = true
+	grass.normal_texture = load(GROUND + "grass_01_normal.jpg")
+	grass.normal_scale = 0.6
+	grass.roughness = 1.0
+	grass.uv1_triplanar = true
+	grass.uv1_world_triplanar = true
+	grass.uv1_scale = Vector3.ONE * 0.25
+	_materials["grass"] = grass
 	# A rocha da base fica só com a luz do céu (o sol não bate embaixo): textura de terra clara.
 	_materials["rock"] = _world_material("T_Dirt_BaseColor.png", 0.12, Color(1.8, 1.7, 1.55))
 	_materials["foundation"] = _world_material("T_Concrete_BaseColor.png", 0.25, Color(0.86, 0.8, 0.7))
@@ -603,12 +698,6 @@ func _make_materials() -> void:
 	lamp.emission = Color(1.0, 0.85, 0.55)
 	lamp.emission_energy_multiplier = 1.5
 	_materials["lamp"] = lamp
-
-
-func _flat_material(color: Color) -> StandardMaterial3D:
-	var material := StandardMaterial3D.new()
-	material.albedo_color = color
-	return material
 
 
 # Textura projetada pelas coordenadas do mundo: `scale` = repetições por metro.

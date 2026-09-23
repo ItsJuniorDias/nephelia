@@ -151,6 +151,14 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   convexa), não a malha, e a navmesh lê as colisões (`geometry_parsed_geometry_type = 1`). Nada
   pode ter degrau: os pisos são planos 1 cm acima da plataforma, sem colisão (por isso não se usa
   calçada com meio-fio), e as pontes têm patamares planos na altura de cada quarteirão.
+- Gramado do parque (oeste): textura pintada à mão (Stylized Grass & Dirt, JulioVII, **CC-BY**:
+  crédito no jogo) + tufos de capim e flores do Nature Kit espalhados pelo `build_skyplaza.gd`
+  (`LAWN_PLANTS`) em nós `levels/lawn_plants.gd` (LawnPlants: MultiMesh montado AO ABRIR a partir de
+  `transforms`; gerado sem janela o Godot não guarda os dados de um MultiMesh e as plantas iam para
+  a origem). Somem a 40 m, sem sombra nem colisão. `tools/texture_audit.gd` lista o que está sem
+  textura na arena (nuvens, vidro, globos, frascos e armas são lisos de propósito).
+- Rodar o `build_skyplaza.gd` renumera os `unique_id` de TODAS as cenas: aplicar só as mudanças
+  reais em cima das cenas antigas (ou aceitar o diff grande conscientemente).
 - Nuvens: o `build_skyplaza.gd` gera `skyplaza_clouds.tscn` (aglomerados de esferas achatadas
   numa malha só, sem sombra e sem colisão) por baixo e em volta dos quarteirões: a cidade flutua
   sobre um mar de nuvens e dá para cair atravessando. O "chão" do céu é claro (acima das nuvens),

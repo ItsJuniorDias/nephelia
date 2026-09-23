@@ -14,6 +14,15 @@ ficam fora do projeto, em `~/Downloads/nephelia_assets/`.
 | Modular Character Outfits - Fantasy [Standard] (roupa Peasant) | Quaternius | CC0 1.0 | https://quaternius.itch.io/modular-character-outfits-fantasy |
 | Low Poly Wild West Guns | LowPolyAssets | CC0 1.0 | https://lowpolyassets.itch.io/low-poly-guns |
 
+## Texturas
+
+| Asset | Autor | Licença | Link |
+|---|---|---|---|
+| Stylized Grass & Dirt (textura Stylized_HandpaintedGrass_01: grama do parque) | JulioVII | **CC-BY** (uso comercial liberado, só não pode revender): **crédito obrigatório no jogo** | https://juliovii.itch.io/ftpgrass-dirt |
+
+Reduzida para 1024 px (cor e relevo) em `assets/textures/juliovii/`; o pacote original (4K) fica
+em `~/Downloads/nephelia_assets/textures/juliovii/`.
+
 ## Interface, efeitos e sons
 
 | Asset | Autor | Licença | Link |
