@@ -829,7 +829,7 @@ func _test_time_up_and_result() -> void:
 	await _frames(2)
 	# Jogador tem mais abates que o bot nos testes anteriores: deve ganhar.
 	var ok: bool = _match.is_finished and paused and result.visible and result.title_label.text == "YOU WIN!" \
-			and result.ranking_label.text.begins_with("1.  You") and not touch.visible
+			and not result.ranking_lines.is_empty() and result.ranking_lines[0].begins_with("1.  You") and not touch.visible
 	# Pausado: ninguém se mexe.
 	var before: Vector3 = _player.global_position
 	Input.action_press("move_forward")
@@ -838,7 +838,7 @@ func _test_time_up_and_result() -> void:
 	var frozen: bool = _player.global_position.distance_to(before) < 0.001
 	_check("34 time up: game freezes and result screen shows the winner", ok and frozen,
 			"finished=%s paused=%s visible=%s title=%s ranking=%s touch=%s frozen=%s" % [_match.is_finished, paused,
-			result.visible, result.title_label.text, result.ranking_label.text.replace("\n", " / "), touch.visible, frozen])
+			result.visible, result.title_label.text, " / ".join(result.ranking_lines), touch.visible, frozen])
 
 
 func _test_play_again() -> void:

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://be8owdmor6q80"
-path="res://.godot/imported/BackPanelBlackMarble.jpg-02971c4f43da04bb4b954d1ba0a43fc4.ctex"
+uid="uid://c5h3e4h5e6yrb"
+path="res://.godot/imported/options_window_marble.png-e5081582a9f566604c3c29e1c954e82f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/artdeco/BackPanelBlackMarble.jpg"
-dest_files=["res://.godot/imported/BackPanelBlackMarble.jpg-02971c4f43da04bb4b954d1ba0a43fc4.ctex"]
+source_file="res://assets/ui/marble_gold/options_window_marble.png"
+dest_files=["res://.godot/imported/options_window_marble.png-e5081582a9f566604c3c29e1c954e82f.ctex"]
 
 [params]
 

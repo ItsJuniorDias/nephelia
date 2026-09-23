@@ -36,8 +36,10 @@ ao longo de várias sessões; o usuário testa e dá feedback.
 - Nada de nomes, personagens, arte ou música de BioShock. O mundo é 100% original.
 
 ## Assets
-- Decisão (2026-09-22, revisada): usar **somente assets gratuitos**. Preferir CC0; CC-BY só com
+- Decisão (2026-09-22, revisada): usar **assets gratuitos**. Preferir CC0; CC-BY só com
   crédito em `CREDITS.md` e nos créditos do jogo. Nunca usar licenças NC, ND ou "uso pessoal".
+  Exceção (2026-09-23): o usuário COMPROU o Marble and Gold UI Kit (interface). Asset pago só
+  entra quando o próprio usuário compra; conferir a licença (a desse kit não está escrita).
 - Família visual escolhida: **Quaternius MegaKits** (cidade, natureza, personagens e animações do
   mesmo autor, CC0) + Kenney (UI, partículas, sons, CC0). Downloads brutos ficam FORA do projeto
   (`~/Downloads/nephelia_assets/`); só os modelos usados entram em `res://assets/`.
@@ -254,12 +256,19 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   `user://settings.cfg`. Quem precisa reagir a mudanças compara `Settings.version` (sinal estático
   não existe). `levels/arena_setup.gd` aplica a dificuldade aos bots ao abrir a arena (com
   `call_deferred`: os bots ficam prontos depois dele).
-- Arte da interface: menus usam o **NEI's Art Deco UI Kit** (molduras douradas dos botões em
-  "nove fatias" e fundo de mármore). A moldura é comprida (1224 x 101): esticada na vertical ela
-  distorce, então painel alto usa fundo sólido com borda de latão. Controles de toque e HUD usam o
-  **Kenney Mobile Controls** (anel do botão, base do joystick e ícones de mira, pulo, recarga, mão
-  e pausa), com um fundo escuro por baixo, senão somem contra o céu claro.
-- HUD: `ui/hud/health_bar.gd` (barra dourada com o número dentro e um rastro claro do dano) e
+- Arte da interface: **Marble and Gold UI Kit** (pago, mármore verde, cobre e ouro), em
+  `assets/ui/marble_gold/`. Quase tudo vem do TEMA (`tools/make_theme.gd`, peças em "nove fatias"):
+  Button/TitleButton (trapézio de mármore; dourado com foco), "MenuItem" (só texto, barra de cobre
+  atrás do selecionado), PanelContainer (janela de mármore), HSlider (trilho, laranja e alça
+  quadrada), ProgressBar, CheckBox, OptionButton, VScrollBar, "HudTag" (etiqueta preta inclinada
+  atrás dos textos do HUD) e "HudBanner" (faixa de cobre). O menu inicial é o monumento do kit com
+  a janela de cobre centrada (`tools/make_menus.gd`, `MONUMENT_SCALE`); o placar final
+  (`ui/match_result/`) é uma tabela na janela de "banco de dados" entre colunas de mármore. Anéis
+  dos botões de toque e do joystick são do kit; os ícones (mira, pulo, recarga, mão, pausa) e o
+  pino do joystick continuam do **Kenney Mobile Controls**, com fundo escuro por baixo. A fonte do
+  corpo é a Josefin Sans em peso 600 (`FontVariation`): o padrão da fonte variável é o 100, fino
+  demais. Conferir tudo com `tools/ui_sheet.gd` (fotos de todas as telas).
+- HUD: `ui/hud/health_bar.gd` (trilho e preenchimento do kit, com o número dentro e um rastro claro do dano) e
   `ui/hud/ammo_pips.gd` (uma bala por tiro do tambor; na recarga elas acendem no ritmo dela).
   O botão de pausa na tela aperta a AÇÃO `pause`, e quem lê isso é o `PauseMenu` no `_process`
   (botão de toque não manda evento de input).
@@ -387,5 +396,6 @@ Atualizar esta seção ao fim de cada sessão.
     ficavam parados no ar) e pernas virando para o lado da caminhada. 39 + 8 + 18 + 10 + 6 + 7
     testes passando. Etapa 3 (aprovada): armas longas no ombro, 1ª pessoa própria. Etapa 4
     (aprovada): pegada do revólver calculada (cabo no punho, indicador no gatilho) e mira calibrada.
-    39 + 8 + 18 + 11 + 6 + 7 testes passando. Próximas: começo e fim do pulo e o Nature Kit.
+    39 + 8 + 18 + 11 + 6 + 7 testes passando. Etapa 5 (aprovada): interface inteira com o Marble
+    and Gold UI Kit (pago, comprado pelo usuário). Próximas: começo e fim do pulo e o Nature Kit.
   - Próximo: seguir o polish; depois Tarefa 11 (desempenho no iPhone) ou o que o usuário pedir.

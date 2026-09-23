@@ -10,8 +10,9 @@ extends Control
 
 # Folga extra no toque: dedos são imprecisos, melhor aceitar um pouco fora do círculo.
 const HIT_SLOP: float = 12.0
-## Arte do pacote Kenney Mobile Controls (contorno branco, que tingimos).
-const RING: Texture2D = preload("res://assets/ui/kenney/button_circle.png")
+## Anel dourado do Marble and Gold UI Kit; o ícone dentro é do Kenney Mobile Controls (branco,
+## que tingimos).
+const RING: Texture2D = preload("res://assets/ui/marble_gold/options_icon_frame.png")
 const TINT_IDLE := Color(1.0, 0.97, 0.9, 0.7)
 const TINT_PRESSED := Color(1.0, 0.86, 0.45, 1.0)
 ## Fundo escuro por baixo do anel: sem ele o botão some contra o céu claro.

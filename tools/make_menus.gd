@@ -9,13 +9,15 @@ const OPTIONS_OUT := "res://ui/options_menu/options_menu.tscn"
 const MAIN_OUT := "res://ui/main_menu/main_menu.tscn"
 const PAUSE_OUT := "res://ui/pause_menu/pause_menu.tscn"
 
-const DIM := Color(0.02, 0.03, 0.05, 0.92)
-const PANEL_COLOR := Color(0.09, 0.11, 0.15, 0.93)
-const BRASS := Color(0.85, 0.7, 0.38)
-## Arte do NEI's Art Deco UI Kit: moldura dourada dos botões e mármore do fundo.
-const BUTTON_OUTLINE := "res://assets/ui/artdeco/ButtonOutlineLong1.png"
-const BUTTON_FILL := "res://assets/ui/artdeco/ButtonFillLong1.png"
-const MARBLE := "res://assets/ui/artdeco/BackPanelBlackMarble.jpg"
+const DIM := Color(0.02, 0.03, 0.05, 0.82)
+## Arte do Marble and Gold UI Kit (botões, janelas e sliders vêm do tema, ver make_theme.gd).
+const KIT := "res://assets/ui/marble_gold/"
+## Menu inicial: o monumento de mármore (peça central do kit, 1019 x 1028 no original) com a
+## janela de cobre (418 x 618, no ponto (418, 205) do monumento) onde ficam os itens.
+const MONUMENT_SCALE := 0.76
+const MONUMENT_SIZE := Vector2(1019, 1028)
+const WINDOW_AT := Vector2(418, 205)
+const WINDOW_SIZE := Vector2(418, 618)
 
 
 func _initialize() -> void:
@@ -35,13 +37,11 @@ func _build_options() -> Control:
 	root.visible = false
 	_dim(root)
 
+	# Janela de mármore do kit (o estilo "panel" vem do tema).
 	var panel := PanelContainer.new()
 	panel.name = "Panel"
 	panel.set_anchors_preset(Control.PRESET_CENTER)
-	panel.custom_minimum_size = Vector2(620, 0)
-	# A moldura comprida do kit distorce quando esticada na vertical: o painel usa fundo sólido
-	# com borda de latão, e as molduras ficam só nos botões.
-	panel.add_theme_stylebox_override(&"panel", _panel_style())
+	panel.custom_minimum_size = Vector2(720, 0)
 	_center(panel)
 	root.add_child(panel)
 
@@ -49,14 +49,7 @@ func _build_options() -> Control:
 	rows.name = "Rows"
 	rows.add_theme_constant_override(&"separation", 18)
 	panel.add_child(rows)
-
-	var title := Label.new()
-	title.name = "Title"
-	title.text = "OPÇÕES"
-	title.theme_type_variation = &"Subtitle"
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_color_override(&"font_color", BRASS)
-	rows.add_child(title)
+	_heading(rows, "OPÇÕES")
 
 	_slider_row(rows, "Sensitivity", "SENSIBILIDADE", 0.3, 3.0, 0.05)
 	_slider_row(rows, "Buttons", "TAMANHO DOS BOTÕES", 0.7, 1.6, 0.05)
@@ -75,49 +68,63 @@ func _build_main_menu() -> Control:
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.set_script(load("res://ui/main_menu/main_menu.gd"))
 
-	# Fundo de mármore preto do kit Art Déco, escurecido para o texto ficar legível.
+	# Céu do kit (degradê azul) atrás de tudo: a cidade do jogo flutua nele.
 	var background := TextureRect.new()
 	background.name = "Background"
 	background.set_anchors_preset(Control.PRESET_FULL_RECT)
-	background.texture = load(MARBLE)
+	background.texture = load(KIT + "screen_bg_blue.png")
 	background.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	background.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	background.modulate = Color(0.55, 0.55, 0.6)
 	background.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(background)
 
+	# O monumento de mármore, com a janela de cobre no meio da tela (a base e a ponta podem
+	# sair um pouco da tela, para a janela ter espaço para os itens).
+	var window_center: Vector2 = (WINDOW_AT + WINDOW_SIZE * 0.5) * MONUMENT_SCALE
+	var monument := _picture("Monument", "mmenu_centerpiece_isolated.png")
+	_place(monument, -window_center, MONUMENT_SIZE * MONUMENT_SCALE)
+	root.add_child(monument)
+	var window := _picture("MenuWindow", "mmenu_centerpiece_menu.png")
+	_place(window, WINDOW_AT * MONUMENT_SCALE - window_center, WINDOW_SIZE * MONUMENT_SCALE)
+	root.add_child(window)
+
+	# Itens dentro da janela: título, subtítulo e os botões separados por filetes de cobre.
 	var rows := VBoxContainer.new()
 	rows.name = "Rows"
-	rows.set_anchors_preset(Control.PRESET_CENTER)
-	rows.custom_minimum_size = Vector2(620, 0)
-	rows.add_theme_constant_override(&"separation", 16)
-	_center(rows)
+	rows.alignment = BoxContainer.ALIGNMENT_CENTER
+	rows.add_theme_constant_override(&"separation", 6)
+	var inner: Vector2 = WINDOW_SIZE * MONUMENT_SCALE - Vector2(36, 48)
+	_place(rows, -inner * 0.5, inner)
 	root.add_child(rows)
 
 	var title := Label.new()
 	title.name = "Title"
 	title.text = "NEPHELIA"
 	title.theme_type_variation = &"Title"
+	title.add_theme_font_size_override(&"font_size", 40)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_color_override(&"font_color", BRASS)
 	rows.add_child(title)
 
 	var subtitle := Label.new()
 	subtitle.name = "Subtitle"
 	subtitle.text = "ARENA NAS NUVENS"
+	subtitle.add_theme_font_size_override(&"font_size", 14)
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	subtitle.add_theme_color_override(&"font_color", Color(0.75, 0.82, 0.9))
+	subtitle.add_theme_color_override(&"font_color", Color(0.75, 0.85, 0.82))
 	rows.add_child(subtitle)
 
 	var spacer := Control.new()
 	spacer.name = "Spacer"
-	spacer.custom_minimum_size = Vector2(0, 24)
+	spacer.custom_minimum_size = Vector2(0, 14)
 	rows.add_child(spacer)
 
-	rows.add_child(_button("PlayButton", "JOGAR"))
-	rows.add_child(_button("DifficultyButton", "DIFICULDADE: MÉDIO"))
-	rows.add_child(_button("OptionsButton", "OPÇÕES"))
-	rows.add_child(_button("QuitButton", "SAIR"))
+	var items: Array[Button] = [_menu_item("PlayButton", "JOGAR"),
+			_menu_item("DifficultyButton", "DIFICULDADE: MÉDIO"), _menu_item("OptionsButton", "OPÇÕES"),
+			_menu_item("QuitButton", "SAIR")]
+	for i: int in items.size():
+		rows.add_child(_separator("Separator%d" % i))
+		rows.add_child(items[i])
+	rows.add_child(_separator("Separator%d" % items.size()))
 
 	var options: Node = (load(OPTIONS_OUT) as PackedScene).instantiate()
 	options.name = "OptionsMenu"
@@ -139,21 +146,19 @@ func _build_pause() -> CanvasLayer:
 	root.add_child(screen)
 	_dim(screen)
 
+	# Janela de mármore do kit com os botões.
+	var frame := PanelContainer.new()
+	frame.name = "Frame"
+	frame.set_anchors_preset(Control.PRESET_CENTER)
+	frame.custom_minimum_size = Vector2(560, 0)
+	_center(frame)
+	screen.add_child(frame)
+
 	var rows := VBoxContainer.new()
 	rows.name = "Rows"
-	rows.set_anchors_preset(Control.PRESET_CENTER)
-	rows.custom_minimum_size = Vector2(620, 0)
 	rows.add_theme_constant_override(&"separation", 16)
-	_center(rows)
-	screen.add_child(rows)
-
-	var title := Label.new()
-	title.name = "Title"
-	title.text = "PAUSA"
-	title.theme_type_variation = &"Subtitle"
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_color_override(&"font_color", BRASS)
-	rows.add_child(title)
+	frame.add_child(rows)
+	_heading(rows, "PAUSA")
 
 	rows.add_child(_button("ResumeButton", "CONTINUAR"))
 	rows.add_child(_button("OptionsButton", "OPÇÕES"))
@@ -214,64 +219,58 @@ func _button(button_name: String, text: String) -> Button:
 	button.name = button_name
 	button.text = text
 	button.theme_type_variation = &"TitleButton"
-	button.custom_minimum_size = Vector2(0, 78)
-	button.add_theme_color_override(&"font_color", Color(0.93, 0.85, 0.62))
-	button.add_theme_color_override(&"font_hover_color", Color(1.0, 0.97, 0.9))
-	button.add_theme_color_override(&"font_focus_color", Color(1.0, 0.97, 0.9))
-	button.add_theme_color_override(&"font_pressed_color", Color(0.2, 0.16, 0.1))
-	button.add_theme_stylebox_override(&"normal", _frame_style(BUTTON_OUTLINE, Color(1, 1, 1, 0.92)))
-	button.add_theme_stylebox_override(&"hover", _frame_style(BUTTON_FILL, Color(1, 1, 1, 0.98)))
-	button.add_theme_stylebox_override(&"pressed", _frame_style(BUTTON_FILL, Color(1.0, 0.92, 0.75)))
-	button.add_theme_stylebox_override(&"focus", _frame_style(BUTTON_OUTLINE, Color(1.0, 0.95, 0.8)))
+	button.custom_minimum_size = Vector2(0, 72)
 	return button
 
 
-# Moldura dourada do kit, em "nove fatias": os enfeites das pontas ficam no tamanho certo e só
-# o meio estica.
-func _frame_style(texture_path: String, tint: Color) -> StyleBoxTexture:
-	var style := StyleBoxTexture.new()
-	style.texture = load(texture_path)
-	style.modulate_color = tint
-	style.set_texture_margin(SIDE_LEFT, 120.0)
-	style.set_texture_margin(SIDE_RIGHT, 120.0)
-	style.set_texture_margin(SIDE_TOP, 30.0)
-	style.set_texture_margin(SIDE_BOTTOM, 30.0)
-	# O texto começa depois dos enfeites das pontas (senão passa por cima deles).
-	style.set_content_margin(SIDE_LEFT, 118.0)
-	style.set_content_margin(SIDE_RIGHT, 118.0)
-	style.set_content_margin(SIDE_TOP, 12.0)
-	style.set_content_margin(SIDE_BOTTOM, 12.0)
-	return style
+# Item do menu inicial: só o texto; a barra de cobre aparece atrás quando o dedo está nele.
+func _menu_item(button_name: String, text: String) -> Button:
+	var button := Button.new()
+	button.name = button_name
+	button.text = text
+	button.theme_type_variation = &"MenuItem"
+	button.custom_minimum_size = Vector2(0, 50)
+	return button
 
 
-# Painel com a mesma moldura dourada dos botões, com sobra para o conteúdo.
-func _panel_frame() -> StyleBoxTexture:
-	var style := _frame_style(BUTTON_OUTLINE, Color(1, 1, 1, 0.97))
-	style.set_content_margin(SIDE_LEFT, 130.0)
-	style.set_content_margin(SIDE_RIGHT, 130.0)
-	style.set_content_margin(SIDE_TOP, 34.0)
-	style.set_content_margin(SIDE_BOTTOM, 34.0)
-	return style
+# Filete de cobre entre os itens do menu.
+func _separator(separator_name: String) -> TextureRect:
+	var line := _picture(separator_name, "mmenu_centerpiece_menu_separator.png")
+	line.custom_minimum_size = Vector2(0, 2)
+	line.stretch_mode = TextureRect.STRETCH_SCALE
+	return line
 
 
-func _panel_style() -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.bg_color = PANEL_COLOR
-	style.border_color = BRASS
-	style.set_border_width_all(2)
-	style.set_corner_radius_all(10)
-	style.set_content_margin_all(28)
-	return style
+# Título de janela: letras douradas e, embaixo, a faixa de cobre do kit.
+func _heading(parent: VBoxContainer, text: String) -> void:
+	var title := Label.new()
+	title.name = "Title"
+	title.text = text
+	title.theme_type_variation = &"Subtitle"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	parent.add_child(title)
+	var strip := _picture("TitleStrip", "options_window_header_gold.png")
+	strip.custom_minimum_size = Vector2(0, 14)
+	strip.stretch_mode = TextureRect.STRETCH_SCALE
+	parent.add_child(strip)
 
 
-func _button_style(color: Color) -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.bg_color = color
-	style.border_color = Color(0.85, 0.7, 0.38, 0.55)
-	style.set_border_width_all(1)
-	style.set_corner_radius_all(8)
-	style.set_content_margin_all(10)
-	return style
+func _picture(picture_name: String, file: String) -> TextureRect:
+	var picture := TextureRect.new()
+	picture.name = picture_name
+	picture.texture = load(KIT + file)
+	picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	picture.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return picture
+
+
+# Põe um controle a `offset` do centro da tela, com `size` (continua no centro em qualquer tela).
+func _place(control: Control, offset: Vector2, size: Vector2) -> void:
+	control.set_anchors_preset(Control.PRESET_CENTER)
+	control.offset_left = offset.x
+	control.offset_top = offset.y
+	control.offset_right = offset.x + size.x
+	control.offset_bottom = offset.y + size.y
 
 
 # Centraliza um controle já ancorado no centro (o tamanho vem do conteúdo).

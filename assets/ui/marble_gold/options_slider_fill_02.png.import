@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cuou8svb3rb8a"
-path="res://.godot/imported/Vignette.png-3fff5337479ae9b30cd14c628eb40121.ctex"
+uid="uid://b5wwdw0xrc72d"
+path="res://.godot/imported/options_slider_fill_02.png-31270c148d326746f3a67c30f3c89cb1.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/artdeco/Vignette.png"
-dest_files=["res://.godot/imported/Vignette.png-3fff5337479ae9b30cd14c628eb40121.ctex"]
+source_file="res://assets/ui/marble_gold/options_slider_fill_02.png"
+dest_files=["res://.godot/imported/options_slider_fill_02.png-31270c148d326746f3a67c30f3c89cb1.ctex"]
 
 [params]
 

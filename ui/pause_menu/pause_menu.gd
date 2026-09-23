@@ -11,9 +11,9 @@ signal opened
 signal resumed
 
 @onready var screen: Control = $Screen
-@onready var resume_button: Button = $Screen/Rows/ResumeButton
-@onready var options_button: Button = $Screen/Rows/OptionsButton
-@onready var menu_button: Button = $Screen/Rows/MenuButton
+@onready var resume_button: Button = $Screen/Frame/Rows/ResumeButton
+@onready var options_button: Button = $Screen/Frame/Rows/OptionsButton
+@onready var menu_button: Button = $Screen/Frame/Rows/MenuButton
 @onready var options_menu: OptionsMenu = $Screen/OptionsMenu
 
 

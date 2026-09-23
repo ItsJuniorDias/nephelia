@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://77lsci1cvv7q"
-path="res://.godot/imported/joystick_circle_pad_b.png-72ff614d4f6284bb08cfdd8e552bcfed.ctex"
+uid="uid://bsn6ghhev2iy7"
+path="res://.godot/imported/check_off.png-59757281337d40d62684ad16723fb21b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/kenney/joystick_circle_pad_b.png"
-dest_files=["res://.godot/imported/joystick_circle_pad_b.png-72ff614d4f6284bb08cfdd8e552bcfed.ctex"]
+source_file="res://assets/ui/marble_gold/check_off.png"
+dest_files=["res://.godot/imported/check_off.png-59757281337d40d62684ad16723fb21b.ctex"]
 
 [params]
 

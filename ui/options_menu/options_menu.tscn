@@ -1,89 +1,24 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://ui/options_menu/options_menu.gd" id="1_utl02"]
-[ext_resource type="Texture2D" path="res://assets/ui/artdeco/ButtonOutlineLong1.png" id="2_kx268"]
-[ext_resource type="Texture2D" path="res://assets/ui/artdeco/ButtonFillLong1.png" id="3_tjtux"]
+[ext_resource type="Script" path="res://ui/options_menu/options_menu.gd" id="1_8h7tm"]
+[ext_resource type="Texture2D" path="res://assets/ui/marble_gold/options_window_header_gold.png" id="2_utl02"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wakw5"]
-content_margin_left = 28.0
-content_margin_top = 28.0
-content_margin_right = 28.0
-content_margin_bottom = 28.0
-bg_color = Color(0.09, 0.11, 0.15, 0.93)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.85, 0.7, 0.38, 1)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_1ubxx"]
-content_margin_left = 118.0
-content_margin_top = 12.0
-content_margin_right = 118.0
-content_margin_bottom = 12.0
-texture = ExtResource("2_kx268")
-texture_margin_left = 120.0
-texture_margin_top = 30.0
-texture_margin_right = 120.0
-texture_margin_bottom = 30.0
-modulate_color = Color(1, 1, 1, 0.92)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_21oyd"]
-content_margin_left = 118.0
-content_margin_top = 12.0
-content_margin_right = 118.0
-content_margin_bottom = 12.0
-texture = ExtResource("3_tjtux")
-texture_margin_left = 120.0
-texture_margin_top = 30.0
-texture_margin_right = 120.0
-texture_margin_bottom = 30.0
-modulate_color = Color(1, 0.92, 0.75, 1)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_mt34y"]
-content_margin_left = 118.0
-content_margin_top = 12.0
-content_margin_right = 118.0
-content_margin_bottom = 12.0
-texture = ExtResource("3_tjtux")
-texture_margin_left = 120.0
-texture_margin_top = 30.0
-texture_margin_right = 120.0
-texture_margin_bottom = 30.0
-modulate_color = Color(1, 1, 1, 0.98)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_sk6u8"]
-content_margin_left = 118.0
-content_margin_top = 12.0
-content_margin_right = 118.0
-content_margin_bottom = 12.0
-texture = ExtResource("2_kx268")
-texture_margin_left = 120.0
-texture_margin_top = 30.0
-texture_margin_right = 120.0
-texture_margin_bottom = 30.0
-modulate_color = Color(1, 0.95, 0.8, 1)
-
-[node name="OptionsMenu" type="Control" unique_id=1370626794]
+[node name="OptionsMenu" type="Control" unique_id=1170618259]
 visible = false
 layout_mode = 3
 anchors_preset = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
-script = ExtResource("1_utl02")
+script = ExtResource("1_8h7tm")
 
-[node name="Dim" type="ColorRect" parent="." unique_id=1907368412]
+[node name="Dim" type="ColorRect" parent="." unique_id=1542731804]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
-color = Color(0.02, 0.03, 0.05, 0.92)
+color = Color(0.02, 0.03, 0.05, 0.82)
 
-[node name="Panel" type="PanelContainer" parent="." unique_id=1160171397]
-custom_minimum_size = Vector2(620, 0)
+[node name="Panel" type="PanelContainer" parent="." unique_id=1745178721]
+custom_minimum_size = Vector2(720, 0)
 layout_mode = 0
 anchor_left = 0.5
 anchor_top = 0.5
@@ -91,29 +26,34 @@ anchor_right = 0.5
 anchor_bottom = 0.5
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_wakw5")
 
-[node name="Rows" type="VBoxContainer" parent="Panel" unique_id=1016111264]
+[node name="Rows" type="VBoxContainer" parent="Panel" unique_id=1355327071]
 layout_mode = 2
 theme_override_constants/separation = 18
 
-[node name="Title" type="Label" parent="Panel/Rows" unique_id=858934434]
+[node name="Title" type="Label" parent="Panel/Rows" unique_id=833453264]
 layout_mode = 2
 theme_type_variation = &"Subtitle"
-theme_override_colors/font_color = Color(0.85, 0.7, 0.38, 1)
 text = "OPÇÕES"
 horizontal_alignment = 1
 
-[node name="Sensitivity" type="HBoxContainer" parent="Panel/Rows" unique_id=650184790]
+[node name="TitleStrip" type="TextureRect" parent="Panel/Rows" unique_id=1926325936]
+custom_minimum_size = Vector2(0, 14)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("2_utl02")
+expand_mode = 1
+
+[node name="Sensitivity" type="HBoxContainer" parent="Panel/Rows" unique_id=1258717214]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="Label" type="Label" parent="Panel/Rows/Sensitivity" unique_id=2138041354]
+[node name="Label" type="Label" parent="Panel/Rows/Sensitivity" unique_id=1572986539]
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 text = "SENSIBILIDADE"
 
-[node name="Slider" type="HSlider" parent="Panel/Rows/Sensitivity" unique_id=1692732908]
+[node name="Slider" type="HSlider" parent="Panel/Rows/Sensitivity" unique_id=1078903535]
 custom_minimum_size = Vector2(240, 36)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -123,22 +63,22 @@ max_value = 3.0
 step = 0.05
 value = 0.3
 
-[node name="Value" type="Label" parent="Panel/Rows/Sensitivity" unique_id=586602308]
+[node name="Value" type="Label" parent="Panel/Rows/Sensitivity" unique_id=1969587066]
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
 text = "100%"
 horizontal_alignment = 2
 
-[node name="Buttons" type="HBoxContainer" parent="Panel/Rows" unique_id=1625540616]
+[node name="Buttons" type="HBoxContainer" parent="Panel/Rows" unique_id=150014418]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="Label" type="Label" parent="Panel/Rows/Buttons" unique_id=1485177439]
+[node name="Label" type="Label" parent="Panel/Rows/Buttons" unique_id=2107692173]
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 text = "TAMANHO DOS BOTÕES"
 
-[node name="Slider" type="HSlider" parent="Panel/Rows/Buttons" unique_id=915724369]
+[node name="Slider" type="HSlider" parent="Panel/Rows/Buttons" unique_id=1065892850]
 custom_minimum_size = Vector2(240, 36)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -148,22 +88,22 @@ max_value = 1.6
 step = 0.05
 value = 0.7
 
-[node name="Value" type="Label" parent="Panel/Rows/Buttons" unique_id=649663332]
+[node name="Value" type="Label" parent="Panel/Rows/Buttons" unique_id=32314324]
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
 text = "100%"
 horizontal_alignment = 2
 
-[node name="Volume" type="HBoxContainer" parent="Panel/Rows" unique_id=1890755248]
+[node name="Volume" type="HBoxContainer" parent="Panel/Rows" unique_id=486357814]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="Label" type="Label" parent="Panel/Rows/Volume" unique_id=405973331]
+[node name="Label" type="Label" parent="Panel/Rows/Volume" unique_id=977997499]
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 text = "VOLUME"
 
-[node name="Slider" type="HSlider" parent="Panel/Rows/Volume" unique_id=1779790985]
+[node name="Slider" type="HSlider" parent="Panel/Rows/Volume" unique_id=219218555]
 custom_minimum_size = Vector2(240, 36)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -171,22 +111,22 @@ size_flags_vertical = 4
 max_value = 1.0
 step = 0.05
 
-[node name="Value" type="Label" parent="Panel/Rows/Volume" unique_id=969216795]
+[node name="Value" type="Label" parent="Panel/Rows/Volume" unique_id=847694010]
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
 text = "100%"
 horizontal_alignment = 2
 
-[node name="Music" type="HBoxContainer" parent="Panel/Rows" unique_id=510361972]
+[node name="Music" type="HBoxContainer" parent="Panel/Rows" unique_id=174831756]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="Label" type="Label" parent="Panel/Rows/Music" unique_id=1583239406]
+[node name="Label" type="Label" parent="Panel/Rows/Music" unique_id=836707474]
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 text = "MÚSICA"
 
-[node name="Slider" type="HSlider" parent="Panel/Rows/Music" unique_id=50616318]
+[node name="Slider" type="HSlider" parent="Panel/Rows/Music" unique_id=1708089883]
 custom_minimum_size = Vector2(240, 36)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -194,22 +134,14 @@ size_flags_vertical = 4
 max_value = 1.0
 step = 0.05
 
-[node name="Value" type="Label" parent="Panel/Rows/Music" unique_id=736293449]
+[node name="Value" type="Label" parent="Panel/Rows/Music" unique_id=1378787454]
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
 text = "100%"
 horizontal_alignment = 2
 
-[node name="BackButton" type="Button" parent="Panel/Rows" unique_id=1162788931]
-custom_minimum_size = Vector2(0, 78)
+[node name="BackButton" type="Button" parent="Panel/Rows" unique_id=155964708]
+custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
 theme_type_variation = &"TitleButton"
-theme_override_styles/normal = SubResource("StyleBoxTexture_1ubxx")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_21oyd")
-theme_override_styles/hover = SubResource("StyleBoxTexture_mt34y")
-theme_override_styles/focus = SubResource("StyleBoxTexture_sk6u8")
-theme_override_colors/font_color = Color(0.93, 0.85, 0.62, 1)
-theme_override_colors/font_focus_color = Color(1, 0.97, 0.9, 1)
-theme_override_colors/font_pressed_color = Color(0.2, 0.16, 0.1, 1)
-theme_override_colors/font_hover_color = Color(1, 0.97, 0.9, 1)
 text = "VOLTAR"

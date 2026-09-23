@@ -1,309 +1,151 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://ui/main_menu/main_menu.gd" id="1_joh67"]
-[ext_resource type="Texture2D" path="res://assets/ui/artdeco/BackPanelBlackMarble.jpg" id="2_u184e"]
-[ext_resource type="Texture2D" path="res://assets/ui/artdeco/ButtonOutlineLong1.png" id="3_6mijq"]
-[ext_resource type="Texture2D" path="res://assets/ui/artdeco/ButtonFillLong1.png" id="4_w2r0d"]
-[ext_resource type="PackedScene" path="res://ui/options_menu/options_menu.tscn" id="5_4e78x"]
-[ext_resource type="Script" path="res://ui/options_menu/options_menu.gd" id="6_s4pem"]
+[ext_resource type="Script" path="res://ui/main_menu/main_menu.gd" id="1_u184e"]
+[ext_resource type="Texture2D" path="res://assets/ui/marble_gold/screen_bg_blue.png" id="2_6mijq"]
+[ext_resource type="Texture2D" path="res://assets/ui/marble_gold/mmenu_centerpiece_isolated.png" id="3_w2r0d"]
+[ext_resource type="Texture2D" path="res://assets/ui/marble_gold/mmenu_centerpiece_menu.png" id="4_4e78x"]
+[ext_resource type="Texture2D" path="res://assets/ui/marble_gold/mmenu_centerpiece_menu_separator.png" id="5_s4pem"]
+[ext_resource type="PackedScene" path="res://ui/options_menu/options_menu.tscn" id="6_xio0d"]
+[ext_resource type="Script" path="res://ui/options_menu/options_menu.gd" id="7_tf5ef"]
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_xio0d"]
-content_margin_left = 118.0
-content_margin_top = 12.0
-content_margin_right = 118.0
-content_margin_bottom = 12.0
-texture = ExtResource("3_6mijq")
-texture_margin_left = 120.0
-texture_margin_top = 30.0
-texture_margin_right = 120.0
-texture_margin_bottom = 30.0
-modulate_color = Color(1, 1, 1, 0.92)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_tf5ef"]
-content_margin_left = 118.0
-content_margin_top = 12.0
-content_margin_right = 118.0
-content_margin_bottom = 12.0
-texture = ExtResource("4_w2r0d")
-texture_margin_left = 120.0
-texture_margin_top = 30.0
-texture_margin_right = 120.0
-texture_margin_bottom = 30.0
-modulate_color = Color(1, 0.92, 0.75, 1)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_qao3l"]
-content_margin_left = 118.0
-content_margin_top = 12.0
-content_margin_right = 118.0
-content_margin_bottom = 12.0
-texture = ExtResource("4_w2r0d")
-texture_margin_left = 120.0
-texture_margin_top = 30.0
-texture_margin_right = 120.0
-texture_margin_bottom = 30.0
-modulate_color = Color(1, 1, 1, 0.98)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_lknku"]
-content_margin_left = 118.0
-content_margin_top = 12.0
-content_margin_right = 118.0
-content_margin_bottom = 12.0
-texture = ExtResource("3_6mijq")
-texture_margin_left = 120.0
-texture_margin_top = 30.0
-texture_margin_right = 120.0
-texture_margin_bottom = 30.0
-modulate_color = Color(1, 0.95, 0.8, 1)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_u2jyo"]
-content_margin_left = 118.0
-content_margin_top = 12.0
-content_margin_right = 118.0
-content_margin_bottom = 12.0
-texture = ExtResource("3_6mijq")
-texture_margin_left = 120.0
-texture_margin_top = 30.0
-texture_margin_right = 120.0
-texture_margin_bottom = 30.0
-modulate_color = Color(1, 1, 1, 0.92)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_bpbph"]
-content_margin_left = 118.0
-content_margin_top = 12.0
-content_margin_right = 118.0
-content_margin_bottom = 12.0
-texture = ExtResource("4_w2r0d")
-texture_margin_left = 120.0
-texture_margin_top = 30.0
-texture_margin_right = 120.0
-texture_margin_bottom = 30.0
-modulate_color = Color(1, 0.92, 0.75, 1)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_qewnw"]
-content_margin_left = 118.0
-content_margin_top = 12.0
-content_margin_right = 118.0
-content_margin_bottom = 12.0
-texture = ExtResource("4_w2r0d")
-texture_margin_left = 120.0
-texture_margin_top = 30.0
-texture_margin_right = 120.0
-texture_margin_bottom = 30.0
-modulate_color = Color(1, 1, 1, 0.98)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_db6af"]
-content_margin_left = 118.0
-content_margin_top = 12.0
-content_margin_right = 118.0
-content_margin_bottom = 12.0
-texture = ExtResource("3_6mijq")
-texture_margin_left = 120.0
-texture_margin_top = 30.0
-texture_margin_right = 120.0
-texture_margin_bottom = 30.0
-modulate_color = Color(1, 0.95, 0.8, 1)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_rkggs"]
-content_margin_left = 118.0
-content_margin_top = 12.0
-content_margin_right = 118.0
-content_margin_bottom = 12.0
-texture = ExtResource("3_6mijq")
-texture_margin_left = 120.0
-texture_margin_top = 30.0
-texture_margin_right = 120.0
-texture_margin_bottom = 30.0
-modulate_color = Color(1, 1, 1, 0.92)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_1bnxd"]
-content_margin_left = 118.0
-content_margin_top = 12.0
-content_margin_right = 118.0
-content_margin_bottom = 12.0
-texture = ExtResource("4_w2r0d")
-texture_margin_left = 120.0
-texture_margin_top = 30.0
-texture_margin_right = 120.0
-texture_margin_bottom = 30.0
-modulate_color = Color(1, 0.92, 0.75, 1)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_3xnla"]
-content_margin_left = 118.0
-content_margin_top = 12.0
-content_margin_right = 118.0
-content_margin_bottom = 12.0
-texture = ExtResource("4_w2r0d")
-texture_margin_left = 120.0
-texture_margin_top = 30.0
-texture_margin_right = 120.0
-texture_margin_bottom = 30.0
-modulate_color = Color(1, 1, 1, 0.98)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_ln2ma"]
-content_margin_left = 118.0
-content_margin_top = 12.0
-content_margin_right = 118.0
-content_margin_bottom = 12.0
-texture = ExtResource("3_6mijq")
-texture_margin_left = 120.0
-texture_margin_top = 30.0
-texture_margin_right = 120.0
-texture_margin_bottom = 30.0
-modulate_color = Color(1, 0.95, 0.8, 1)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_5pot6"]
-content_margin_left = 118.0
-content_margin_top = 12.0
-content_margin_right = 118.0
-content_margin_bottom = 12.0
-texture = ExtResource("3_6mijq")
-texture_margin_left = 120.0
-texture_margin_top = 30.0
-texture_margin_right = 120.0
-texture_margin_bottom = 30.0
-modulate_color = Color(1, 1, 1, 0.92)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_abcvk"]
-content_margin_left = 118.0
-content_margin_top = 12.0
-content_margin_right = 118.0
-content_margin_bottom = 12.0
-texture = ExtResource("4_w2r0d")
-texture_margin_left = 120.0
-texture_margin_top = 30.0
-texture_margin_right = 120.0
-texture_margin_bottom = 30.0
-modulate_color = Color(1, 0.92, 0.75, 1)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_mrexm"]
-content_margin_left = 118.0
-content_margin_top = 12.0
-content_margin_right = 118.0
-content_margin_bottom = 12.0
-texture = ExtResource("4_w2r0d")
-texture_margin_left = 120.0
-texture_margin_top = 30.0
-texture_margin_right = 120.0
-texture_margin_bottom = 30.0
-modulate_color = Color(1, 1, 1, 0.98)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_62ljp"]
-content_margin_left = 118.0
-content_margin_top = 12.0
-content_margin_right = 118.0
-content_margin_bottom = 12.0
-texture = ExtResource("3_6mijq")
-texture_margin_left = 120.0
-texture_margin_top = 30.0
-texture_margin_right = 120.0
-texture_margin_bottom = 30.0
-modulate_color = Color(1, 0.95, 0.8, 1)
-
-[node name="MainMenu" type="Control" unique_id=1062593313]
+[node name="MainMenu" type="Control" unique_id=1852604096]
 layout_mode = 3
 anchors_preset = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
-script = ExtResource("1_joh67")
+script = ExtResource("1_u184e")
 
-[node name="Background" type="TextureRect" parent="." unique_id=1243604832]
-modulate = Color(0.55, 0.55, 0.6, 1)
+[node name="Background" type="TextureRect" parent="." unique_id=1034882941]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
-texture = ExtResource("2_u184e")
+texture = ExtResource("2_6mijq")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="Rows" type="VBoxContainer" parent="." unique_id=1001928247]
-custom_minimum_size = Vector2(620, 0)
+[node name="Monument" type="TextureRect" parent="." unique_id=93762612]
 layout_mode = 0
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/separation = 16
+offset_left = -476.52
+offset_top = -390.63998
+offset_right = 297.92
+offset_bottom = 390.63998
+mouse_filter = 2
+texture = ExtResource("3_w2r0d")
+expand_mode = 1
 
-[node name="Title" type="Label" parent="Rows" unique_id=786780112]
+[node name="MenuWindow" type="TextureRect" parent="." unique_id=164209648]
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -158.84
+offset_top = -234.83998
+offset_right = 158.84
+offset_bottom = 234.84001
+mouse_filter = 2
+texture = ExtResource("4_4e78x")
+expand_mode = 1
+
+[node name="Rows" type="VBoxContainer" parent="." unique_id=1472695079]
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -140.84
+offset_top = -210.84
+offset_right = 140.84
+offset_bottom = 210.84
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="Title" type="Label" parent="Rows" unique_id=1542529722]
 layout_mode = 2
 theme_type_variation = &"Title"
-theme_override_colors/font_color = Color(0.85, 0.7, 0.38, 1)
+theme_override_font_sizes/font_size = 40
 text = "NEPHELIA"
 horizontal_alignment = 1
 
-[node name="Subtitle" type="Label" parent="Rows" unique_id=1113118985]
+[node name="Subtitle" type="Label" parent="Rows" unique_id=1266712068]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.75, 0.82, 0.9, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.75, 0.85, 0.82, 1)
 text = "ARENA NAS NUVENS"
 horizontal_alignment = 1
 
-[node name="Spacer" type="Control" parent="Rows" unique_id=1670668976]
-custom_minimum_size = Vector2(0, 24)
+[node name="Spacer" type="Control" parent="Rows" unique_id=1781497419]
+custom_minimum_size = Vector2(0, 14)
 layout_mode = 2
 
-[node name="PlayButton" type="Button" parent="Rows" unique_id=1655386603]
-custom_minimum_size = Vector2(0, 78)
+[node name="Separator0" type="TextureRect" parent="Rows" unique_id=2026359646]
+custom_minimum_size = Vector2(0, 2)
 layout_mode = 2
-theme_type_variation = &"TitleButton"
-theme_override_styles/normal = SubResource("StyleBoxTexture_xio0d")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_tf5ef")
-theme_override_styles/hover = SubResource("StyleBoxTexture_qao3l")
-theme_override_styles/focus = SubResource("StyleBoxTexture_lknku")
-theme_override_colors/font_color = Color(0.93, 0.85, 0.62, 1)
-theme_override_colors/font_focus_color = Color(1, 0.97, 0.9, 1)
-theme_override_colors/font_pressed_color = Color(0.2, 0.16, 0.1, 1)
-theme_override_colors/font_hover_color = Color(1, 0.97, 0.9, 1)
+mouse_filter = 2
+texture = ExtResource("5_s4pem")
+expand_mode = 1
+
+[node name="PlayButton" type="Button" parent="Rows" unique_id=1978750073]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+theme_type_variation = &"MenuItem"
 text = "JOGAR"
 
-[node name="DifficultyButton" type="Button" parent="Rows" unique_id=418762391]
-custom_minimum_size = Vector2(0, 78)
+[node name="Separator1" type="TextureRect" parent="Rows" unique_id=1342570627]
+custom_minimum_size = Vector2(0, 2)
 layout_mode = 2
-theme_type_variation = &"TitleButton"
-theme_override_styles/normal = SubResource("StyleBoxTexture_u2jyo")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_bpbph")
-theme_override_styles/hover = SubResource("StyleBoxTexture_qewnw")
-theme_override_styles/focus = SubResource("StyleBoxTexture_db6af")
-theme_override_colors/font_color = Color(0.93, 0.85, 0.62, 1)
-theme_override_colors/font_focus_color = Color(1, 0.97, 0.9, 1)
-theme_override_colors/font_pressed_color = Color(0.2, 0.16, 0.1, 1)
-theme_override_colors/font_hover_color = Color(1, 0.97, 0.9, 1)
+mouse_filter = 2
+texture = ExtResource("5_s4pem")
+expand_mode = 1
+
+[node name="DifficultyButton" type="Button" parent="Rows" unique_id=1399475558]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+theme_type_variation = &"MenuItem"
 text = "DIFICULDADE: MÉDIO"
 
-[node name="OptionsButton" type="Button" parent="Rows" unique_id=2033597063]
-custom_minimum_size = Vector2(0, 78)
+[node name="Separator2" type="TextureRect" parent="Rows" unique_id=301480892]
+custom_minimum_size = Vector2(0, 2)
 layout_mode = 2
-theme_type_variation = &"TitleButton"
-theme_override_styles/normal = SubResource("StyleBoxTexture_rkggs")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_1bnxd")
-theme_override_styles/hover = SubResource("StyleBoxTexture_3xnla")
-theme_override_styles/focus = SubResource("StyleBoxTexture_ln2ma")
-theme_override_colors/font_color = Color(0.93, 0.85, 0.62, 1)
-theme_override_colors/font_focus_color = Color(1, 0.97, 0.9, 1)
-theme_override_colors/font_pressed_color = Color(0.2, 0.16, 0.1, 1)
-theme_override_colors/font_hover_color = Color(1, 0.97, 0.9, 1)
+mouse_filter = 2
+texture = ExtResource("5_s4pem")
+expand_mode = 1
+
+[node name="OptionsButton" type="Button" parent="Rows" unique_id=1865856807]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+theme_type_variation = &"MenuItem"
 text = "OPÇÕES"
 
-[node name="QuitButton" type="Button" parent="Rows" unique_id=578035148]
-custom_minimum_size = Vector2(0, 78)
+[node name="Separator3" type="TextureRect" parent="Rows" unique_id=1749255984]
+custom_minimum_size = Vector2(0, 2)
 layout_mode = 2
-theme_type_variation = &"TitleButton"
-theme_override_styles/normal = SubResource("StyleBoxTexture_5pot6")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_abcvk")
-theme_override_styles/hover = SubResource("StyleBoxTexture_mrexm")
-theme_override_styles/focus = SubResource("StyleBoxTexture_62ljp")
-theme_override_colors/font_color = Color(0.93, 0.85, 0.62, 1)
-theme_override_colors/font_focus_color = Color(1, 0.97, 0.9, 1)
-theme_override_colors/font_pressed_color = Color(0.2, 0.16, 0.1, 1)
-theme_override_colors/font_hover_color = Color(1, 0.97, 0.9, 1)
+mouse_filter = 2
+texture = ExtResource("5_s4pem")
+expand_mode = 1
+
+[node name="QuitButton" type="Button" parent="Rows" unique_id=1152504643]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+theme_type_variation = &"MenuItem"
 text = "SAIR"
 
-[node name="OptionsMenu" type="Control" parent="." unique_id=1370626794 instance=ExtResource("5_4e78x")]
+[node name="Separator4" type="TextureRect" parent="Rows" unique_id=1926666898]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("5_s4pem")
+expand_mode = 1
+
+[node name="OptionsMenu" type="Control" parent="." unique_id=1170618259 instance=ExtResource("6_xio0d")]
 visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-script = ExtResource("6_s4pem")
+script = ExtResource("7_tf5ef")

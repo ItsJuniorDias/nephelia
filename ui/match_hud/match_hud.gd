@@ -79,6 +79,9 @@ func _on_kill_happened(killer: Character, victim: Character) -> void:
 func _add_feed_line(text: String) -> void:
 	var line := Label.new()
 	line.text = text
+	# Etiqueta preta do kit atrás de cada linha, colada à direita do tamanho do texto.
+	line.theme_type_variation = &"HudTag"
+	line.size_flags_horizontal = Control.SIZE_SHRINK_END
 	line.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	line.add_theme_font_size_override(&"font_size", 20)
 	line.add_theme_constant_override(&"outline_size", 6)

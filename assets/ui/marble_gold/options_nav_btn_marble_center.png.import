@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cruueo13txlvq"
-path="res://.godot/imported/ButtonFillLong1.png-0f503529224e197258f531e60183dc4c.ctex"
+uid="uid://dtaqs6yxe41wl"
+path="res://.godot/imported/options_nav_btn_marble_center.png-84ceb38c9e2b55a5c9c232feed0a87b1.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/artdeco/ButtonFillLong1.png"
-dest_files=["res://.godot/imported/ButtonFillLong1.png-0f503529224e197258f531e60183dc4c.ctex"]
+source_file="res://assets/ui/marble_gold/options_nav_btn_marble_center.png"
+dest_files=["res://.godot/imported/options_nav_btn_marble_center.png-84ceb38c9e2b55a5c9c232feed0a87b1.ctex"]
 
 [params]
 

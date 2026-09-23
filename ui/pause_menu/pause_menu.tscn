@@ -1,174 +1,29 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://ui/pause_menu/pause_menu.gd" id="1_c3jo5"]
-[ext_resource type="Texture2D" path="res://assets/ui/artdeco/ButtonOutlineLong1.png" id="2_uraes"]
-[ext_resource type="Texture2D" path="res://assets/ui/artdeco/ButtonFillLong1.png" id="3_ihaig"]
-[ext_resource type="PackedScene" path="res://ui/options_menu/options_menu.tscn" id="4_umsyg"]
-[ext_resource type="Script" path="res://ui/options_menu/options_menu.gd" id="5_3qrb2"]
+[ext_resource type="Script" path="res://ui/pause_menu/pause_menu.gd" id="1_b4b0p"]
+[ext_resource type="Texture2D" path="res://assets/ui/marble_gold/options_window_header_gold.png" id="2_c3jo5"]
+[ext_resource type="PackedScene" path="res://ui/options_menu/options_menu.tscn" id="3_uraes"]
+[ext_resource type="Script" path="res://ui/options_menu/options_menu.gd" id="4_ihaig"]
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_b05md"]
-content_margin_left = 118.0
-content_margin_top = 12.0
-content_margin_right = 118.0
-content_margin_bottom = 12.0
-texture = ExtResource("2_uraes")
-texture_margin_left = 120.0
-texture_margin_top = 30.0
-texture_margin_right = 120.0
-texture_margin_bottom = 30.0
-modulate_color = Color(1, 1, 1, 0.92)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_f2x4c"]
-content_margin_left = 118.0
-content_margin_top = 12.0
-content_margin_right = 118.0
-content_margin_bottom = 12.0
-texture = ExtResource("3_ihaig")
-texture_margin_left = 120.0
-texture_margin_top = 30.0
-texture_margin_right = 120.0
-texture_margin_bottom = 30.0
-modulate_color = Color(1, 0.92, 0.75, 1)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_lhp7q"]
-content_margin_left = 118.0
-content_margin_top = 12.0
-content_margin_right = 118.0
-content_margin_bottom = 12.0
-texture = ExtResource("3_ihaig")
-texture_margin_left = 120.0
-texture_margin_top = 30.0
-texture_margin_right = 120.0
-texture_margin_bottom = 30.0
-modulate_color = Color(1, 1, 1, 0.98)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_j11rl"]
-content_margin_left = 118.0
-content_margin_top = 12.0
-content_margin_right = 118.0
-content_margin_bottom = 12.0
-texture = ExtResource("2_uraes")
-texture_margin_left = 120.0
-texture_margin_top = 30.0
-texture_margin_right = 120.0
-texture_margin_bottom = 30.0
-modulate_color = Color(1, 0.95, 0.8, 1)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_pu65w"]
-content_margin_left = 118.0
-content_margin_top = 12.0
-content_margin_right = 118.0
-content_margin_bottom = 12.0
-texture = ExtResource("2_uraes")
-texture_margin_left = 120.0
-texture_margin_top = 30.0
-texture_margin_right = 120.0
-texture_margin_bottom = 30.0
-modulate_color = Color(1, 1, 1, 0.92)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_nkwjh"]
-content_margin_left = 118.0
-content_margin_top = 12.0
-content_margin_right = 118.0
-content_margin_bottom = 12.0
-texture = ExtResource("3_ihaig")
-texture_margin_left = 120.0
-texture_margin_top = 30.0
-texture_margin_right = 120.0
-texture_margin_bottom = 30.0
-modulate_color = Color(1, 0.92, 0.75, 1)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_wdlyj"]
-content_margin_left = 118.0
-content_margin_top = 12.0
-content_margin_right = 118.0
-content_margin_bottom = 12.0
-texture = ExtResource("3_ihaig")
-texture_margin_left = 120.0
-texture_margin_top = 30.0
-texture_margin_right = 120.0
-texture_margin_bottom = 30.0
-modulate_color = Color(1, 1, 1, 0.98)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_tfo3w"]
-content_margin_left = 118.0
-content_margin_top = 12.0
-content_margin_right = 118.0
-content_margin_bottom = 12.0
-texture = ExtResource("2_uraes")
-texture_margin_left = 120.0
-texture_margin_top = 30.0
-texture_margin_right = 120.0
-texture_margin_bottom = 30.0
-modulate_color = Color(1, 0.95, 0.8, 1)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_8cp71"]
-content_margin_left = 118.0
-content_margin_top = 12.0
-content_margin_right = 118.0
-content_margin_bottom = 12.0
-texture = ExtResource("2_uraes")
-texture_margin_left = 120.0
-texture_margin_top = 30.0
-texture_margin_right = 120.0
-texture_margin_bottom = 30.0
-modulate_color = Color(1, 1, 1, 0.92)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_cc3db"]
-content_margin_left = 118.0
-content_margin_top = 12.0
-content_margin_right = 118.0
-content_margin_bottom = 12.0
-texture = ExtResource("3_ihaig")
-texture_margin_left = 120.0
-texture_margin_top = 30.0
-texture_margin_right = 120.0
-texture_margin_bottom = 30.0
-modulate_color = Color(1, 0.92, 0.75, 1)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_o4uxx"]
-content_margin_left = 118.0
-content_margin_top = 12.0
-content_margin_right = 118.0
-content_margin_bottom = 12.0
-texture = ExtResource("3_ihaig")
-texture_margin_left = 120.0
-texture_margin_top = 30.0
-texture_margin_right = 120.0
-texture_margin_bottom = 30.0
-modulate_color = Color(1, 1, 1, 0.98)
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_b0bgw"]
-content_margin_left = 118.0
-content_margin_top = 12.0
-content_margin_right = 118.0
-content_margin_bottom = 12.0
-texture = ExtResource("2_uraes")
-texture_margin_left = 120.0
-texture_margin_top = 30.0
-texture_margin_right = 120.0
-texture_margin_bottom = 30.0
-modulate_color = Color(1, 0.95, 0.8, 1)
-
-[node name="PauseMenu" type="CanvasLayer" unique_id=238764169]
+[node name="PauseMenu" type="CanvasLayer" unique_id=1207427105]
 layer = 50
-script = ExtResource("1_c3jo5")
+script = ExtResource("1_b4b0p")
 
-[node name="Screen" type="Control" parent="." unique_id=715115146]
+[node name="Screen" type="Control" parent="." unique_id=308595876]
 visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 
-[node name="Dim" type="ColorRect" parent="Screen" unique_id=545367274]
+[node name="Dim" type="ColorRect" parent="Screen" unique_id=557523073]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
-color = Color(0.02, 0.03, 0.05, 0.92)
+color = Color(0.02, 0.03, 0.05, 0.82)
 
-[node name="Rows" type="VBoxContainer" parent="Screen" unique_id=1709726676]
-custom_minimum_size = Vector2(620, 0)
+[node name="Frame" type="PanelContainer" parent="Screen" unique_id=2001570362]
+custom_minimum_size = Vector2(560, 0)
 layout_mode = 0
 anchor_left = 0.5
 anchor_top = 0.5
@@ -176,61 +31,46 @@ anchor_right = 0.5
 anchor_bottom = 0.5
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="Rows" type="VBoxContainer" parent="Screen/Frame" unique_id=711777550]
+layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="Title" type="Label" parent="Screen/Rows" unique_id=1371833601]
+[node name="Title" type="Label" parent="Screen/Frame/Rows" unique_id=398062283]
 layout_mode = 2
 theme_type_variation = &"Subtitle"
-theme_override_colors/font_color = Color(0.85, 0.7, 0.38, 1)
 text = "PAUSA"
 horizontal_alignment = 1
 
-[node name="ResumeButton" type="Button" parent="Screen/Rows" unique_id=1131082912]
-custom_minimum_size = Vector2(0, 78)
+[node name="TitleStrip" type="TextureRect" parent="Screen/Frame/Rows" unique_id=1219188138]
+custom_minimum_size = Vector2(0, 14)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("2_c3jo5")
+expand_mode = 1
+
+[node name="ResumeButton" type="Button" parent="Screen/Frame/Rows" unique_id=1083104979]
+custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
 theme_type_variation = &"TitleButton"
-theme_override_styles/normal = SubResource("StyleBoxTexture_b05md")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_f2x4c")
-theme_override_styles/hover = SubResource("StyleBoxTexture_lhp7q")
-theme_override_styles/focus = SubResource("StyleBoxTexture_j11rl")
-theme_override_colors/font_color = Color(0.93, 0.85, 0.62, 1)
-theme_override_colors/font_focus_color = Color(1, 0.97, 0.9, 1)
-theme_override_colors/font_pressed_color = Color(0.2, 0.16, 0.1, 1)
-theme_override_colors/font_hover_color = Color(1, 0.97, 0.9, 1)
 text = "CONTINUAR"
 
-[node name="OptionsButton" type="Button" parent="Screen/Rows" unique_id=1332856717]
-custom_minimum_size = Vector2(0, 78)
+[node name="OptionsButton" type="Button" parent="Screen/Frame/Rows" unique_id=1140762858]
+custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
 theme_type_variation = &"TitleButton"
-theme_override_styles/normal = SubResource("StyleBoxTexture_pu65w")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_nkwjh")
-theme_override_styles/hover = SubResource("StyleBoxTexture_wdlyj")
-theme_override_styles/focus = SubResource("StyleBoxTexture_tfo3w")
-theme_override_colors/font_color = Color(0.93, 0.85, 0.62, 1)
-theme_override_colors/font_focus_color = Color(1, 0.97, 0.9, 1)
-theme_override_colors/font_pressed_color = Color(0.2, 0.16, 0.1, 1)
-theme_override_colors/font_hover_color = Color(1, 0.97, 0.9, 1)
 text = "OPÇÕES"
 
-[node name="MenuButton" type="Button" parent="Screen/Rows" unique_id=1082603721]
-custom_minimum_size = Vector2(0, 78)
+[node name="MenuButton" type="Button" parent="Screen/Frame/Rows" unique_id=1987191107]
+custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
 theme_type_variation = &"TitleButton"
-theme_override_styles/normal = SubResource("StyleBoxTexture_8cp71")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_cc3db")
-theme_override_styles/hover = SubResource("StyleBoxTexture_o4uxx")
-theme_override_styles/focus = SubResource("StyleBoxTexture_b0bgw")
-theme_override_colors/font_color = Color(0.93, 0.85, 0.62, 1)
-theme_override_colors/font_focus_color = Color(1, 0.97, 0.9, 1)
-theme_override_colors/font_pressed_color = Color(0.2, 0.16, 0.1, 1)
-theme_override_colors/font_hover_color = Color(1, 0.97, 0.9, 1)
 text = "MENU PRINCIPAL"
 
-[node name="OptionsMenu" type="Control" parent="Screen" unique_id=1370626794 instance=ExtResource("4_umsyg")]
+[node name="OptionsMenu" type="Control" parent="Screen" unique_id=1170618259 instance=ExtResource("3_uraes")]
 visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-script = ExtResource("5_3qrb2")
+script = ExtResource("4_ihaig")

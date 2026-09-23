@@ -35,6 +35,10 @@ func show_ammo(value: int, size_of_magazine: int, is_reloading: bool, progress: 
 
 
 func _draw() -> void:
+	# Caixa preta com borda de cobre do kit (a da lista suspensa) atrás das balas e da reserva.
+	var backdrop: StyleBox = get_theme_stylebox(&"normal", &"OptionButton")
+	var reserve_room: float = 34.0 if reserve >= 0 else 0.0
+	draw_style_box(backdrop, Rect2(Vector2(-10.0, -7.0), size + Vector2(20.0 + reserve_room, 14.0)))
 	var count: int = magazine
 	var pip_width: float = (size.x - SPACING * (count - 1)) / count
 	var filled: int = ammo

@@ -8,7 +8,8 @@ extends Control
 # @tool só para o joystick aparecer desenhado no editor e facilitar o ajuste da posição.
 
 ## Arte do pacote Kenney Mobile Controls (contorno branco, que tingimos).
-const PAD: Texture2D = preload("res://assets/ui/kenney/joystick_circle_pad_b.png")
+## Anel dourado do Marble and Gold UI Kit em volta; o pino continua o da Kenney.
+const PAD: Texture2D = preload("res://assets/ui/marble_gold/options_icon_frame.png")
 const NUB: Texture2D = preload("res://assets/ui/kenney/joystick_circle_nub_b.png")
 const TINT := Color(1.0, 0.97, 0.9, 0.85)
 ## Fundo escuro por baixo: sem ele o joystick some contra o chão claro.

@@ -1,27 +1,30 @@
 class_name HealthBar
 extends Control
-## Barra de vida do HUD: desenhada em código (barra, borda de latão e o número dentro).
+## Barra de vida do HUD: trilho e preenchimento do Marble and Gold UI Kit (os estilos da
+## ProgressBar no tema), com o número dentro.
 ##
-## A cor vai do verde ao vermelho conforme a vida cai, e a barra "escorre" até o valor novo,
-## para o dano ser visível mesmo quando a tela está cheia de coisa.
+## O preenchimento (laranja, como os sliders) vai para o vermelho conforme a vida cai, e a barra
+## "escorre" até o valor novo, para o dano ser visível mesmo quando a tela está cheia de coisa.
 
-const BACKGROUND := Color(0.05, 0.07, 0.1, 0.55)
-const BORDER := Color(0.85, 0.7, 0.38, 0.85)
-## Dourado como o resto da interface; vira vermelho quando a vida cai.
-const FULL_COLOR := Color(0.88, 0.73, 0.4)
-const LOW_COLOR := Color(0.9, 0.25, 0.2)
+## Tinta do preenchimento: branco = a cor do kit; vermelho com pouca vida.
+const FULL_COLOR := Color(1.0, 1.0, 1.0)
+const LOW_COLOR := Color(1.3, 0.35, 0.3)
 ## Rastro claro que mostra quanto acabou de ser perdido.
-const TRAIL_COLOR := Color(1.0, 0.85, 0.5, 0.55)
+const TRAIL_COLOR := Color(1.8, 1.6, 1.2, 0.5)
 const TRAIL_SPEED: float = 0.45
-const CORNER: float = 6.0
 
 var health: float = 100.0
 var max_health: float = 100.0
 
 var _trail: float = 1.0
+var _track: StyleBox
+var _fill: StyleBoxTexture
 
 
 func _ready() -> void:
+	_track = get_theme_stylebox(&"background", &"ProgressBar")
+	# Cópia: a tinta muda com a vida (o estilo do tema é compartilhado).
+	_fill = (get_theme_stylebox(&"fill", &"ProgressBar") as StyleBoxTexture).duplicate()
 	set_process(true)
 
 
@@ -44,15 +47,20 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	var ratio: float = clampf(health / max_health, 0.0, 1.0)
-	var full := Rect2(Vector2.ZERO, size)
-	draw_rect(full, BACKGROUND, true)
+	draw_style_box(_track, Rect2(Vector2.ZERO, size))
+	# O preenchimento fica dentro da moldura do trilho.
+	var inner := Rect2(Vector2.ZERO, size).grow_individual(-6.0, -6.0, -6.0, -6.0)
 	if _trail > ratio:
-		draw_rect(Rect2(Vector2.ZERO, Vector2(size.x * _trail, size.y)), TRAIL_COLOR, true)
-	draw_rect(Rect2(Vector2.ZERO, Vector2(size.x * ratio, size.y)), LOW_COLOR.lerp(FULL_COLOR, ratio), true)
-	draw_rect(full, BORDER, false, 2.0)
+		_fill.modulate_color = TRAIL_COLOR
+		draw_style_box(_fill, Rect2(inner.position, Vector2(inner.size.x * _trail, inner.size.y)))
+	if ratio > 0.0:
+		_fill.modulate_color = LOW_COLOR.lerp(FULL_COLOR, ratio)
+		draw_style_box(_fill, Rect2(inner.position, Vector2(maxf(inner.size.x * ratio, 12.0), inner.size.y)))
 
 	var font: Font = get_theme_default_font()
 	var font_size: int = maxi(int(size.y * 0.7), 10)
 	var baseline: float = size.y * 0.5 + (font.get_ascent(font_size) - font.get_descent(font_size)) * 0.5
-	draw_string(font, Vector2(10.0, baseline), "%d" % roundi(health), HORIZONTAL_ALIGNMENT_LEFT,
-			size.x - 20.0, font_size, Color(1.0, 0.98, 0.94))
+	draw_string_outline(font, Vector2(12.0, baseline), "%d" % roundi(health), HORIZONTAL_ALIGNMENT_LEFT,
+			size.x - 24.0, font_size, 4, Color(0.05, 0.05, 0.05, 0.8))
+	draw_string(font, Vector2(12.0, baseline), "%d" % roundi(health), HORIZONTAL_ALIGNMENT_LEFT,
+			size.x - 24.0, font_size, Color(1.0, 0.98, 0.94))

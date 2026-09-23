@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://de8cd5i6cnmxs"
-path="res://.godot/imported/button_circle.png-4618b78aad96ec9c3af32db336855345.ctex"
+uid="uid://dbbx5opo2w0pt"
+path="res://.godot/imported/mmenu_centerpiece_menu_selection.png-9f4bf321007b3040ee83b1be273707ab.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/kenney/button_circle.png"
-dest_files=["res://.godot/imported/button_circle.png-4618b78aad96ec9c3af32db336855345.ctex"]
+source_file="res://assets/ui/marble_gold/mmenu_centerpiece_menu_selection.png"
+dest_files=["res://.godot/imported/mmenu_centerpiece_menu_selection.png-9f4bf321007b3040ee83b1be273707ab.ctex"]
 
 [params]
 

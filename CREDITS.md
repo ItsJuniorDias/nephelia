@@ -48,9 +48,15 @@ As recargas foram convertidas para mono e normalizadas por `tools/prepare_sounds
 
 | Asset | Autor | Licença | Link |
 |---|---|---|---|
-| NEI's Art Deco UI Kit | New England Interactive | Gratuito, "livre para usar como quiser" | https://newenglandinteractive.itch.io/neis-art-deco-ui-kit |
+| Marble and Gold UI Kit - Strategy Game | iuliana-u | **Pago** (US$ 7, comprado pelo usuário em 2026-09-23). A página e o zip não dizem a licença: confirmar o uso comercial com a autora antes de publicar. | https://iuliana-u.itch.io/marble-and-gold-ui-kit |
 
-Usamos as molduras douradas dos botões e o fundo de mármore nos menus.
+Usamos o monumento e a janela do menu inicial, o céu azul, as janelas de mármore, os botões, os
+sliders, as etiquetas e faixas do HUD, o anel dos botões de toque e a janela do placar final
+(`assets/ui/marble_gold/`; o zip original fica em `~/Downloads/nephelia_assets/ui/`). A página
+diz que não usou IA generativa.
+
+O NEI's Art Deco UI Kit (New England Interactive, gratuito) foi usado nos menus até 2026-09-23 e
+saiu do projeto quando o Marble and Gold entrou.
 
 ## Fontes
 

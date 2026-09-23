@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dnmist227mucj"
-path="res://.godot/imported/ButtonOutlineLong1.png-de01fbd5b4fe1a3d98fa0ddf8364bfc0.ctex"
+uid="uid://nyai60oykymv"
+path="res://.godot/imported/options_nav_btn_gold_center.png-ae39f6be17b061d666ad3a7dcbcc37cf.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/artdeco/ButtonOutlineLong1.png"
-dest_files=["res://.godot/imported/ButtonOutlineLong1.png-de01fbd5b4fe1a3d98fa0ddf8364bfc0.ctex"]
+source_file="res://assets/ui/marble_gold/options_nav_btn_gold_center.png"
+dest_files=["res://.godot/imported/options_nav_btn_gold_center.png-ae39f6be17b061d666ad3a7dcbcc37cf.ctex"]
 
 [params]
 
