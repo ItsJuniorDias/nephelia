@@ -253,6 +253,12 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   `levels/arena_ambience.gd` (criado pelo ArenaSetup): vento e música da partida. Música e sons de
   interface tocam com o jogo pausado (`PROCESS_MODE_ALWAYS`). Loops: marcar no `.import`
   (`loop=true` no OGG, `edit/loop_mode=2` no WAV).
+- Ícone: `ui/icon/app_icon.png` (1024 x 1024, sem transparência), em `config/icon` e no iOS
+  `icons/icon_1024x1024` (os outros tamanhos vazios do preset usam o `config/icon`, o mesmo arquivo). Feito por IA com `tools/make_icon.py` (Python:
+  OpenRouter + Nano Banana `google/gemini-2.5-flash-image`; chave em `.env`, fora do Git): `generate`
+  cria opções em `~/Downloads/nephelia_assets/icon/candidates/` (com fotos do jogo de
+  `tools/icon_reference.gd` como referência de estilo) e `use <imagem>` aplica. Escolhido pelo
+  usuário: o emblema (revólveres cruzados, gancho, sol Art Déco, fundo azul-petróleo).
 - Testes: `Godot --headless --path . -s res://tests/<suíte>.gd` para `test_controls`, `test_bots`,
   `test_arena`, `test_items`, `test_menus` e `test_audio` (saída 0 = tudo passou). Rodar as seis
   depois de qualquer mudança. Num script de teste (`extends SceneTree`) não existe `get_tree()`: o próprio

@@ -4,3 +4,4 @@
 
 # Chaves de API (tools/make_icon.py)
 .env
+.DS_Store

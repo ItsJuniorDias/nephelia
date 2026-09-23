@@ -68,4 +68,10 @@ As licenças vêm junto em `assets/fonts/*-OFL.txt`, como a OFL exige.
 | `assets/audio/sfx/nephelia/revolver_shot_placeholder.wav` | Tiro das três armas, sintetizado por código (sem material de terceiros); cada arma muda o tom |
 | `assets/audio/sfx/nephelia/rail_slide_loop.wav` | Chiado da roldana no trilho, sintetizado por `tools/prepare_sounds.py` (sem material de terceiros) |
 
+## Gerados por IA (declarar no formulário da Steam)
+
+| Asset | Como foi feito |
+|---|---|
+| `ui/icon/app_icon.png` (ícone do jogo) | Google Gemini 2.5 Flash Image ("Nano Banana") pelo OpenRouter, com `tools/make_icon.py` (ideia "emblem", sem imagens de referência), em 2026-09-22. O prompt e o modelo ficam em `~/Downloads/nephelia_assets/icon/app_icon_source.json`. |
+
 CC0 não exige crédito, mas agradecemos aos autores nos créditos do jogo.
