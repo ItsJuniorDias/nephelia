@@ -22,6 +22,8 @@ func _run() -> void:
 	await _test_play_opens_arena()
 	await _test_pause_freezes_and_resumes()
 	await _test_difficulty_reaches_bots()
+	await _test_lobby_host_and_leave()
+	await _test_lobby_shows_why_match_ended()
 
 	print("RESULT: ", "ALL PASSED" if _failures == 0 else "%d FAILED" % _failures)
 	quit(0 if _failures == 0 else 1)
@@ -60,9 +62,9 @@ func _test_menu_buttons() -> void:
 	for child: Node in menu.get_node(^"Rows").get_children():
 		if child is Button:
 			buttons.append((child as Button).text)
-	_check("M1 the main menu shows play, difficulty, options and quit", buttons.size() == 4
-			and buttons[0] == "PLAY" and buttons[1].begins_with("DIFFICULTY")
-			and buttons[2] == "OPTIONS" and buttons[3] == "QUIT", "botões=%s" % [buttons])
+	_check("M1 the main menu shows play, multiplayer, difficulty, options and quit", buttons.size() == 5
+			and buttons[0] == "PLAY" and buttons[1] == "MULTIPLAYER" and buttons[2].begins_with("DIFFICULTY")
+			and buttons[3] == "OPTIONS" and buttons[4] == "QUIT", "botões=%s" % [buttons])
 	await _close(menu)
 
 
@@ -152,3 +154,40 @@ func _test_difficulty_reaches_bots() -> void:
 	_check("M6 the chosen difficulty reaches the bots", wrong.is_empty(), "errados=%s" % [wrong])
 	Settings.set_option(&"difficulty", &"medium")
 	await _close(arena)
+
+
+# Sala do multiplayer: hospedar mostra o endereço e a lista; sozinho não dá para começar; sair
+# fecha a sala e volta ao começo.
+func _test_lobby_host_and_leave() -> void:
+	var menu: MainMenu = await _open_menu()
+	var saved_name: String = Settings.player_name
+	menu.multiplayer_button.pressed.emit()
+	await _physics(2)
+	var lobby: Lobby = menu.lobby
+	var opened: bool = lobby.is_open() and lobby.host_button.visible and lobby.join_row.visible
+	lobby.name_edit.text = "Tester"
+	lobby.name_edit.text_changed.emit("Tester")
+	lobby.host_button.pressed.emit()
+	await _physics(3)
+	var hosting: bool = Net.is_host() and not lobby.host_button.visible and lobby.info_label.visible \
+			and lobby.start_button.visible and lobby.start_button.disabled \
+			and lobby.get_player_lines().size() >= 1 and lobby.get_player_lines()[0].begins_with("Tester")
+	lobby.back_button.pressed.emit()
+	await _physics(2)
+	var left: bool = not Net.is_online() and lobby.host_button.visible and lobby.is_open()
+	lobby.back_button.pressed.emit()
+	await _physics(2)
+	_check("M7 the lobby hosts a room, lists the players and leaves it", opened and hosting and left
+			and not lobby.is_open(), "sala=%s" % [lobby.get_player_lines()])
+	Settings.set_option(&"player_name", saved_name)
+	await _close(menu)
+
+
+# A partida em rede acabou mal (o anfitrião saiu): o menu abre a sala contando o motivo.
+func _test_lobby_shows_why_match_ended() -> void:
+	Net.last_error = "The host left the match."
+	var menu: MainMenu = await _open_menu()
+	var shown: bool = menu.lobby.is_open() and menu.lobby.status_label.visible \
+			and menu.lobby.status_label.text == "The host left the match." and Net.last_error.is_empty()
+	_check("M8 the menu tells why the network match ended", shown, menu.lobby.status_label.text)
+	await _close(menu)

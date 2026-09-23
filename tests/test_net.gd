@@ -251,6 +251,14 @@ func _test_match_over_network() -> void:
 	if not ready:
 		_leave_network(level, pid)
 		return
+	var tags_ok: bool = true
+	var tag_texts: Array[String] = []
+	for puppet: Character in puppets:
+		var tag := puppet.get_node_or_null(^"NameTag") as NameTag
+		tags_ok = tags_ok and tag != null and tag.text.begins_with("BOT") == (puppet.display_name != "HostBot")
+		tag_texts.append(tag.text if tag != null else "-")
+	_check("N16 real players and bots are marked above their heads", tags_ok
+			and client.local.get_node_or_null(^"NameTag") == null, "etiquetas=%s" % [tag_texts])
 
 	# O anfitrião anda em círculo: a marionete dele anda aqui, sem pulos.
 	var start: Vector3 = host_character.global_position

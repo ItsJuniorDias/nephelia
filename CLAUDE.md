@@ -332,12 +332,47 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   `tools/icon_reference.gd` como referência de estilo) e `use <imagem>` aplica. Escolhido pelo
   usuário: o emblema (revólveres cruzados, gancho, sol Art Déco, fundo azul-petróleo).
 - Testes: `Godot --headless --path . -s res://tests/<suíte>.gd` para `test_controls`, `test_bots`,
-  `test_arena`, `test_items`, `test_menus` e `test_audio` (saída 0 = tudo passou). Rodar as seis
-  depois de qualquer mudança. Num script de teste (`extends SceneTree`) não existe `get_tree()`: o próprio
+  `test_arena`, `test_items`, `test_menus`, `test_audio` e `test_net` (saída 0 = tudo passou). Rodar
+  as sete depois de qualquer mudança. Num script de teste (`extends SceneTree`) não existe `get_tree()`: o próprio
   script é a árvore (usar `self.paused`, `root`, `get_nodes_in_group`). Ao criar presets de exportação, excluir `tests/*`.
   No headless a janela é 64x64 (viewport 1152x1152): eventos simulados precisam ser convertidos com
   `root.get_final_transform()` (o teste já faz isso). Corpo com `process_mode` desligado sai da
   física (`disable_mode = REMOVE`): nos testes, usar `DISABLE_MODE_KEEP_ACTIVE` para o tiro acertar.
+- **Multiplayer** (`net/`, 2026-09-23): o anfitrião é o servidor. `Net` (classe estática: modo,
+  conexão, sala `roster`, `last_error`); `NetTransport` = "estrada" trocável (`EnetTransport` para
+  Wi-Fi local e testes no Mac; o Game Center entra no mesmo lugar, via GodotApplePlugins/GKMatch).
+  Protocolo PRÓPRIO (`NetMessage`: comandos binários 60/s; `NetSnapshot`: foto do estado 30/s;
+  eventos confiáveis em `var_to_bytes` sem objetos), sem RPC do Godot. `NetLobby` = sala sem tela
+  (HELLO/ROSTER/START), usada pela tela `ui/lobby/` (montada no `make_menus.gd`) e pelos testes.
+  Na arena o `ArenaSetup` cria `NetHost` ou `NetClient` (`net/net_game.gd` em comum: personagens por
+  `net_id`, trilhos e itens por índice, lê pacotes com prioridade -100 e `PROCESS_MODE_ALWAYS`).
+  Anfitrião: `RemoteController` (fila de comandos numerados; se o comando atrasa, o personagem
+  ESPERA até 200 ms e depois o `NetHost._catch_up` alcança com passos extras: adivinhar ou jogar
+  comandos fora dava correções de 0,7 m), compensação do atraso no tiro (`MatchReferee.shot_rewinder`
+  volta os alvos para onde o atirador os via, até 300 ms), bots completam até `Net.MIN_CHARACTERS` = 4
+  (pedido do usuário: partida frenética; quem entra toma a vaga de um bot, quem sai devolve).
+  Cliente: prevê o próprio movimento (`Character.step_movement`; `command_hook` numera e manda) e
+  corrige com `Character.reconcile` quando a foto discorda (> 3 cm); os outros são marionetes
+  (`PuppetController`, 100 ms no passado, `apply_puppet_state`); eventos do anfitrião são
+  repassados pelos MESMOS sinais do juiz/partida (HUD, sons e efeitos não sabem que é rede).
+  `MatchReferee.authority`/`Deathmatch.authority` falsos no cliente (não mata, não dá item, não
+  acaba a partida); o tiro do cliente é desenhado na hora e o acerto chega depois
+  (`Weapon.hit_confirmed`); imprecisão sorteada pelo número do comando (cliente e anfitrião iguais).
+  Na rede os personagens NÃO se bloqueiam (collision exceptions): esbarrão em marionete no passado
+  virava correção. Pausa não congela a partida em rede; só o anfitrião recomeça ("WAITING FOR
+  HOST"). Etiqueta de nome sobre os outros (`characters/name_tag.gd`: gente em dourado, bot em
+  cinza com "BOT"; some atrás de parede); placar final marca "(BOT)".
+  Armadilhas já pegas: (1) o "acelerador" do ENet joga fora pacotes não confiáveis quando acha
+  que a rede congestionou (logo após carregar a arena): sumiam fotos por ~1 s e tiros; está
+  desligado em `EnetTransport` (`throttle_configure(..., 0)`) e o SHOT é confiável. (2) O aviso
+  CHARACTER_ADDED chega ao próprio cliente antes do WORLD: ele criava uma marionete de si mesmo que
+  o empurrava 0,69 m; o cliente ignora esse aviso antes do mundo e nunca cria a própria marionete.
+  Testes: `tests/test_net.gd` abre OUTRO processo do Godot como anfitrião (`tests/net_host_runner.gd`,
+  relatório em JSON) e joga como cliente. Fotos: `tools/net_sheet.gd` (com janela; abre processos
+  ajudantes). No Mac: no editor, Debug > Customize Run Instances = 2 janelas (uma hospeda, a outra
+  entra em 127.0.0.1). iPhone: o preset iOS tem `NSLocalNetworkUsageDescription`
+  (`additional_plist_content`); sem ele o iOS bloqueia a rede local calado. Achar a sala sozinho
+  (broadcast) no iOS exige a permissão de multicast da Apple: por isso o endereço é digitado.
 - Godot 4.7 tem classes nativas `VirtualJoystick` e `Logger`: não usar esses nomes em `class_name`.
   Usamos nosso `TouchJoystick` (não o nativo) porque o `TouchControls` distribui os dedos
   centralmente (joystick flutuante na esquerda, olhar no resto da tela, botões).
@@ -423,4 +458,9 @@ Atualizar esta seção ao fim de cada sessão.
     com capim e flores. Céu da tarde à noite (pôr do sol, estrelas, nebulosa, lua, postes acesos,
     nuvens andando), aprovado pelo usuário. 39 + 8 + 20 + 11 + 6 + 7 testes passando.
     Próximas: começo e fim do pulo; depois Tarefa 11 (desempenho no iPhone).
+  - Multiplayer (pedido do usuário, 2026-09-23), etapa 1 feita: rede com anfitrião-servidor
+    (Wi-Fi local por endereço), previsão, compensação do atraso, bots completando vagas, sala no
+    menu e etiquetas de nome (gente x bot). 39 + 8 + 20 + 11 + 8 + 7 + 16 testes passando (a suíte
+    nova é `test_net`). Próximo: testar Mac + iPhone na mesma Wi-Fi; depois o Game Center (o usuário
+    confirma se tem o Apple Developer pago e aprova baixar o GodotApplePlugins).
   - Próximo: seguir o polish; depois Tarefa 11 (desempenho no iPhone) ou o que o usuário pedir.

@@ -4,6 +4,7 @@ extends SceneTree
 ## personagem (os bots ficam passivos). Quando o cliente sai, confere se um bot voltou para a
 ## vaga, grava um relatório (JSON) e fecha.
 ##   Godot --headless --path . -s res://tests/net_host_runner.gd -- <porta> <relatório.json> <segundos>
+##       [espera antes de começar, em segundos]
 
 const ARENA := "res://levels/skyplaza/skyplaza.tscn"
 
@@ -34,6 +35,10 @@ func _run() -> void:
 		_finish(report_path, "nobody joined")
 		return
 	_report["client_joined"] = true
+	var start_delay: float = args[3].to_float() if args.size() > 3 else 0.0
+	var start_at: int = Time.get_ticks_msec() + int(start_delay * 1000.0)
+	while Time.get_ticks_msec() < start_at:
+		await process_frame
 	lobby.start_match()
 	lobby.queue_free()
 

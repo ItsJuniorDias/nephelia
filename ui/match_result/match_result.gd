@@ -57,7 +57,11 @@ func _on_match_finished(ranking: Array[Dictionary]) -> void:
 	for i in ranking.size():
 		var entry: Dictionary = ranking[i]
 		var mine: bool = entry["character"] == character
-		var who: String = "You" if mine else (entry["character"] as Character).display_name
+		var other: Character = entry["character"]
+		var who: String = "You" if mine else other.display_name
+		# No multiplayer dá para saber quem é gente e quem é bot.
+		if not mine and other.is_bot and Net.is_online():
+			who += "  (BOT)"
 		ranking_lines.append("%d.  %s   %s   %s" % [i + 1, who, MatchHud.count_label(entry["kills"], "kill"),
 				MatchHud.count_label(entry["deaths"], "death")])
 		_add_row([str(i + 1), who, str(entry["kills"]), str(entry["deaths"])], mine, false)

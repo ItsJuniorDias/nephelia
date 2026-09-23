@@ -41,7 +41,9 @@ func _process(delta: float) -> void:
 	if deathmatch == null:
 		return
 	var seconds: int = ceili(deathmatch.time_left)
-	timer_label.text = "%d:%02d" % [seconds / 60, seconds % 60]
+	# Multiplayer: a partida só começa quando todos carregaram a arena.
+	timer_label.text = "WAITING FOR PLAYERS" if deathmatch.waiting \
+			else "%d:%02d" % [seconds / 60, seconds % 60]
 	timer_label.add_theme_color_override(&"font_color",
 			HURRY_COLOR if deathmatch.time_left <= HURRY_TIME else TIMER_COLOR)
 	if _elimination_timer > 0.0:

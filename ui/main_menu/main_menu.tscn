@@ -1,30 +1,32 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://ui/main_menu/main_menu.gd" id="1_u184e"]
-[ext_resource type="Texture2D" path="res://assets/ui/marble_gold/screen_bg_blue.png" id="2_6mijq"]
-[ext_resource type="Texture2D" path="res://assets/ui/marble_gold/mmenu_centerpiece_isolated.png" id="3_w2r0d"]
-[ext_resource type="Texture2D" path="res://assets/ui/marble_gold/mmenu_centerpiece_menu.png" id="4_4e78x"]
-[ext_resource type="Texture2D" path="res://assets/ui/marble_gold/mmenu_centerpiece_menu_separator.png" id="5_s4pem"]
-[ext_resource type="PackedScene" path="res://ui/options_menu/options_menu.tscn" id="6_xio0d"]
-[ext_resource type="Script" path="res://ui/options_menu/options_menu.gd" id="7_tf5ef"]
+[ext_resource type="Script" path="res://ui/main_menu/main_menu.gd" id="1_w2r0d"]
+[ext_resource type="Texture2D" path="res://assets/ui/marble_gold/screen_bg_blue.png" id="2_4e78x"]
+[ext_resource type="Texture2D" path="res://assets/ui/marble_gold/mmenu_centerpiece_isolated.png" id="3_s4pem"]
+[ext_resource type="Texture2D" path="res://assets/ui/marble_gold/mmenu_centerpiece_menu.png" id="4_xio0d"]
+[ext_resource type="Texture2D" path="res://assets/ui/marble_gold/mmenu_centerpiece_menu_separator.png" id="5_tf5ef"]
+[ext_resource type="PackedScene" path="res://ui/options_menu/options_menu.tscn" id="6_qao3l"]
+[ext_resource type="Script" path="res://ui/options_menu/options_menu.gd" id="7_lknku"]
+[ext_resource type="PackedScene" path="res://ui/lobby/lobby.tscn" id="8_u2jyo"]
+[ext_resource type="Script" path="res://ui/lobby/lobby.gd" id="9_bpbph"]
 
-[node name="MainMenu" type="Control" unique_id=1338462371]
+[node name="MainMenu" type="Control" unique_id=34482828]
 layout_mode = 3
 anchors_preset = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
-script = ExtResource("1_u184e")
+script = ExtResource("1_w2r0d")
 
-[node name="Background" type="TextureRect" parent="." unique_id=1486144559]
+[node name="Background" type="TextureRect" parent="." unique_id=1027390739]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
-texture = ExtResource("2_6mijq")
+texture = ExtResource("2_4e78x")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="Monument" type="TextureRect" parent="." unique_id=8899538]
+[node name="Monument" type="TextureRect" parent="." unique_id=906236438]
 layout_mode = 0
 anchor_left = 0.5
 anchor_top = 0.5
@@ -35,10 +37,10 @@ offset_top = -390.63998
 offset_right = 297.92
 offset_bottom = 390.63998
 mouse_filter = 2
-texture = ExtResource("3_w2r0d")
+texture = ExtResource("3_s4pem")
 expand_mode = 1
 
-[node name="MenuWindow" type="TextureRect" parent="." unique_id=672901874]
+[node name="MenuWindow" type="TextureRect" parent="." unique_id=1919765377]
 layout_mode = 0
 anchor_left = 0.5
 anchor_top = 0.5
@@ -49,10 +51,10 @@ offset_top = -234.83998
 offset_right = 158.84
 offset_bottom = 234.84001
 mouse_filter = 2
-texture = ExtResource("4_4e78x")
+texture = ExtResource("4_xio0d")
 expand_mode = 1
 
-[node name="Rows" type="VBoxContainer" parent="." unique_id=1624837924]
+[node name="Rows" type="VBoxContainer" parent="." unique_id=1231763551]
 layout_mode = 0
 anchor_left = 0.5
 anchor_top = 0.5
@@ -65,87 +67,108 @@ offset_bottom = 210.84
 theme_override_constants/separation = 6
 alignment = 1
 
-[node name="Title" type="Label" parent="Rows" unique_id=2146136810]
+[node name="Title" type="Label" parent="Rows" unique_id=1070050837]
 layout_mode = 2
 theme_type_variation = &"Title"
 theme_override_font_sizes/font_size = 40
 text = "NEPHELIA"
 horizontal_alignment = 1
 
-[node name="Subtitle" type="Label" parent="Rows" unique_id=2009971616]
+[node name="Subtitle" type="Label" parent="Rows" unique_id=970496754]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 theme_override_colors/font_color = Color(0.75, 0.85, 0.82, 1)
 text = "ARENA IN THE CLOUDS"
 horizontal_alignment = 1
 
-[node name="Spacer" type="Control" parent="Rows" unique_id=757538866]
+[node name="Spacer" type="Control" parent="Rows" unique_id=520490505]
 custom_minimum_size = Vector2(0, 14)
 layout_mode = 2
 
-[node name="Separator0" type="TextureRect" parent="Rows" unique_id=1326717970]
+[node name="Separator0" type="TextureRect" parent="Rows" unique_id=327823191]
 custom_minimum_size = Vector2(0, 2)
 layout_mode = 2
 mouse_filter = 2
-texture = ExtResource("5_s4pem")
+texture = ExtResource("5_tf5ef")
 expand_mode = 1
 
-[node name="PlayButton" type="Button" parent="Rows" unique_id=859699724]
+[node name="PlayButton" type="Button" parent="Rows" unique_id=1730525031]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 theme_type_variation = &"MenuItem"
 text = "PLAY"
 
-[node name="Separator1" type="TextureRect" parent="Rows" unique_id=1182846591]
+[node name="Separator1" type="TextureRect" parent="Rows" unique_id=2061268629]
 custom_minimum_size = Vector2(0, 2)
 layout_mode = 2
 mouse_filter = 2
-texture = ExtResource("5_s4pem")
+texture = ExtResource("5_tf5ef")
 expand_mode = 1
 
-[node name="DifficultyButton" type="Button" parent="Rows" unique_id=1467866892]
+[node name="MultiplayerButton" type="Button" parent="Rows" unique_id=2104587054]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+theme_type_variation = &"MenuItem"
+text = "MULTIPLAYER"
+
+[node name="Separator2" type="TextureRect" parent="Rows" unique_id=9937237]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("5_tf5ef")
+expand_mode = 1
+
+[node name="DifficultyButton" type="Button" parent="Rows" unique_id=1748073005]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 theme_type_variation = &"MenuItem"
 text = "DIFFICULTY: MEDIUM"
 
-[node name="Separator2" type="TextureRect" parent="Rows" unique_id=1434719440]
+[node name="Separator3" type="TextureRect" parent="Rows" unique_id=366745641]
 custom_minimum_size = Vector2(0, 2)
 layout_mode = 2
 mouse_filter = 2
-texture = ExtResource("5_s4pem")
+texture = ExtResource("5_tf5ef")
 expand_mode = 1
 
-[node name="OptionsButton" type="Button" parent="Rows" unique_id=610661085]
+[node name="OptionsButton" type="Button" parent="Rows" unique_id=181171390]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 theme_type_variation = &"MenuItem"
 text = "OPTIONS"
 
-[node name="Separator3" type="TextureRect" parent="Rows" unique_id=780462999]
+[node name="Separator4" type="TextureRect" parent="Rows" unique_id=1446711545]
 custom_minimum_size = Vector2(0, 2)
 layout_mode = 2
 mouse_filter = 2
-texture = ExtResource("5_s4pem")
+texture = ExtResource("5_tf5ef")
 expand_mode = 1
 
-[node name="QuitButton" type="Button" parent="Rows" unique_id=1808202104]
+[node name="QuitButton" type="Button" parent="Rows" unique_id=602787882]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 theme_type_variation = &"MenuItem"
 text = "QUIT"
 
-[node name="Separator4" type="TextureRect" parent="Rows" unique_id=2099754828]
+[node name="Separator5" type="TextureRect" parent="Rows" unique_id=1422660729]
 custom_minimum_size = Vector2(0, 2)
 layout_mode = 2
 mouse_filter = 2
-texture = ExtResource("5_s4pem")
+texture = ExtResource("5_tf5ef")
 expand_mode = 1
 
-[node name="OptionsMenu" type="Control" parent="." unique_id=1869649724 instance=ExtResource("6_xio0d")]
+[node name="OptionsMenu" type="Control" parent="." unique_id=694781707 instance=ExtResource("6_qao3l")]
 visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-script = ExtResource("7_tf5ef")
+script = ExtResource("7_lknku")
+
+[node name="Lobby" type="Control" parent="." unique_id=1397361482 instance=ExtResource("8_u2jyo")]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("9_bpbph")

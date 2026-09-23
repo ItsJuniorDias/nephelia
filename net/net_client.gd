@@ -177,6 +177,8 @@ func _add_described(described: Array) -> void:
 	puppet.client = self
 	var character: Character = spawn_character(net_id, Settings.clean_name(described[2]), described[3],
 			described[4], puppet)
+	character.is_bot = described[1] == 0
+	NameTag.attach(character)
 	# Invisível até a primeira foto dizer onde ele está (senão aparece na origem do mapa).
 	character.visible = false
 	if not described[5]:

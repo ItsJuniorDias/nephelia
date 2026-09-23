@@ -55,6 +55,7 @@ func _initialize() -> void:
 	_sliders(theme)
 	_toggles(theme)
 	_dropdowns(theme)
+	_text_fields(theme)
 	_scrollbars(theme)
 	_hud(theme, title)
 
@@ -157,6 +158,19 @@ func _dropdowns(theme: Theme) -> void:
 	theme.set_color(&"font_hover_color", &"OptionButton", LIGHT)
 	theme.set_color(&"font_focus_color", &"OptionButton", LIGHT)
 	theme.set_color(&"font_pressed_color", &"OptionButton", LIGHT)
+
+
+# Campo de texto (nome, endereço do anfitrião): a mesma caixa preta de borda dourada da lista.
+func _text_fields(theme: Theme) -> void:
+	var box := _slice("options_dropdown_bg", 6, 6, 14, 8)
+	theme.set_stylebox(&"normal", &"LineEdit", box)
+	theme.set_stylebox(&"read_only", &"LineEdit", _slice("options_dropdown_bg", 6, 6, 14, 8, Color(1, 1, 1, 0.6)))
+	theme.set_stylebox(&"focus", &"LineEdit", _slice("options_dropdown_bg", 6, 6, 14, 8, Color(1.25, 1.15, 0.9)))
+	theme.set_color(&"font_color", &"LineEdit", LIGHT)
+	theme.set_color(&"font_uneditable_color", &"LineEdit", Color(CREAM, 0.6))
+	theme.set_color(&"font_placeholder_color", &"LineEdit", Color(CREAM, 0.45))
+	theme.set_color(&"caret_color", &"LineEdit", GOLD)
+	theme.set_color(&"selection_color", &"LineEdit", Color(GOLD, 0.35))
 
 
 # Barra de rolagem: trilho escuro e alça de cobre arredondada.

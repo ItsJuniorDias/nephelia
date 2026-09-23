@@ -1,11 +1,14 @@
 extends SceneTree
-## Ferramenta: monta as telas de menu (opções, menu inicial e pausa) e salva as cenas.
+## Ferramenta: monta as telas de menu (opções, sala do multiplayer, menu inicial e pausa) e salva
+## as cenas.
 ##   Godot --headless --path . -s res://tools/make_menus.gd
 ##
 ## O layout é feito em código para ficar fácil de reajustar (tamanhos pensados para o celular
-## em paisagem). Os scripts ficam em `ui/options_menu/`, `ui/main_menu/` e `ui/pause_menu/`.
+## em paisagem). Os scripts ficam em `ui/options_menu/`, `ui/lobby/`, `ui/main_menu/` e
+## `ui/pause_menu/`.
 
 const OPTIONS_OUT := "res://ui/options_menu/options_menu.tscn"
+const LOBBY_OUT := "res://ui/lobby/lobby.tscn"
 const MAIN_OUT := "res://ui/main_menu/main_menu.tscn"
 const PAUSE_OUT := "res://ui/pause_menu/pause_menu.tscn"
 
@@ -22,6 +25,7 @@ const WINDOW_SIZE := Vector2(418, 618)
 
 func _initialize() -> void:
 	_save(_build_options(), OPTIONS_OUT)
+	_save(_build_lobby(), LOBBY_OUT)
 	_save(_build_main_menu(), MAIN_OUT)
 	_save(_build_pause(), PAUSE_OUT)
 	quit()
@@ -58,6 +62,77 @@ func _build_options() -> Control:
 
 	var back := _button("BackButton", "BACK")
 	rows.add_child(back)
+	_own(root, root)
+	return root
+
+
+# Sala do multiplayer: nome, hospedar ou entrar pelo endereço, lista de quem está e começar.
+# O script (ui/lobby/lobby.gd) mostra e esconde as partes conforme o momento.
+func _build_lobby() -> Control:
+	var root := Control.new()
+	root.name = "Lobby"
+	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.set_script(load("res://ui/lobby/lobby.gd"))
+	root.visible = false
+	_dim(root)
+
+	var panel := PanelContainer.new()
+	panel.name = "Panel"
+	panel.set_anchors_preset(Control.PRESET_CENTER)
+	panel.custom_minimum_size = Vector2(760, 0)
+	_center(panel)
+	root.add_child(panel)
+
+	var rows := VBoxContainer.new()
+	rows.name = "Rows"
+	rows.add_theme_constant_override(&"separation", 14)
+	panel.add_child(rows)
+	_heading(rows, "MULTIPLAYER")
+
+	var name_row := HBoxContainer.new()
+	name_row.name = "NameRow"
+	name_row.add_theme_constant_override(&"separation", 16)
+	rows.add_child(name_row)
+	var name_label := Label.new()
+	name_label.name = "Label"
+	name_label.text = "YOUR NAME"
+	name_label.custom_minimum_size = Vector2(200, 0)
+	name_row.add_child(name_label)
+	name_row.add_child(_text_field("NameEdit", "Player"))
+
+	rows.add_child(_button("HostButton", "HOST GAME"))
+
+	var join_row := HBoxContainer.new()
+	join_row.name = "JoinRow"
+	join_row.add_theme_constant_override(&"separation", 16)
+	rows.add_child(join_row)
+	var address := _text_field("AddressEdit", "HOST ADDRESS (EX.: 192.168.0.12)")
+	address.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_NUMBER_DECIMAL
+	join_row.add_child(address)
+	var join := _button("JoinButton", "JOIN")
+	join.custom_minimum_size.x = 200
+	join_row.add_child(join)
+
+	var info := Label.new()
+	info.name = "Info"
+	info.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	rows.add_child(info)
+
+	var players := VBoxContainer.new()
+	players.name = "Players"
+	players.add_theme_constant_override(&"separation", 6)
+	rows.add_child(players)
+
+	rows.add_child(_button("StartButton", "START MATCH"))
+
+	var status := Label.new()
+	status.name = "Status"
+	status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	rows.add_child(status)
+
+	rows.add_child(_button("BackButton", "BACK"))
 	_own(root, root)
 	return root
 
@@ -119,6 +194,7 @@ func _build_main_menu() -> Control:
 	rows.add_child(spacer)
 
 	var items: Array[Button] = [_menu_item("PlayButton", "PLAY"),
+			_menu_item("MultiplayerButton", "MULTIPLAYER"),
 			_menu_item("DifficultyButton", "DIFFICULTY: MEDIUM"), _menu_item("OptionsButton", "OPTIONS"),
 			_menu_item("QuitButton", "QUIT")]
 	for i: int in items.size():
@@ -129,6 +205,9 @@ func _build_main_menu() -> Control:
 	var options: Node = (load(OPTIONS_OUT) as PackedScene).instantiate()
 	options.name = "OptionsMenu"
 	root.add_child(options)
+	var lobby: Node = (load(LOBBY_OUT) as PackedScene).instantiate()
+	lobby.name = "Lobby"
+	root.add_child(lobby)
 	_own(root, root)
 	return root
 
@@ -221,6 +300,17 @@ func _button(button_name: String, text: String) -> Button:
 	button.theme_type_variation = &"TitleButton"
 	button.custom_minimum_size = Vector2(0, 72)
 	return button
+
+
+# Campo de texto que estica na linha (caixa preta de borda dourada, do tema).
+func _text_field(field_name: String, placeholder: String) -> LineEdit:
+	var field := LineEdit.new()
+	field.name = field_name
+	field.placeholder_text = placeholder
+	field.custom_minimum_size = Vector2(0, 56)
+	field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	field.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	return field
 
 
 # Item do menu inicial: só o texto; a barra de cobre aparece atrás quando o dedo está nele.

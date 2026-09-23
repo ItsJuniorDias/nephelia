@@ -129,6 +129,8 @@ func _register(character: Character) -> void:
 	characters[character.net_id] = character
 	pass_through_others(character)
 	_watch(character)
+	if character != local_character:
+		NameTag.attach(character)
 
 
 func _watch(character: Character) -> void:
@@ -143,6 +145,7 @@ func _add_player(peer: int, player_name: String) -> Character:
 	var character: Character = spawn_character(_next_id, player_name, HUMAN_LOOK, color, remote)
 	_next_id += 1
 	_watch(character)
+	NameTag.attach(character)
 	players[peer] = {"name": player_name, "character": character, "ready": false}
 	_broadcast(NetMessage.Type.CHARACTER_ADDED, [describe(character, peer)])
 	referee.respawn_now(character)

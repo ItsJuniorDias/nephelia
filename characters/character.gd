@@ -93,6 +93,8 @@ var controller: CharacterController
 var weapon: Weapon
 ## Número do personagem na partida em rede (0 = fora do multiplayer). Quem distribui é o anfitrião.
 var net_id: int = 0
+## É bot (e não gente): placar e etiqueta de nome mostram. No cliente vem do anfitrião.
+var is_bot: bool = false
 ## Multiplayer: recebe o comando de cada passo antes de o personagem obedecer (o NetClient
 ## numera, ajusta e manda para o anfitrião o comando do jogador local).
 var command_hook: Callable
@@ -143,6 +145,7 @@ func _ready() -> void:
 		model.mount.watch(weapon)
 	if controller != null:
 		controller.setup(self)
+		is_bot = controller is BotController
 	# Sons do personagem (passos, pulo, dano, trilho...), criados em código como a arma.
 	var sounds := CharacterAudio.new()
 	add_child(sounds)

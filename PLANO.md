@@ -130,13 +130,22 @@ aéreos, a 60 FPS no iPhone.
 
 ---
 
-## Marco 2: multiplayer na mesma Wi-Fi
-- [ ] Rede com a API de multiplayer do Godot (ENet): um aparelho hospeda e é o servidor
-- [ ] Lobby: achar partidas na rede local, entrar, escolher nome
-- [ ] Sincronizar jogadores, tiros (o servidor valida os acertos), itens e placar
-- [ ] Previsão do próprio movimento e suavização dos outros jogadores (sem "teleportes")
-- [ ] Bots completam as vagas vazias
-- [ ] Testes com Mac + iPhone e lag simulado
+## Marco 2: multiplayer (Wi-Fi local, depois Game Center)
+Decisão do usuário (2026-09-23): multiplayer integrado ao Game Center da Apple, sempre com bots
+completando as vagas (partida frenética, pelo menos 4 lutadores). Feito em camadas: a base da rede
+serve para qualquer "estrada" (Wi-Fi local agora, Game Center depois, servidor próprio no Marco 3).
+- [x] Rede própria em cima do ENet do Godot: um aparelho hospeda e é o servidor (`net/`)
+- [x] Sala no menu: hospedar, entrar pelo endereço, lista de jogadores, começar (`ui/lobby/`)
+- [x] Sincronizar jogadores, tiros (o anfitrião valida, com compensação do atraso), itens e placar
+- [x] Previsão do próprio movimento e suavização dos outros jogadores (sem "teleportes")
+- [x] Bots completam as vagas vazias; quem sai devolve a vaga a um bot
+- [x] Marca visual de quem é gente e quem é bot (etiqueta de nome, placar)
+- [x] Testes com dois processos do Godot e atraso simulado (`tests/test_net.gd`)
+- [ ] Teste de verdade: Mac + iPhone na mesma Wi-Fi (usuário)
+- [ ] Game Center: plugin GodotApplePlugins (aprovar download), `GameCenterTransport` (GKMatch),
+      convite de amigos e busca automática pela tela da Apple; ranking e conquistas de bônus.
+      Precisa do Apple Developer pago (US$ 99/ano) e do app no App Store Connect com Game Center.
+- [ ] Anfitrião saiu: hoje a partida acaba para todos (passar o posto para outro fica para depois)
 - Pronto quando: 2 ou mais aparelhos jogam juntos sem travadas perceptíveis
 
 ## Marco 3: online
