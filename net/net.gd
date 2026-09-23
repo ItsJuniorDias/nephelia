@@ -12,6 +12,8 @@ enum Mode { OFFLINE, HOST, CLIENT }
 ## Jogadores humanos por partida (o anfitrião conta). Bots completam até `MIN_CHARACTERS`.
 const MAX_PLAYERS: int = 6
 const MIN_CHARACTERS: int = 4
+## Porta em que o anfitrião responde a quem procura salas no Wi-Fi (LanBeacon / LanScanner).
+const DISCOVERY_PORT: int = 24682
 
 static var mode: Mode = Mode.OFFLINE
 static var transport: NetTransport
@@ -19,6 +21,12 @@ static var transport: NetTransport
 static var roster: Dictionary[int, String] = {}
 ## Por que a última partida em rede acabou ("" = saiu por vontade própria). O menu mostra.
 static var last_error: String = ""
+## Anfitrião: responde a quem procura salas no Wi-Fi (null = ninguém acha esta sala sozinho).
+static var beacon: LanBeacon
+## Número sorteado da sala (quem procura junta as respostas do mesmo anfitrião por ele).
+static var room_id: int = 0
+## Anfitrião: a partida já está rolando (quem acha a sala vê "playing" e entra no meio).
+static var match_running: bool = false
 
 
 static func is_online() -> bool:
@@ -38,8 +46,10 @@ static func local_id() -> int:
 	return transport.local_id if transport != null else 0
 
 
-## Abre uma sala no Wi-Fi local (este aparelho vira o anfitrião).
-static func host_lan(player_name: String, port: int = NetMessage.PORT) -> Error:
+## Abre uma sala no Wi-Fi local (este aparelho vira o anfitrião). Quem procura salas acha esta
+## pela porta `discovery_port` (0 = não responde; testes).
+static func host_lan(player_name: String, port: int = NetMessage.PORT,
+		discovery_port: int = DISCOVERY_PORT) -> Error:
 	stop()
 	var enet := EnetTransport.new()
 	var err: Error = enet.host(port, MAX_PLAYERS - 1)
@@ -49,6 +59,13 @@ static func host_lan(player_name: String, port: int = NetMessage.PORT) -> Error:
 	mode = Mode.HOST
 	roster = {NetTransport.HOST_ID: player_name}
 	last_error = ""
+	room_id = randi() & 0x7fffffff
+	match_running = false
+	if discovery_port > 0:
+		beacon = LanBeacon.new()
+		# Porta ocupada (outra sala neste aparelho): a sala funciona, só não é achada sozinha.
+		if beacon.start(discovery_port, port) != OK:
+			beacon = null
 	return OK
 
 
@@ -66,8 +83,20 @@ static func join_lan(address: String, port: int = NetMessage.PORT) -> Error:
 	return OK
 
 
+## Lê o que chegou pela conexão e responde a quem procura salas (chamar a cada passo).
+static func poll() -> void:
+	if transport != null:
+		transport.poll()
+	if beacon != null:
+		beacon.poll()
+
+
 ## Fecha a conexão e volta a jogar sozinho. `reason` fica em `last_error` para o menu mostrar.
 static func stop(reason: String = "") -> void:
+	if beacon != null:
+		beacon.stop()
+		beacon = null
+	match_running = false
 	if transport != null:
 		if transport.is_open():
 			transport.send(0, NetMessage.pack(NetMessage.Type.LEAVE), true)

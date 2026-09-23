@@ -24,6 +24,7 @@ func _run() -> void:
 	await _test_difficulty_reaches_bots()
 	await _test_lobby_host_and_leave()
 	await _test_lobby_shows_why_match_ended()
+	await _test_lobby_finds_games()
 
 	print("RESULT: ", "ALL PASSED" if _failures == 0 else "%d FAILED" % _failures)
 	quit(0 if _failures == 0 else 1)
@@ -164,20 +165,22 @@ func _test_lobby_host_and_leave() -> void:
 	menu.multiplayer_button.pressed.emit()
 	await _physics(2)
 	var lobby: Lobby = menu.lobby
-	var opened: bool = lobby.is_open() and lobby.host_button.visible and lobby.join_row.visible
+	var opened: bool = lobby.is_open() and lobby.host_button.visible and lobby.rooms_title.visible
 	lobby.name_edit.text = "Tester"
 	lobby.name_edit.text_changed.emit("Tester")
 	lobby.host_button.pressed.emit()
 	await _physics(3)
+	# Sem botão de começar: o anfitrião espera alguém entrar (aí começa sozinho).
 	var hosting: bool = Net.is_host() and not lobby.host_button.visible and lobby.info_label.visible \
-			and lobby.start_button.visible and lobby.start_button.disabled \
+			and lobby.info_label.text.begins_with("Waiting for a friend") \
+			and lobby.get_node_or_null(^"Panel/Rows/StartButton") == null \
 			and lobby.get_player_lines().size() >= 1 and lobby.get_player_lines()[0].begins_with("Tester")
 	lobby.back_button.pressed.emit()
 	await _physics(2)
 	var left: bool = not Net.is_online() and lobby.host_button.visible and lobby.is_open()
 	lobby.back_button.pressed.emit()
 	await _physics(2)
-	_check("M7 the lobby hosts a room, lists the players and leaves it", opened and hosting and left
+	_check("M7 the lobby hosts a room, waits for a friend and leaves it", opened and hosting and left
 			and not lobby.is_open(), "sala=%s" % [lobby.get_player_lines()])
 	Settings.set_option(&"player_name", saved_name)
 	await _close(menu)
@@ -190,4 +193,26 @@ func _test_lobby_shows_why_match_ended() -> void:
 	var shown: bool = menu.lobby.is_open() and menu.lobby.status_label.visible \
 			and menu.lobby.status_label.text == "The host left the match." and Net.last_error.is_empty()
 	_check("M8 the menu tells why the network match ended", shown, menu.lobby.status_label.text)
+	await _close(menu)
+
+
+# Ninguém digita endereço: uma sala aberta neste aparelho aparece sozinha na lista, com botão.
+func _test_lobby_finds_games() -> void:
+	var menu: MainMenu = await _open_menu()
+	var saved_roster: Dictionary[int, String] = Net.roster.duplicate()
+	Net.roster = {NetTransport.HOST_ID: "Ana"}
+	Net.room_id = 4242
+	var beacon := LanBeacon.new()
+	var listening: bool = beacon.start(Net.DISCOVERY_PORT, NetMessage.PORT) == OK
+	menu.lobby.open()
+	var until: int = Time.get_ticks_msec() + 5000
+	while Time.get_ticks_msec() < until and menu.lobby.get_room_buttons().is_empty():
+		beacon.poll()
+		await process_frame
+	var buttons: Array[Button] = menu.lobby.get_room_buttons()
+	_check("M9 the lobby finds a game on the Wi-Fi by itself (no address to type)", listening
+			and buttons.size() == 1 and buttons[0].text == "JOIN ANA'S GAME  (1/6)"
+			and not menu.lobby.searching_label.visible, "botões=%s" % [buttons.map(func(b: Button) -> String: return b.text)])
+	beacon.stop()
+	Net.roster = saved_roster
 	await _close(menu)

@@ -3,9 +3,12 @@ extends Node
 ## Sala do multiplayer, antes da partida: quem entra, a lista de jogadores e o "começar".
 ## Sem tela (a tela é `ui/lobby/`), para os testes usarem igual.
 ##
-## Anfitrião: aceita (ou recusa) quem manda HELLO, mantém `Net.roster` e manda a lista a todos;
-## `start_match()` manda todo mundo para a arena. Cliente: manda HELLO ao conectar, recebe a lista
-## e espera o START. Os pacotes são lidos aqui (`_process`) enquanto a sala está aberta.
+## Anfitrião: aceita (ou recusa) quem manda HELLO, mantém `Net.roster` e manda a lista a todos.
+## A partida começa SOZINHA (pedido do usuário, 2026-09-23): assim que alguém entra, conta
+## `auto_start_delay` segundos (dá tempo de mais um amigo entrar junto) e manda todo mundo para a
+## arena (`start_match()`). Quem chega depois entra no meio da partida (NetHost), no lugar de um
+## bot. Cliente: manda HELLO ao conectar, recebe a lista e espera o START. Os pacotes são lidos
+## aqui (`_process`) enquanto a sala está aberta.
 
 signal roster_changed
 ## Todos vão para a arena agora (quem está com a sala aberta troca de cena).
@@ -14,8 +17,17 @@ signal match_starting
 signal joined
 ## A sala acabou: não conectou, foi recusado ou o anfitrião fechou. `reason` em inglês (tela).
 signal failed(reason: String)
+## Anfitrião: segundos até a partida começar sozinha (-1 = parou: todo mundo saiu).
+signal countdown_changed(seconds_left: int)
+
+## Anfitrião: a partida começa este tanto de segundos depois que o primeiro amigo entra.
+var auto_start_delay: float = 3.0
 
 var _hello_sent: bool = false
+var _started: bool = false
+## Tempo que falta para começar (-1 = sem contagem).
+var _countdown: float = -1.0
+var _shown_seconds: int = -1
 
 
 func _ready() -> void:
@@ -33,17 +45,44 @@ func _ready() -> void:
 		_on_connected()
 
 
-func _process(_delta: float) -> void:
-	if Net.transport != null:
-		Net.transport.poll()
+func _process(delta: float) -> void:
+	Net.poll()
+	if Net.is_host() and not _started:
+		_count_down(delta)
 
 
-## Anfitrião: começa a partida para todos da sala.
+## Anfitrião: começa a partida para todos da sala agora.
 func start_match() -> void:
-	if not Net.is_host():
+	if not Net.is_host() or _started:
 		return
+	_started = true
 	Net.transport.send(0, NetMessage.pack(NetMessage.Type.START, []), true)
 	match_starting.emit()
+
+
+## Segundos (arredondados para cima) até começar; -1 = sem contagem.
+func seconds_to_start() -> int:
+	return ceili(_countdown) if _countdown >= 0.0 else -1
+
+
+# Alguém entrou: conta e começa. Todo mundo saiu antes do fim: para a contagem.
+func _count_down(delta: float) -> void:
+	if Net.roster.size() < 2:
+		if _countdown >= 0.0:
+			_countdown = -1.0
+			_shown_seconds = -1
+			countdown_changed.emit(-1)
+		return
+	if _countdown < 0.0:
+		_countdown = auto_start_delay
+	else:
+		_countdown -= delta
+	var seconds: int = maxi(ceili(_countdown), 0)
+	if seconds != _shown_seconds:
+		_shown_seconds = seconds
+		countdown_changed.emit(seconds)
+	if _countdown <= 0.0:
+		start_match()
 
 
 ## Nomes na sala, o anfitrião primeiro.

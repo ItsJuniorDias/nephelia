@@ -135,7 +135,8 @@ Decisão do usuário (2026-09-23): multiplayer integrado ao Game Center da Apple
 completando as vagas (partida frenética, pelo menos 4 lutadores). Feito em camadas: a base da rede
 serve para qualquer "estrada" (Wi-Fi local agora, Game Center depois, servidor próprio no Marco 3).
 - [x] Rede própria em cima do ENet do Godot: um aparelho hospeda e é o servidor (`net/`)
-- [x] Sala no menu: hospedar, entrar pelo endereço, lista de jogadores, começar (`ui/lobby/`)
+- [x] Sala no menu (`ui/lobby/`): hospedar; as salas do mesmo Wi-Fi aparecem sozinhas (sem digitar
+      endereço); a partida começa sozinha 3 s depois que alguém entra; dá para entrar no meio
 - [x] Sincronizar jogadores, tiros (o anfitrião valida, com compensação do atraso), itens e placar
 - [x] Previsão do próprio movimento e suavização dos outros jogadores (sem "teleportes")
 - [x] Bots completam as vagas vazias; quem sai devolve a vaga a um bot

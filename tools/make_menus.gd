@@ -66,8 +66,8 @@ func _build_options() -> Control:
 	return root
 
 
-# Sala do multiplayer: nome, hospedar ou entrar pelo endereço, lista de quem está e começar.
-# O script (ui/lobby/lobby.gd) mostra e esconde as partes conforme o momento.
+# Sala do multiplayer: nome, hospedar, salas achadas no Wi-Fi e lista de quem está (a partida
+# começa sozinha quando alguém entra). O script (ui/lobby/lobby.gd) mostra e esconde as partes.
 func _build_lobby() -> Control:
 	var root := Control.new()
 	root.name = "Lobby"
@@ -102,16 +102,23 @@ func _build_lobby() -> Control:
 
 	rows.add_child(_button("HostButton", "HOST GAME"))
 
-	var join_row := HBoxContainer.new()
-	join_row.name = "JoinRow"
-	join_row.add_theme_constant_override(&"separation", 16)
-	rows.add_child(join_row)
-	var address := _text_field("AddressEdit", "HOST ADDRESS (EX.: 192.168.0.12)")
-	address.virtual_keyboard_type = LineEdit.KEYBOARD_TYPE_NUMBER_DECIMAL
-	join_row.add_child(address)
-	var join := _button("JoinButton", "JOIN")
-	join.custom_minimum_size.x = 200
-	join_row.add_child(join)
+	# Salas achadas sozinhas no Wi-Fi (sem digitar endereço): um botão por sala, montado no script.
+	var rooms_title := Label.new()
+	rooms_title.name = "RoomsTitle"
+	rooms_title.text = "GAMES ON THIS WI-FI"
+	rooms_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	rooms_title.add_theme_color_override(&"font_color", Color(0.88, 0.72, 0.42))
+	rows.add_child(rooms_title)
+	var rooms := VBoxContainer.new()
+	rooms.name = "Rooms"
+	rooms.add_theme_constant_override(&"separation", 10)
+	rows.add_child(rooms)
+	var searching := Label.new()
+	searching.name = "Searching"
+	searching.text = "Searching..."
+	searching.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	searching.add_theme_color_override(&"font_color", Color(0.94, 0.87, 0.7, 0.6))
+	rows.add_child(searching)
 
 	var info := Label.new()
 	info.name = "Info"
@@ -123,8 +130,6 @@ func _build_lobby() -> Control:
 	players.name = "Players"
 	players.add_theme_constant_override(&"separation", 6)
 	rows.add_child(players)
-
-	rows.add_child(_button("StartButton", "START MATCH"))
 
 	var status := Label.new()
 	status.name = "Status"

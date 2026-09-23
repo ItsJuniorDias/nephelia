@@ -1,7 +1,9 @@
 class_name Lobby
 extends Control
-## Sala do multiplayer no menu (Wi-Fi local): escolher o nome, hospedar ou entrar pelo endereço
-## do anfitrião, ver quem está na sala e começar. Quem cuida da conversa é o `NetLobby`.
+## Sala do multiplayer no menu (Wi-Fi local): escolher o nome, hospedar ou entrar numa sala achada
+## no mesmo Wi-Fi (LanScanner: ninguém digita endereço) e ver quem está na sala. Não tem botão de
+## começar: assim que alguém entra, a partida começa sozinha depois de uma contagem curta
+## (`NetLobby`, que cuida da conversa).
 ##
 ## A tela é montada por `tools/make_menus.gd`. Quando uma partida em rede acaba mal (o anfitrião
 ## saiu), o menu inicial abre esta tela com o motivo (`Net.last_error`).
@@ -12,16 +14,19 @@ const ARENA := "res://levels/skyplaza/skyplaza.tscn"
 const ERROR_COLOR := Color(1.0, 0.55, 0.45)
 const INFO_COLOR := Color(0.94, 0.87, 0.7)
 
+## Tamanho dos botões das salas achadas.
+const ROOM_BUTTON_HEIGHT: float = 64.0
+
 var _room: NetLobby
+var _scanner := LanScanner.new()
 
 @onready var name_edit: LineEdit = $Panel/Rows/NameRow/NameEdit
 @onready var host_button: Button = $Panel/Rows/HostButton
-@onready var join_row: HBoxContainer = $Panel/Rows/JoinRow
-@onready var address_edit: LineEdit = $Panel/Rows/JoinRow/AddressEdit
-@onready var join_button: Button = $Panel/Rows/JoinRow/JoinButton
+@onready var rooms_title: Label = $Panel/Rows/RoomsTitle
+@onready var rooms_box: VBoxContainer = $Panel/Rows/Rooms
+@onready var searching_label: Label = $Panel/Rows/Searching
 @onready var info_label: Label = $Panel/Rows/Info
 @onready var players_box: VBoxContainer = $Panel/Rows/Players
-@onready var start_button: Button = $Panel/Rows/StartButton
 @onready var status_label: Label = $Panel/Rows/Status
 @onready var back_button: Button = $Panel/Rows/BackButton
 
@@ -31,11 +36,8 @@ func _ready() -> void:
 	name_edit.max_length = 14
 	name_edit.text = Settings.player_name
 	name_edit.text_changed.connect(func(_text: String) -> void: _save_name())
-	address_edit.text = Settings.last_address
-	address_edit.text_submitted.connect(func(_text: String) -> void: _on_join())
 	host_button.pressed.connect(_on_host)
-	join_button.pressed.connect(_on_join)
-	start_button.pressed.connect(_on_start)
+	_scanner.rooms_changed.connect(_refresh_rooms)
 	back_button.pressed.connect(_on_back)
 	Sounds.wire_buttons(self)
 
@@ -44,8 +46,26 @@ func _ready() -> void:
 func open(message: String = "") -> void:
 	visible = true
 	_show_status(message, not message.is_empty())
+	_update_search()
 	_refresh()
 	host_button.grab_focus()
+
+
+func _process(_delta: float) -> void:
+	_scanner.poll()
+
+
+func _exit_tree() -> void:
+	_scanner.stop()
+
+
+## Salas achadas no Wi-Fi agora (testes).
+func get_room_buttons() -> Array[Button]:
+	var buttons: Array[Button] = []
+	for child: Node in rooms_box.get_children():
+		if child is Button and not child.is_queued_for_deletion():
+			buttons.append(child as Button)
+	return buttons
 
 
 func is_open() -> bool:
@@ -71,24 +91,14 @@ func _on_host() -> void:
 	_open_room()
 
 
-func _on_join() -> void:
+# Entra na sala que o LanScanner achou (endereço e porta vêm da resposta do anfitrião).
+func _join_room(room: Dictionary) -> void:
 	_save_name()
-	var address: String = address_edit.text.strip_edges()
-	if address.is_empty():
-		_show_status("Type the host's address (it is shown on the host's screen).", true)
-		address_edit.grab_focus()
+	if Net.join_lan(room["address"], room["port"]) != OK:
+		_show_status("Could not reach that game.", true)
 		return
-	Settings.set_option(&"last_address", address)
-	if Net.join_lan(address) != OK:
-		_show_status("That address does not look right.", true)
-		return
-	_show_status("Connecting to %s..." % address)
+	_show_status("Joining %s's game..." % room["host"])
 	_open_room()
-
-
-func _on_start() -> void:
-	if _room != null:
-		_room.start_match()
 
 
 func _on_back() -> void:
@@ -97,10 +107,12 @@ func _on_back() -> void:
 		_close_room()
 		Net.stop()
 		_show_status("")
+		_update_search()
 		_refresh()
 		host_button.grab_focus()
 		return
 	visible = false
+	_update_search()
 	closed.emit()
 
 
@@ -113,6 +125,8 @@ func _open_room() -> void:
 	_room.joined.connect(_on_joined)
 	_room.failed.connect(_on_failed)
 	_room.match_starting.connect(_on_match_starting)
+	_room.countdown_changed.connect(_refresh.unbind(1))
+	_update_search()
 	_refresh()
 	back_button.grab_focus()
 
@@ -131,6 +145,7 @@ func _on_joined() -> void:
 func _on_failed(reason: String) -> void:
 	_close_room()
 	_show_status(reason, true)
+	_update_search()
 	_refresh()
 
 
@@ -155,14 +170,17 @@ func _refresh() -> void:
 	var in_room: bool = hosting or (Net.is_client() and Net.roster.has(Net.local_id()))
 	name_edit.editable = not online
 	host_button.visible = not online
-	join_row.visible = not online
+	rooms_title.visible = not online
+	rooms_box.visible = not online
+	searching_label.visible = not online and _scanner.rooms.is_empty()
 	info_label.visible = in_room
-	if hosting:
-		var addresses: PackedStringArray = Net.local_addresses()
-		info_label.text = "On the same Wi-Fi, friends join with:  %s" % (
-				"  or  ".join(addresses) if not addresses.is_empty() else "this device's address")
+	var countdown: int = _room.seconds_to_start() if _room != null else -1
+	if hosting and countdown >= 0:
+		info_label.text = "Starting in %d..." % maxi(countdown, 1)
+	elif hosting:
+		info_label.text = "Waiting for a friend to join.\nOn the same Wi-Fi, they open MULTIPLAYER and tap your game."
 	elif in_room:
-		info_label.text = "Waiting for the host to start the match..."
+		info_label.text = "You are in! The match starts in a moment..."
 	for child: Node in players_box.get_children():
 		players_box.remove_child(child)
 		child.queue_free()
@@ -184,7 +202,35 @@ func _refresh() -> void:
 			bots.text = "+ %d bot%s to fill the arena" % [free_slots, "" if free_slots == 1 else "s"]
 			bots.add_theme_color_override(&"font_color", NameTag.BOT_COLOR)
 			players_box.add_child(bots)
-	start_button.visible = hosting
-	start_button.disabled = Net.roster.size() < 2
-	start_button.text = "START MATCH" if Net.roster.size() >= 2 else "WAITING FOR PLAYERS"
 	back_button.text = "LEAVE ROOM" if online else "BACK"
+
+
+# Procura salas só com a tela aberta e fora de uma sala (no iPhone, a primeira procura pede a
+# permissão de rede local).
+func _update_search() -> void:
+	if visible and not Net.is_online():
+		if not _scanner.is_running():
+			_scanner.start()
+	else:
+		_scanner.stop()
+	_refresh_rooms()
+
+
+# Um botão por sala achada: "JOIN ALEX'S GAME", com quantos já estão e se já está jogando.
+func _refresh_rooms() -> void:
+	for child: Node in rooms_box.get_children():
+		rooms_box.remove_child(child)
+		child.queue_free()
+	for room: Dictionary in _scanner.room_list():
+		var button := Button.new()
+		button.theme_type_variation = &"TitleButton"
+		button.custom_minimum_size = Vector2(0, ROOM_BUTTON_HEIGHT)
+		var full: bool = int(room["players"]) >= int(room["max_players"])
+		var state: String = "FULL" if full else ("PLAYING" if room["in_match"] else "%d/%d" % [room["players"],
+				room["max_players"]])
+		button.text = "JOIN %s'S GAME  (%s)" % [str(room["host"]).to_upper(), state]
+		button.disabled = full
+		button.pressed.connect(_join_room.bind(room))
+		rooms_box.add_child(button)
+	Sounds.wire_buttons(rooms_box)
+	searching_label.visible = visible and not Net.is_online() and _scanner.rooms.is_empty()

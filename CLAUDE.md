@@ -344,6 +344,12 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   Protocolo PRÓPRIO (`NetMessage`: comandos binários 60/s; `NetSnapshot`: foto do estado 30/s;
   eventos confiáveis em `var_to_bytes` sem objetos), sem RPC do Godot. `NetLobby` = sala sem tela
   (HELLO/ROSTER/START), usada pela tela `ui/lobby/` (montada no `make_menus.gd`) e pelos testes.
+  Pedidos do usuário (2026-09-23): SEM botão de começar (quando alguém entra, a sala conta
+  `auto_start_delay` = 3 s e começa; quem chega depois entra no meio, no lugar de um bot) e SEM
+  digitar endereço: o anfitrião responde na porta `Net.DISCOVERY_PORT` (`LanBeacon`, ligado por
+  `Net.host_lan` e lido por `Net.poll`) e a sala procura com `LanScanner`, que pergunta endereço por
+  endereço na rede x.x.x.1-254 (broadcast no iPhone exigiria a permissão de multicast da Apple;
+  unicast só precisa da permissão de rede local). A tela mostra "JOIN <NOME>'S GAME (1/6)".
   Na arena o `ArenaSetup` cria `NetHost` ou `NetClient` (`net/net_game.gd` em comum: personagens por
   `net_id`, trilhos e itens por índice, lê pacotes com prioridade -100 e `PROCESS_MODE_ALWAYS`).
   Anfitrião: `RemoteController` (fila de comandos numerados; se o comando atrasa, o personagem
@@ -370,9 +376,9 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   Testes: `tests/test_net.gd` abre OUTRO processo do Godot como anfitrião (`tests/net_host_runner.gd`,
   relatório em JSON) e joga como cliente. Fotos: `tools/net_sheet.gd` (com janela; abre processos
   ajudantes). No Mac: no editor, Debug > Customize Run Instances = 2 janelas (uma hospeda, a outra
-  entra em 127.0.0.1). iPhone: o preset iOS tem `NSLocalNetworkUsageDescription`
-  (`additional_plist_content`); sem ele o iOS bloqueia a rede local calado. Achar a sala sozinho
-  (broadcast) no iOS exige a permissão de multicast da Apple: por isso o endereço é digitado.
+  entra: a sala aparece sozinha). iPhone: o preset iOS tem `NSLocalNetworkUsageDescription`
+  (`additional_plist_content`); sem ele o iOS bloqueia a rede local calado (a primeira procura de
+  salas pede a permissão ao jogador).
 - Godot 4.7 tem classes nativas `VirtualJoystick` e `Logger`: não usar esses nomes em `class_name`.
   Usamos nosso `TouchJoystick` (não o nativo) porque o `TouchControls` distribui os dedos
   centralmente (joystick flutuante na esquerda, olhar no resto da tela, botões).
@@ -459,8 +465,8 @@ Atualizar esta seção ao fim de cada sessão.
     nuvens andando), aprovado pelo usuário. 39 + 8 + 20 + 11 + 6 + 7 testes passando.
     Próximas: começo e fim do pulo; depois Tarefa 11 (desempenho no iPhone).
   - Multiplayer (pedido do usuário, 2026-09-23), etapa 1 feita: rede com anfitrião-servidor
-    (Wi-Fi local por endereço), previsão, compensação do atraso, bots completando vagas, sala no
-    menu e etiquetas de nome (gente x bot). 39 + 8 + 20 + 11 + 8 + 7 + 16 testes passando (a suíte
-    nova é `test_net`). Próximo: testar Mac + iPhone na mesma Wi-Fi; depois o Game Center (o usuário
+    (Wi-Fi local; a sala aparece sozinha e começa sozinha quando alguém entra), previsão,
+    compensação do atraso, bots completando vagas e etiquetas de nome (gente x bot).
+    39 + 8 + 20 + 11 + 9 + 7 + 20 testes passando (a suíte nova é `test_net`). Próximo: testar Mac + iPhone na mesma Wi-Fi; depois o Game Center (o usuário
     confirma se tem o Apple Developer pago e aprova baixar o GodotApplePlugins).
   - Próximo: seguir o polish; depois Tarefa 11 (desempenho no iPhone) ou o que o usuário pedir.

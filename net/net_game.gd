@@ -63,7 +63,9 @@ func _setup() -> void:
 
 
 func _physics_process(_delta: float) -> void:
-	if transport != null:
+	if transport != null and transport == Net.transport:
+		Net.poll()
+	elif transport != null:
 		transport.poll()
 
 

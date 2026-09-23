@@ -10,14 +10,14 @@
 [ext_resource type="PackedScene" path="res://ui/lobby/lobby.tscn" id="8_u2jyo"]
 [ext_resource type="Script" path="res://ui/lobby/lobby.gd" id="9_bpbph"]
 
-[node name="MainMenu" type="Control" unique_id=34482828]
+[node name="MainMenu" type="Control" unique_id=666481698]
 layout_mode = 3
 anchors_preset = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource("1_w2r0d")
 
-[node name="Background" type="TextureRect" parent="." unique_id=1027390739]
+[node name="Background" type="TextureRect" parent="." unique_id=1053684317]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -26,7 +26,7 @@ texture = ExtResource("2_4e78x")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="Monument" type="TextureRect" parent="." unique_id=906236438]
+[node name="Monument" type="TextureRect" parent="." unique_id=1588189866]
 layout_mode = 0
 anchor_left = 0.5
 anchor_top = 0.5
@@ -40,7 +40,7 @@ mouse_filter = 2
 texture = ExtResource("3_s4pem")
 expand_mode = 1
 
-[node name="MenuWindow" type="TextureRect" parent="." unique_id=1919765377]
+[node name="MenuWindow" type="TextureRect" parent="." unique_id=1094103543]
 layout_mode = 0
 anchor_left = 0.5
 anchor_top = 0.5
@@ -54,7 +54,7 @@ mouse_filter = 2
 texture = ExtResource("4_xio0d")
 expand_mode = 1
 
-[node name="Rows" type="VBoxContainer" parent="." unique_id=1231763551]
+[node name="Rows" type="VBoxContainer" parent="." unique_id=1725434395]
 layout_mode = 0
 anchor_left = 0.5
 anchor_top = 0.5
@@ -67,97 +67,97 @@ offset_bottom = 210.84
 theme_override_constants/separation = 6
 alignment = 1
 
-[node name="Title" type="Label" parent="Rows" unique_id=1070050837]
+[node name="Title" type="Label" parent="Rows" unique_id=35719091]
 layout_mode = 2
 theme_type_variation = &"Title"
 theme_override_font_sizes/font_size = 40
 text = "NEPHELIA"
 horizontal_alignment = 1
 
-[node name="Subtitle" type="Label" parent="Rows" unique_id=970496754]
+[node name="Subtitle" type="Label" parent="Rows" unique_id=1837205603]
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 theme_override_colors/font_color = Color(0.75, 0.85, 0.82, 1)
 text = "ARENA IN THE CLOUDS"
 horizontal_alignment = 1
 
-[node name="Spacer" type="Control" parent="Rows" unique_id=520490505]
+[node name="Spacer" type="Control" parent="Rows" unique_id=1062053203]
 custom_minimum_size = Vector2(0, 14)
 layout_mode = 2
 
-[node name="Separator0" type="TextureRect" parent="Rows" unique_id=327823191]
+[node name="Separator0" type="TextureRect" parent="Rows" unique_id=1096884595]
 custom_minimum_size = Vector2(0, 2)
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("5_tf5ef")
 expand_mode = 1
 
-[node name="PlayButton" type="Button" parent="Rows" unique_id=1730525031]
+[node name="PlayButton" type="Button" parent="Rows" unique_id=1786847382]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 theme_type_variation = &"MenuItem"
 text = "PLAY"
 
-[node name="Separator1" type="TextureRect" parent="Rows" unique_id=2061268629]
+[node name="Separator1" type="TextureRect" parent="Rows" unique_id=1334447190]
 custom_minimum_size = Vector2(0, 2)
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("5_tf5ef")
 expand_mode = 1
 
-[node name="MultiplayerButton" type="Button" parent="Rows" unique_id=2104587054]
+[node name="MultiplayerButton" type="Button" parent="Rows" unique_id=138096443]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 theme_type_variation = &"MenuItem"
 text = "MULTIPLAYER"
 
-[node name="Separator2" type="TextureRect" parent="Rows" unique_id=9937237]
+[node name="Separator2" type="TextureRect" parent="Rows" unique_id=971639559]
 custom_minimum_size = Vector2(0, 2)
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("5_tf5ef")
 expand_mode = 1
 
-[node name="DifficultyButton" type="Button" parent="Rows" unique_id=1748073005]
+[node name="DifficultyButton" type="Button" parent="Rows" unique_id=1670108798]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 theme_type_variation = &"MenuItem"
 text = "DIFFICULTY: MEDIUM"
 
-[node name="Separator3" type="TextureRect" parent="Rows" unique_id=366745641]
+[node name="Separator3" type="TextureRect" parent="Rows" unique_id=496345103]
 custom_minimum_size = Vector2(0, 2)
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("5_tf5ef")
 expand_mode = 1
 
-[node name="OptionsButton" type="Button" parent="Rows" unique_id=181171390]
+[node name="OptionsButton" type="Button" parent="Rows" unique_id=316441222]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 theme_type_variation = &"MenuItem"
 text = "OPTIONS"
 
-[node name="Separator4" type="TextureRect" parent="Rows" unique_id=1446711545]
+[node name="Separator4" type="TextureRect" parent="Rows" unique_id=691504424]
 custom_minimum_size = Vector2(0, 2)
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("5_tf5ef")
 expand_mode = 1
 
-[node name="QuitButton" type="Button" parent="Rows" unique_id=602787882]
+[node name="QuitButton" type="Button" parent="Rows" unique_id=1992071802]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 theme_type_variation = &"MenuItem"
 text = "QUIT"
 
-[node name="Separator5" type="TextureRect" parent="Rows" unique_id=1422660729]
+[node name="Separator5" type="TextureRect" parent="Rows" unique_id=1656111016]
 custom_minimum_size = Vector2(0, 2)
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("5_tf5ef")
 expand_mode = 1
 
-[node name="OptionsMenu" type="Control" parent="." unique_id=694781707 instance=ExtResource("6_qao3l")]
+[node name="OptionsMenu" type="Control" parent="." unique_id=1001357012 instance=ExtResource("6_qao3l")]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -165,7 +165,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource("7_lknku")
 
-[node name="Lobby" type="Control" parent="." unique_id=1397361482 instance=ExtResource("8_u2jyo")]
+[node name="Lobby" type="Control" parent="." unique_id=1636005150 instance=ExtResource("8_u2jyo")]
 visible = false
 layout_mode = 1
 anchors_preset = 15

@@ -47,6 +47,8 @@ var _rewound: Dictionary[Character, Vector3] = {}
 
 func _setup() -> void:
 	super._setup()
+	# Quem procura salas no Wi-Fi vê "jogando" e entra no meio.
+	Net.match_running = true
 	referee.shot_rewinder = _rewind
 	referee.shot_resolved.connect(_on_shot_resolved)
 	referee.character_died.connect(_on_character_died)

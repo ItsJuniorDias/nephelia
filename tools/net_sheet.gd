@@ -17,9 +17,8 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	# A sala salva o nome e o endereço: guarda os do jogador e devolve no fim.
+	# A sala salva o nome: guarda o do jogador e devolve no fim.
 	var saved_name: String = Settings.player_name
-	var saved_address: String = Settings.last_address
 	var menu: MainMenu = (load(MAIN_MENU) as PackedScene).instantiate()
 	root.add_child(menu)
 	current_scene = menu
@@ -29,28 +28,30 @@ func _run() -> void:
 	await _frames(6)
 	_shot("2_sala")
 
-	# Hospedando, com um amigo que entrou (outro processo).
+	# Hospedando: esperando alguém; depois um amigo entra (outro processo) e a contagem começa.
 	var lobby: Lobby = menu.lobby
 	Net.host_lan(Settings.player_name, FRIEND_PORT)
 	lobby._open_room()
+	lobby._room.auto_start_delay = 3.4
+	await _frames(6)
+	_shot("3_sala_anfitriao_esperando")
 	_spawn(["-s", "res://tools/net_sheet_peer.gd", "--", str(FRIEND_PORT), "Beatriz", "25"])
 	await _until(func() -> bool: return Net.roster.size() >= 2, 25000)
 	await _frames(8)
-	_shot("3_sala_anfitriao")
+	_shot("3_sala_anfitriao_contagem")
 	lobby._on_back()
 	await _frames(4)
 
-	# Entrando na sala de outro aparelho (o anfitrião de teste começa assim que alguém entra).
+	# Entrando na sala de outro aparelho: ela aparece sozinha na lista (sem digitar endereço).
 	var report: String = ProjectSettings.globalize_path("user://net_sheet_host.json")
-	_spawn(["-s", "res://tests/net_host_runner.gd", "--", str(NetMessage.PORT), report, "90", "4"])
-	lobby.address_edit.text = "127.0.0.1"
+	_spawn(["-s", "res://tests/net_host_runner.gd", "--", str(NetMessage.PORT), report, "90", "4", "beacon"])
+	await _until(func() -> bool: return not lobby.get_room_buttons().is_empty(), 25000)
+	await _frames(6)
+	_shot("4_sala_achou_jogo")
 	var level: Node = null
-	for attempt: int in 30:
-		lobby._on_join()
-		if await _until(func() -> bool: return Net.is_client() and Net.roster.size() >= 2, 3000):
-			break
-		lobby._on_back()
-		await _until(func() -> bool: return false, 500)
+	if not lobby.get_room_buttons().is_empty():
+		lobby.get_room_buttons()[0].pressed.emit()
+	await _until(func() -> bool: return Net.is_client() and Net.roster.size() >= 2, 10000)
 	await _frames(6)
 	_shot("4_sala_cliente")
 	await _until(func() -> bool: return current_scene is Node3D, 15000)
@@ -86,7 +87,6 @@ func _run() -> void:
 
 	Net.stop()
 	Settings.set_option(&"player_name", saved_name)
-	Settings.set_option(&"last_address", saved_address)
 	for pid: int in _processes:
 		if OS.is_process_running(pid):
 			OS.kill(pid)

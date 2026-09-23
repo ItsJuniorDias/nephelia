@@ -1,10 +1,12 @@
 extends SceneTree
 ## Anfitrião de teste para o `tests/test_net.gd`: roda em OUTRO processo do Godot (sem tela),
-## abre a sala, espera um cliente, começa a partida e fica andando em círculo com o próprio
-## personagem (os bots ficam passivos). Quando o cliente sai, confere se um bot voltou para a
-## vaga, grava um relatório (JSON) e fecha.
+## abre a sala e espera um cliente (a partida começa sozinha, pela contagem da sala), e fica
+## andando em círculo com o próprio personagem (os bots ficam passivos). Quando o cliente sai,
+## confere se um bot voltou para a vaga, grava um relatório (JSON) e fecha.
 ##   Godot --headless --path . -s res://tests/net_host_runner.gd -- <porta> <relatório.json> <segundos>
-##       [espera antes de começar, em segundos]
+##       [contagem da sala, em segundos] [alone,beacon]
+## `alone`: começa a partida sem ninguém; o cliente entra no meio (no lugar de um bot).
+## `beacon`: responde a quem procura salas no Wi-Fi (porta padrão; nos testes fica desligado).
 
 const ARENA := "res://levels/skyplaza/skyplaza.tscn"
 
@@ -23,24 +25,26 @@ func _run() -> void:
 	var seconds: float = args[2].to_float()
 	var deadline: int = Time.get_ticks_msec() + int(seconds * 1000.0)
 
+	var flags: PackedStringArray = args[4].split(",") if args.size() > 4 else PackedStringArray()
 	Settings.player_name = "HostBot"
-	if Net.host_lan("HostBot", port) != OK:
+	var discovery: int = Net.DISCOVERY_PORT if "beacon" in flags else 0
+	if Net.host_lan("HostBot", port, discovery) != OK:
 		_finish(report_path, "could not open the room")
 		return
-	var lobby := NetLobby.new()
-	root.add_child(lobby)
-	while Net.roster.size() < 2 and Time.get_ticks_msec() < deadline:
-		await process_frame
-	if Net.roster.size() < 2:
-		_finish(report_path, "nobody joined")
-		return
-	_report["client_joined"] = true
-	var start_delay: float = args[3].to_float() if args.size() > 3 else 0.0
-	var start_at: int = Time.get_ticks_msec() + int(start_delay * 1000.0)
-	while Time.get_ticks_msec() < start_at:
-		await process_frame
-	lobby.start_match()
-	lobby.queue_free()
+	var alone: bool = "alone" in flags
+	if not alone:
+		var lobby := NetLobby.new()
+		lobby.auto_start_delay = args[3].to_float() if args.size() > 3 else 0.5
+		var starting: Array[bool] = [false]
+		lobby.match_starting.connect(func() -> void: starting[0] = true)
+		root.add_child(lobby)
+		while not starting[0] and Time.get_ticks_msec() < deadline:
+			await process_frame
+		if not starting[0]:
+			_finish(report_path, "nobody joined")
+			return
+		_report["client_joined"] = true
+		lobby.queue_free()
 
 	var level: Node = (load(ARENA) as PackedScene).instantiate()
 	root.add_child(level)
@@ -66,6 +70,12 @@ func _run() -> void:
 	var target_placed: bool = false
 	while Time.get_ticks_msec() < deadline:
 		await physics_frame
+		# Sozinho: o cliente chega no meio da partida.
+		if client_peer == 0:
+			for peer: int in host.players:
+				client_peer = peer
+				_report["client_joined"] = true
+				_report["joined_mid_match"] = not deathmatch.waiting
 		if not deathmatch.waiting:
 			_report["started"] = true
 			deathmatch.time_left = maxf(deathmatch.time_left, 600.0)

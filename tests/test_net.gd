@@ -22,7 +22,10 @@ func _run() -> void:
 	_test_malformed_packets()
 	await _test_enet_connection()
 	await _test_simulated_network()
+	await _test_room_starts_by_itself()
+	await _test_find_room_on_wifi()
 	await _test_match_over_network()
+	await _test_join_running_match()
 
 	print("RESULT: ", "ALL PASSED" if _failures == 0 else "%d FAILED" % _failures)
 	quit(0 if _failures == 0 else 1)
@@ -185,6 +188,66 @@ func _test_simulated_network() -> void:
 	_check("N8 simulated loss drops only unreliable packets", arrivals.has("kept") and not arrivals.has("lost"))
 	client.close()
 	host.close()
+
+
+# A sala começa a partida sozinha: alguém entra, conta alguns segundos e manda todos para a arena.
+func _test_room_starts_by_itself() -> void:
+	var port: int = TEST_PORT + 3
+	Net.host_lan("Tester", port)
+	var room := NetLobby.new()
+	room.auto_start_delay = 0.4
+	var seen: Array[int] = []
+	var starting: Array[bool] = [false]
+	room.countdown_changed.connect(func(seconds: int) -> void: seen.append(seconds))
+	room.match_starting.connect(func() -> void: starting[0] = true)
+	root.add_child(room)
+	await _physics(10)
+	var waited_alone: bool = not starting[0] and seen.is_empty()
+	var friend := EnetTransport.new()
+	var got_start: Array[bool] = [false]
+	friend.packet_received.connect(func(_peer: int, bytes: PackedByteArray) -> void:
+		if NetMessage.type_of(bytes) == NetMessage.Type.START:
+			got_start[0] = true)
+	friend.connected.connect(func() -> void:
+		friend.send(NetTransport.HOST_ID, NetMessage.pack(NetMessage.Type.HELLO, [NetMessage.VERSION, "Friend"]), true))
+	friend.join("127.0.0.1", port)
+	var started_at: int = Time.get_ticks_msec()
+	await _wait_until(func() -> bool: return got_start[0], [friend], 4000)
+	var took: int = Time.get_ticks_msec() - started_at
+	_check("N17 the room starts the match by itself when a friend joins", waited_alone and starting[0]
+			and got_start[0] and not seen.is_empty() and seen[0] == 1 and took >= 350,
+			"contagem=%s em %d ms" % [seen, took])
+	friend.close()
+	room.queue_free()
+	Net.stop()
+	await _physics(2)
+
+
+# Achar a sala sem digitar endereço: o LanScanner pergunta e o anfitrião (LanBeacon) responde.
+func _test_find_room_on_wifi() -> void:
+	var discovery: int = TEST_PORT + 50
+	Net.host_lan("Finder", TEST_PORT + 5, discovery)
+	var scanner := LanScanner.new()
+	scanner.discovery_port = discovery
+	scanner.start()
+	var until: int = Time.get_ticks_msec() + 5000
+	while Time.get_ticks_msec() < until and scanner.rooms.is_empty():
+		Net.poll()
+		scanner.poll()
+		await process_frame
+	var found: Array[Dictionary] = scanner.room_list()
+	var room: Dictionary = found[0] if not found.is_empty() else {}
+	_check("N19 a game on the Wi-Fi is found without typing an address", found.size() == 1
+			and room.get("host") == "Finder" and room.get("port") == TEST_PORT + 5 and room.get("players") == 1
+			and room.get("in_match") == false and Net.beacon != null, "salas=%s" % [found])
+	# A sala some da lista quando o anfitrião fecha.
+	Net.stop()
+	until = Time.get_ticks_msec() + LanScanner.FORGET_AFTER_MS + 3000
+	while Time.get_ticks_msec() < until and not scanner.rooms.is_empty():
+		scanner.poll()
+		await process_frame
+	_check("N20 a closed game disappears from the list", scanner.rooms.is_empty())
+	scanner.stop()
 
 
 # ---------------------------------------------------------------- partida de verdade
@@ -379,3 +442,53 @@ func _wait_frames_until(condition: Callable, timeout_ms: int) -> bool:
 			return true
 		await process_frame
 	return condition.call()
+
+
+# A partida já está rolando (o anfitrião começou sozinho): um amigo entra no meio e toma a vaga
+# de um bot.
+func _test_join_running_match() -> void:
+	var port: int = TEST_PORT + 4
+	var report_path: String = ProjectSettings.globalize_path("user://net_host_report_alone.json")
+	DirAccess.remove_absolute(report_path)
+	var pid: int = OS.create_process(OS.get_executable_path(), ["--headless", "--path",
+			ProjectSettings.globalize_path("res://"), "-s", "res://tests/net_host_runner.gd", "--",
+			str(port), report_path, "45", "0", "alone"])
+	Settings.player_name = "Latecomer"
+	var starting: Array[bool] = [false]
+	var lobby: NetLobby = null
+	for attempt: int in 30:
+		Net.join_lan("127.0.0.1", port)
+		lobby = NetLobby.new()
+		root.add_child(lobby)
+		lobby.match_starting.connect(func() -> void: starting[0] = true)
+		if await _wait_frames_until(func() -> bool: return starting[0] or Net.transport == null, 4000) \
+				and starting[0]:
+			break
+		lobby.queue_free()
+		Net.stop()
+		await _wait_frames_until(func() -> bool: return false, 500)
+	if lobby != null:
+		lobby.queue_free()
+	var in_match: bool = false
+	var puppets: Array[String] = []
+	var level: Node = null
+	if starting[0]:
+		level = (load(ARENA) as PackedScene).instantiate()
+		root.add_child(level)
+		current_scene = level
+		await physics_frame
+		var client := level.find_child("NetClient", true, false) as NetClient
+		in_match = client != null and await _wait_frames_until(func() -> bool:
+			return client.has_world and not (level.get_node("Deathmatch") as Deathmatch).waiting, 20000)
+		await _physics(10)
+		if client != null:
+			for id: int in client.characters:
+				var character: Character = client.character_of(id)
+				if character != null and character != client.local:
+					puppets.append(("BOT " if character.is_bot else "") + character.display_name)
+	var report: Dictionary = await _leave_network(level if level != null else Node.new(), pid, report_path)
+	_check("N18 a friend joins a match already running and takes a bot's place", in_match
+			and puppets.size() == 3 and puppets.count("HostBot") == 1 and report.get("joined_mid_match", false)
+			and int(report.get("characters_with_client", -1)) == 4, "vê=%s relatório=%s" % [puppets,
+			{"joined_mid_match": report.get("joined_mid_match"), "with_client": report.get("characters_with_client"),
+			"problem": report.get("problem")}])

@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://ui/options_menu/options_menu.gd" id="1_8h7tm"]
 [ext_resource type="Texture2D" path="res://assets/ui/marble_gold/options_window_header_gold.png" id="2_utl02"]
 
-[node name="OptionsMenu" type="Control" unique_id=694781707]
+[node name="OptionsMenu" type="Control" unique_id=1001357012]
 visible = false
 layout_mode = 3
 anchors_preset = 0
@@ -11,13 +11,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource("1_8h7tm")
 
-[node name="Dim" type="ColorRect" parent="." unique_id=1868838010]
+[node name="Dim" type="ColorRect" parent="." unique_id=616372226]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 color = Color(0.02, 0.03, 0.05, 0.82)
 
-[node name="Panel" type="PanelContainer" parent="." unique_id=1501039206]
+[node name="Panel" type="PanelContainer" parent="." unique_id=1514393166]
 custom_minimum_size = Vector2(720, 0)
 layout_mode = 0
 anchor_left = 0.5
@@ -27,33 +27,33 @@ anchor_bottom = 0.5
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Rows" type="VBoxContainer" parent="Panel" unique_id=733249571]
+[node name="Rows" type="VBoxContainer" parent="Panel" unique_id=96455123]
 layout_mode = 2
 theme_override_constants/separation = 18
 
-[node name="Title" type="Label" parent="Panel/Rows" unique_id=1615372206]
+[node name="Title" type="Label" parent="Panel/Rows" unique_id=353345606]
 layout_mode = 2
 theme_type_variation = &"Subtitle"
 text = "OPTIONS"
 horizontal_alignment = 1
 
-[node name="TitleStrip" type="TextureRect" parent="Panel/Rows" unique_id=1169089279]
+[node name="TitleStrip" type="TextureRect" parent="Panel/Rows" unique_id=1997633489]
 custom_minimum_size = Vector2(0, 14)
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("2_utl02")
 expand_mode = 1
 
-[node name="Sensitivity" type="HBoxContainer" parent="Panel/Rows" unique_id=1831661127]
+[node name="Sensitivity" type="HBoxContainer" parent="Panel/Rows" unique_id=1852567324]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="Label" type="Label" parent="Panel/Rows/Sensitivity" unique_id=1551869105]
+[node name="Label" type="Label" parent="Panel/Rows/Sensitivity" unique_id=1992233375]
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 text = "SENSITIVITY"
 
-[node name="Slider" type="HSlider" parent="Panel/Rows/Sensitivity" unique_id=986522883]
+[node name="Slider" type="HSlider" parent="Panel/Rows/Sensitivity" unique_id=442855970]
 custom_minimum_size = Vector2(240, 36)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -63,22 +63,22 @@ max_value = 3.0
 step = 0.05
 value = 0.3
 
-[node name="Value" type="Label" parent="Panel/Rows/Sensitivity" unique_id=562924318]
+[node name="Value" type="Label" parent="Panel/Rows/Sensitivity" unique_id=977494592]
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
 text = "100%"
 horizontal_alignment = 2
 
-[node name="Buttons" type="HBoxContainer" parent="Panel/Rows" unique_id=1875618707]
+[node name="Buttons" type="HBoxContainer" parent="Panel/Rows" unique_id=172823448]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="Label" type="Label" parent="Panel/Rows/Buttons" unique_id=1073797986]
+[node name="Label" type="Label" parent="Panel/Rows/Buttons" unique_id=1981779151]
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 text = "BUTTON SIZE"
 
-[node name="Slider" type="HSlider" parent="Panel/Rows/Buttons" unique_id=1814641050]
+[node name="Slider" type="HSlider" parent="Panel/Rows/Buttons" unique_id=848623998]
 custom_minimum_size = Vector2(240, 36)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -88,22 +88,22 @@ max_value = 1.6
 step = 0.05
 value = 0.7
 
-[node name="Value" type="Label" parent="Panel/Rows/Buttons" unique_id=884716830]
+[node name="Value" type="Label" parent="Panel/Rows/Buttons" unique_id=817078115]
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
 text = "100%"
 horizontal_alignment = 2
 
-[node name="Volume" type="HBoxContainer" parent="Panel/Rows" unique_id=962046507]
+[node name="Volume" type="HBoxContainer" parent="Panel/Rows" unique_id=1582549380]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="Label" type="Label" parent="Panel/Rows/Volume" unique_id=1236699544]
+[node name="Label" type="Label" parent="Panel/Rows/Volume" unique_id=620791718]
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 text = "VOLUME"
 
-[node name="Slider" type="HSlider" parent="Panel/Rows/Volume" unique_id=857518608]
+[node name="Slider" type="HSlider" parent="Panel/Rows/Volume" unique_id=843613854]
 custom_minimum_size = Vector2(240, 36)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -111,22 +111,22 @@ size_flags_vertical = 4
 max_value = 1.0
 step = 0.05
 
-[node name="Value" type="Label" parent="Panel/Rows/Volume" unique_id=128427026]
+[node name="Value" type="Label" parent="Panel/Rows/Volume" unique_id=803326899]
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
 text = "100%"
 horizontal_alignment = 2
 
-[node name="Music" type="HBoxContainer" parent="Panel/Rows" unique_id=808546775]
+[node name="Music" type="HBoxContainer" parent="Panel/Rows" unique_id=1135715461]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="Label" type="Label" parent="Panel/Rows/Music" unique_id=1512216543]
+[node name="Label" type="Label" parent="Panel/Rows/Music" unique_id=473984273]
 custom_minimum_size = Vector2(250, 0)
 layout_mode = 2
 text = "MUSIC"
 
-[node name="Slider" type="HSlider" parent="Panel/Rows/Music" unique_id=909362198]
+[node name="Slider" type="HSlider" parent="Panel/Rows/Music" unique_id=308099778]
 custom_minimum_size = Vector2(240, 36)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -134,13 +134,13 @@ size_flags_vertical = 4
 max_value = 1.0
 step = 0.05
 
-[node name="Value" type="Label" parent="Panel/Rows/Music" unique_id=351435153]
+[node name="Value" type="Label" parent="Panel/Rows/Music" unique_id=1948261950]
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
 text = "100%"
 horizontal_alignment = 2
 
-[node name="BackButton" type="Button" parent="Panel/Rows" unique_id=408779530]
+[node name="BackButton" type="Button" parent="Panel/Rows" unique_id=1814398651]
 custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
 theme_type_variation = &"TitleButton"
