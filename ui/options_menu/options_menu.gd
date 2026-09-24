@@ -1,7 +1,7 @@
 class_name OptionsMenu
 extends Control
-## Tela de opções (sensibilidade do olhar, tamanho dos botões de toque, volume e música) e o
-## botão dos créditos (CreditsScreen, por cima).
+## Tela de opções (sensibilidade do olhar, tamanho dos botões de toque, volume, música e os sons
+## de meme) e o botão dos créditos (CreditsScreen, por cima).
 ##
 ## Serve tanto no menu inicial quanto na pausa: aparece por cima, mexe direto no autoload
 ## `Settings` (que salva sozinho) e some ao voltar.
@@ -16,6 +16,7 @@ signal closed
 @onready var volume_value: Label = $Panel/Rows/Volume/Value
 @onready var music_slider: HSlider = $Panel/Rows/Music/Slider
 @onready var music_value: Label = $Panel/Rows/Music/Value
+@onready var funny_check: CheckBox = $Panel/Rows/FunnySounds/Check
 @onready var credits_button: Button = $Panel/Rows/CreditsButton
 @onready var back_button: Button = $Panel/Rows/BackButton
 @onready var credits: CreditsScreen = $Credits
@@ -30,6 +31,8 @@ func _ready() -> void:
 	buttons_slider.value_changed.connect(_on_slider_changed.bind(&"button_scale"))
 	volume_slider.value_changed.connect(_on_slider_changed.bind(&"volume"))
 	music_slider.value_changed.connect(_on_slider_changed.bind(&"music_volume"))
+	funny_check.button_pressed = Settings.funny_sounds
+	funny_check.toggled.connect(func(pressed: bool) -> void: Settings.set_option(&"funny_sounds", pressed))
 	back_button.pressed.connect(_on_back)
 	credits_button.pressed.connect(credits.open)
 	credits.closed.connect(func() -> void: credits_button.grab_focus())

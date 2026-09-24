@@ -9,6 +9,7 @@ extends Object
 ##   volume e volume da música -> canais de áudio "Master" e "Music", aqui mesmo
 ##   dificuldade -> levels/arena_setup.gd, ao abrir a arena
 ##   nome -> sala do multiplayer (ui/lobby)
+##   sons de meme -> audio/meme_sounds.gd
 
 const FILE := "user://settings.cfg"
 const DIFFICULTIES: Array[StringName] = [&"easy", &"medium", &"hard"]
@@ -28,6 +29,8 @@ static var music_volume: float = 0.6
 static var difficulty: StringName = &"medium"
 ## Nome do jogador no multiplayer (placar e lista de abates dos outros).
 static var player_name: String = "Player"
+## Sons de meme por cima da partida (MemeSounds). Ligado de fábrica; FUNNY SOUNDS nas opções.
+static var funny_sounds: bool = true
 ## Sobe a cada mudança: quem precisa reagir (os botões de toque) compara com a versão que já aplicou.
 static var version: int = 0
 
@@ -47,6 +50,7 @@ static func load_settings() -> void:
 		var saved := StringName(file.get_value("game", "difficulty", difficulty))
 		difficulty = saved if saved in DIFFICULTIES else difficulty
 		player_name = clean_name(file.get_value("online", "player_name", player_name))
+		funny_sounds = bool(file.get_value("audio", "funny_sounds", funny_sounds))
 	_apply_volume()
 	version += 1
 
@@ -57,6 +61,7 @@ static func save_settings() -> void:
 	file.set_value("controls", "button_scale", button_scale)
 	file.set_value("audio", "volume", volume)
 	file.set_value("audio", "music_volume", music_volume)
+	file.set_value("audio", "funny_sounds", funny_sounds)
 	file.set_value("game", "difficulty", String(difficulty))
 	file.set_value("online", "player_name", player_name)
 	file.save(FILE)
@@ -79,6 +84,8 @@ static func set_option(option: StringName, value: Variant) -> void:
 			difficulty = value if value in DIFFICULTIES else difficulty
 		&"player_name":
 			player_name = clean_name(value)
+		&"funny_sounds":
+			funny_sounds = bool(value)
 	version += 1
 	save_settings()
 

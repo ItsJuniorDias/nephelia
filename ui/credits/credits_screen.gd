@@ -35,6 +35,11 @@ const SECTIONS: Array = [
 		"Kenney (kenney.nl): Impact Sounds, Interface Sounds. CC0.",
 		"SpringySpringo: Gun reload sounds. CC0.",
 		"SketchMan3: wind whoosh loop. CC0.",
+		"Freesound (freesound.org), CC0: \"Sitcom Laughter 9x, Small Audience\" by Kinoton, "
+				+ "\"Crowd Ooohs and Ahhhs in Excitement\" by noah0189, \"Cash Register Purchase\" by "
+				+ "Zott820, \"crickets\" by FreethinkerAnon.",
+		"Funny sounds (boom, bonk, sad trombone, slide whistle, airhorn, kazoo and friends) "
+				+ "synthesized for Nephelia.",
 	]],
 	["MUSIC", [
 		"\"Maple Leaf Rag\" by Scott Joplin (1899), played by the United States Marine Band (1906). "

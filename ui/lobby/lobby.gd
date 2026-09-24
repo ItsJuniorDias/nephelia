@@ -98,6 +98,7 @@ func _join_room(room: Dictionary) -> void:
 		_show_status("Could not reach that game.", true)
 		return
 	_show_status("Joining %s's game..." % room["host"])
+	MemeSounds.play_joining(self)
 	_open_room()
 
 

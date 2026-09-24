@@ -47,6 +47,19 @@ em `~/Downloads/nephelia_assets/textures/juliovii/`.
 
 As recargas foram convertidas para mono e normalizadas por `tools/prepare_sounds.py`.
 
+## Sons de meme (FUNNY SOUNDS)
+
+Quase todos sintetizados pelo `tools/make_meme_sounds.py` (feitos para o Nephelia). As reações de
+plateia, a caixa registradora e os grilos são gravações do Freesound, baixadas pelo usuário em
+2026-09-24; o jogo usa só um trecho de cada.
+
+| Asset | Autor | Licença | Link |
+|---|---|---|---|
+| Sitcom Laughter 9x, Small Audience | Kinoton | CC0 1.0 | https://freesound.org/people/Kinoton/sounds/383207/ |
+| Crowd Ooohs and Ahhhs in Excitement | noah0189 | CC0 1.0 | https://freesound.org/people/noah0189/sounds/264499/ |
+| Cash Register Purchase | Zott820 | CC0 1.0 | https://freesound.org/people/Zott820/sounds/209578/ |
+| crickets | FreethinkerAnon | CC0 1.0 | https://freesound.org/people/FreethinkerAnon/sounds/129678/ |
+
 ## Música
 
 | Asset | Autor | Licença | Link |

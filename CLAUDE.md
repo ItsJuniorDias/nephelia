@@ -324,6 +324,20 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   `levels/arena_ambience.gd` (criado pelo ArenaSetup): vento e música da partida. Música e sons de
   interface tocam com o jogo pausado (`PROCESS_MODE_ALWAYS`). Loops: marcar no `.import`
   (`loop=true` no OGG, `edit/loop_mode=2` no WAV).
+- Sons de meme (pedido do usuário, 2026-09-24: "jogo engraçado"): `audio/meme_sounds.gd`
+  (MemeSounds, criado pelo ArenaSetup) toca sons por cima da partida a partir dos sinais do juiz,
+  da partida e da arma do jogador local (funciona igual no multiplayer): gongo no início, "dun dun
+  DUNNN" aos 30 s, boom no tiro na cabeça que elimina, bonk sem matar, buzina a cada série de 3
+  abates, arranhão de disco + imagem congelada ("Yep, that's me.") ao morrer depois de uma série,
+  marcha fúnebre em 3 mortes seguidas, grilos ao errar um tambor inteiro, ka-ching ao pegar arma,
+  bipe de erro, apito de desenho em quem cai da ilha, risada quando um bot cai sozinho, "ba dum
+  tss", cano de metal, boing, kazoo (1º) e trombone triste (último); modem ao entrar numa sala do
+  Wi-Fi. Só enfeite; opção FUNNY SOUNDS (`Settings.funny_sounds`, ligada de fábrica). NUNCA usar
+  sons de meme originais (trechos de filmes/jogos/músicas, vozes de gente real): o usuário aceitou
+  fazer a nossa versão. Sons em `assets/audio/sfx/memes/` por `tools/make_meme_sounds.py`
+  (sintetizados em Python puro + trechos de 4 gravações CC0 do Freesound baixadas pelo usuário em
+  `~/Downloads/nephelia_assets/audio/freesound/`). Vídeo de conferência: `tools/meme_demo.gd`.
+  Teste S8 (test_audio) e M3 (opção).
 - Efeitos visuais: `vfx/vfx.gd` (Vfx, funções estáticas: fumaça e clarão do cano, faíscas, poeira e
   marca do tiro, nuvem no corpo atingido, poeira da aterrissagem, fumaça do corpo que some, anel de
   quem renasce, faíscas do gancho) com imagens do Kenney Particle Pack em `assets/vfx/kenney/` (256 px,
@@ -517,4 +531,6 @@ Atualizar esta seção ao fim de cada sessão.
     correm nas 8 direções com o tronco firme na mira (aprovado com vídeo). Ordem recomendada do
     resto: Downtown City MegaKit Source (janelas com "sala dentro"), Impact VFX e Muzzle Flash VFX
     (Binbun), roupas (só se servirem para 1900).
+  - Sons de meme (2026-09-24, aprovado com vídeo): 19 sons (15 sintetizados + 4 trechos CC0 do
+    Freesound) ligados aos momentos da partida, opção FUNNY SOUNDS nas Opções.
   - Próximo: seguir o polish; depois Tarefa 11 (desempenho no iPhone) ou o que o usuário pedir.

@@ -1,6 +1,7 @@
 extends Node
 ## Aplica à arena o que o jogador escolheu no menu (a dificuldade dos bots), liga o fundo
-## sonoro (vento e música, ver ArenaAmbience), o céu da tarde à noite (SkyCycle) e, no
+## sonoro (vento e música, ver ArenaAmbience), os sons de meme (MemeSounds), o céu da tarde à
+## noite (SkyCycle) e, no
 ## multiplayer, a partida em rede (NetHost no anfitrião, NetClient nos outros).
 ##
 ## Fica como nó da fase. Assim a arena continua abrindo sozinha nos testes (com a dificuldade
@@ -11,6 +12,7 @@ func _ready() -> void:
 	# Os bots ficam prontos depois deste nó (a ordem da cena manda): espera o fim do quadro.
 	_apply.call_deferred()
 	add_child(ArenaAmbience.new())
+	add_child(MemeSounds.new())
 	# Céu da tarde à noite conforme a partida passa (e os postes acendem).
 	add_child(SkyCycle.new())
 	# Multiplayer: quem hospeda decide tudo; quem entrou manda comandos e mostra o que chega.

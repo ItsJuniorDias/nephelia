@@ -98,13 +98,20 @@ func _test_options_change_settings() -> void:
 	await _physics(2)
 	var applied: bool = is_equal_approx(Settings.look_sensitivity, 2.0) and is_equal_approx(Settings.volume, 0.3)
 	var label: String = options.sensitivity_value.text
+	# FUNNY SOUNDS: começa marcada (ligado de fábrica) e desmarcar desliga os sons de meme.
+	var funny_default: bool = options.funny_check.button_pressed
+	options.funny_check.button_pressed = false
+	await _physics(2)
+	var funny_off: bool = not Settings.funny_sounds and not MemeSounds.is_enabled()
 	options.back_button.pressed.emit()
 	await _physics(2)
-	_check("M3 options change and show the settings", opened and applied and label == "200%"
-			and not options.visible, "aberta=%s aplicou=%s label=%s" % [opened, applied, label])
+	_check("M3 options change and show the settings (FUNNY SOUNDS turns the meme sounds off)",
+			opened and applied and label == "200%" and funny_default and funny_off and not options.visible,
+			"aberta=%s aplicou=%s label=%s funny=%s->%s" % [opened, applied, label, funny_default, not funny_off])
 	# Deixa como estava para os outros testes.
 	Settings.set_option(&"look_sensitivity", 1.0)
 	Settings.set_option(&"volume", 0.8)
+	Settings.set_option(&"funny_sounds", true)
 	await _close(menu)
 
 

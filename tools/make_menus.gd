@@ -61,6 +61,7 @@ func _build_options() -> Control:
 	_slider_row(rows, "Buttons", "BUTTON SIZE", 0.7, 1.6, 0.05)
 	_slider_row(rows, "Volume", "VOLUME", 0.0, 1.0, 0.05)
 	_slider_row(rows, "Music", "MUSIC", 0.0, 1.0, 0.05)
+	_check_row(rows, "FunnySounds", "FUNNY SOUNDS")
 
 	rows.add_child(_button("CreditsButton", "CREDITS"))
 	var back := _button("BackButton", "BACK")
@@ -316,6 +317,24 @@ func _dim(parent: Control) -> void:
 	dim.color = DIM
 	dim.mouse_filter = Control.MOUSE_FILTER_STOP
 	parent.add_child(dim)
+
+
+# Linha com nome à esquerda e uma caixa de marcar (liga/desliga) à direita.
+func _check_row(parent: VBoxContainer, row_name: String, label_text: String) -> void:
+	var row := HBoxContainer.new()
+	row.name = row_name
+	row.add_theme_constant_override(&"separation", 16)
+	parent.add_child(row)
+	var label := Label.new()
+	label.name = "Label"
+	label.text = label_text
+	label.custom_minimum_size = Vector2(250, 0)
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(label)
+	var check := CheckBox.new()
+	check.name = "Check"
+	check.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(check)
 
 
 # Linha com nome à esquerda, barra no meio e o valor em porcentagem à direita.

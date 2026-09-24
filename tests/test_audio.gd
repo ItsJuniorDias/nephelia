@@ -42,6 +42,7 @@ func _run() -> void:
 	await _test_footsteps()
 	await _test_rail_sounds()
 	await _test_hit_and_hurt_sounds()
+	await _test_meme_sounds()
 
 	await _physics(5)
 	print("RESULT: ", "ALL PASSED" if _failures == 0 else "%d FAILED" % _failures)
@@ -68,6 +69,75 @@ func _seconds(seconds: float) -> int:
 func _place(character: Character, at: Vector3, look_at: Vector3) -> void:
 	var to: Vector3 = look_at - at
 	character.teleport(Transform3D(Basis(Vector3.UP, atan2(-to.x, -to.z)), at))
+
+
+func _test_meme_sounds() -> void:
+	# Sons de meme (MemeSounds, criado pelo ArenaSetup): o apito de quem cai da ilha, o boom do
+	# tiro na cabeça que elimina, a buzina de 3 abates seguidos, o "ka-ching" da arma, e nada com
+	# FUNNY SOUNDS desligado.
+	var memes := _level.find_child("MemeSounds", true, false) as MemeSounds
+	Settings.funny_sounds = true
+	var results: PackedStringArray = []
+	var ok: bool = memes != null and memes.player == _player
+	if memes == null:
+		_check("S8 funny sounds", false, "MemeSounds não foi criado")
+		return
+	# Cai da ilha (além da ponta do braço sul): apito no ar, antes de morrer.
+	_referee.respawn_now(_player)
+	_player.end_spawn_protection()
+	_place(_player, Vector3(0.0, 1.0, 30.0), Vector3(0.0, 1.0, 40.0))
+	var whistled: bool = false
+	for i in _seconds(2.5):
+		await physics_frame
+		if not _players_of(memes, MemeSounds.FALL_WHISTLE).is_empty():
+			whistled = true
+			break
+	results.append("apito=%s" % whistled)
+	_referee.respawn_now(_player)
+	_player.end_spawn_protection()
+	await _physics(5)
+	# Tiro na cabeça que elimina: boom.
+	var bot: Character = _bots[0]
+	_referee.respawn_now(bot)
+	bot.end_spawn_protection()
+	var shot := ShotResult.new()
+	shot.shooter = _player
+	shot.victim = bot
+	shot.hit = true
+	shot.end_point = bot.head.global_position
+	_referee.kill(bot, _player)
+	_player.weapon.hit_confirmed.emit(shot)
+	await _physics(_seconds(0.3))
+	var boomed: bool = not _players_of(memes, MemeSounds.BOOM).is_empty()
+	results.append("boom=%s" % boomed)
+	# Mais dois abates seguidos (3 no total): buzina.
+	for i in 2:
+		var other: Character = _bots[i + 1]
+		_referee.respawn_now(other)
+		other.end_spawn_protection()
+		_referee.kill(other, _player)
+		await _physics(_seconds(0.3))
+	var horn: bool = not _players_of(memes, MemeSounds.AIRHORN).is_empty()
+	results.append("buzina=%s" % horn)
+	# Pega a espingarda: ka-ching; desligado nas opções, nada.
+	var shotgun: Pickup = null
+	for node: Node in get_nodes_in_group(Pickup.GROUP):
+		if (node as Pickup).kind == Pickup.Kind.SHOTGUN:
+			shotgun = node as Pickup
+	await _physics(_seconds(0.5))
+	_referee.item_picked.emit(_player, shotgun)
+	var chings: int = _players_of(memes, MemeSounds.KA_CHING).size()
+	Settings.funny_sounds = false
+	await _physics(_seconds(0.5))
+	_referee.item_picked.emit(_player, shotgun)
+	var silent: bool = _players_of(memes, MemeSounds.KA_CHING).size() == chings
+	Settings.funny_sounds = true
+	results.append("ka-ching=%d desligado_quieto=%s" % [chings, silent])
+	ok = ok and whistled and boomed and horn and chings == 1 and silent
+	for node: Node in _bots:
+		_referee.respawn_now(node as Character)
+	_check("S8 funny sounds: fall whistle, headshot boom, 3-kill airhorn, ka-ching; silent when off",
+			ok, ", ".join(results))
 
 
 # Tocadores de áudio (de uma vez só) dentro de `parent` tocando `stream`.
