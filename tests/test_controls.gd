@@ -88,6 +88,7 @@ func _run() -> void:
 	await _test_timer_format()
 	await _test_first_person_arms()
 	await _test_fall_after_hit_scores()
+	_test_first_person_flash_glows()
 
 	# Deixa rastros e faíscas terminarem antes de sair (evita aviso de recurso em uso).
 	_shots.clear()
@@ -886,3 +887,13 @@ func _test_timer_format() -> void:
 	_match.time_left = 3600.0
 	_check("37 timer shows m:ss and turns red at the end", text_normal == "2:06" and text_hurry == "0:10"
 			and hurry_color == MatchHud.HURRY_COLOR, "normal=%s hurry=%s" % [text_normal, text_hurry])
+
+
+# O clarão do tiro em 1ª pessoa brilha (soma luz): o tratamento dos materiais dos braços não pode
+# trocar o dele por um fosco (virava um quadrado preto em volta da estrela).
+func _test_first_person_flash_glows() -> void:
+	var view_model: ViewModel = _player.camera.get_node("ViewModel")
+	var material := view_model.flash.get_active_material(0) as BaseMaterial3D
+	_check("C40 the first-person muzzle flash keeps its glowing material", material != null
+			and material.blend_mode == BaseMaterial3D.BLEND_MODE_ADD
+			and material.shading_mode == BaseMaterial3D.SHADING_MODE_UNSHADED)

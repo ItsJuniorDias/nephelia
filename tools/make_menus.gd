@@ -8,6 +8,7 @@ extends SceneTree
 ## `ui/pause_menu/`.
 
 const OPTIONS_OUT := "res://ui/options_menu/options_menu.tscn"
+const CREDITS_OUT := "res://ui/credits/credits_screen.tscn"
 const LOBBY_OUT := "res://ui/lobby/lobby.tscn"
 const MAIN_OUT := "res://ui/main_menu/main_menu.tscn"
 const PAUSE_OUT := "res://ui/pause_menu/pause_menu.tscn"
@@ -24,6 +25,7 @@ const WINDOW_SIZE := Vector2(418, 618)
 
 
 func _initialize() -> void:
+	_save(_build_credits(), CREDITS_OUT)
 	_save(_build_options(), OPTIONS_OUT)
 	_save(_build_lobby(), LOBBY_OUT)
 	_save(_build_main_menu(), MAIN_OUT)
@@ -60,8 +62,58 @@ func _build_options() -> Control:
 	_slider_row(rows, "Volume", "VOLUME", 0.0, 1.0, 0.05)
 	_slider_row(rows, "Music", "MUSIC", 0.0, 1.0, 0.05)
 
+	rows.add_child(_button("CreditsButton", "CREDITS"))
 	var back := _button("BackButton", "BACK")
 	rows.add_child(back)
+	# Créditos abrem por cima das opções (no menu inicial e na pausa).
+	var credits: Node = (load(CREDITS_OUT) as PackedScene).instantiate()
+	credits.name = "Credits"
+	root.add_child(credits)
+	_own(root, root)
+	return root
+
+
+# Créditos: janela de mármore com o texto rolando (autores, licenças) e VOLTAR. O texto é montado
+# pelo script (ui/credits/credits_screen.gd).
+func _build_credits() -> Control:
+	var root := Control.new()
+	root.name = "Credits"
+	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.set_script(load("res://ui/credits/credits_screen.gd"))
+	root.visible = false
+	_dim(root)
+
+	var panel := PanelContainer.new()
+	panel.name = "Panel"
+	panel.set_anchors_preset(Control.PRESET_CENTER)
+	panel.custom_minimum_size = Vector2(860, 0)
+	_center(panel)
+	root.add_child(panel)
+
+	var rows := VBoxContainer.new()
+	rows.name = "Rows"
+	rows.add_theme_constant_override(&"separation", 14)
+	panel.add_child(rows)
+	_heading(rows, "CREDITS")
+
+	var scroll := ScrollContainer.new()
+	scroll.name = "Scroll"
+	scroll.custom_minimum_size = Vector2(0, 330)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	rows.add_child(scroll)
+	var text := RichTextLabel.new()
+	text.name = "Text"
+	text.bbcode_enabled = true
+	text.fit_content = true
+	text.scroll_active = false
+	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	text.add_theme_font_size_override(&"normal_font_size", 18)
+	# O dedo arrastando o texto rola a janela (o texto não "segura" o toque).
+	text.mouse_filter = Control.MOUSE_FILTER_PASS
+	scroll.add_child(text)
+
+	rows.add_child(_button("BackButton", "BACK"))
 	_own(root, root)
 	return root
 

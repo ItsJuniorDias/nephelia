@@ -5,3 +5,17 @@
 # Chaves de API (tools/make_icon.py)
 .env
 .DS_Store
+
+# Saídas da exportação do iOS (exportar FORA do projeto, ex.: ~/Builds/nephelia_ios/: dentro dele o
+# Godot importa as imagens do Xcode como se fossem do jogo)
+/Nephelia/
+/Nephelia.*
+/MoltenVK.xcframework/
+/libgodot_*.xcframework/
+/*.ipa
+/*.xcarchive/
+/DistributionSummary.plist
+/ExportOptions.plist
+/Packaging.log
+/PrivacyInfo.xcprivacy
+/nephilia_xcode.zip

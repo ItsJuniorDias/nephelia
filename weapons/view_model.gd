@@ -333,6 +333,10 @@ func _hide_bones() -> void:
 # da câmera, e os FBX das armas trazem cores de vértice azuladas.
 func _prepare_meshes() -> void:
 	for node: Node in model.find_children("*", "MeshInstance3D", true, false):
+		# O clarão do tiro tem o material dele (brilho somado): com o material fosco virava um
+		# quadrado preto em volta da estrela (visto nos prints da loja, 2026-09-23).
+		if node == flash:
+			continue
 		_style_mesh(node as MeshInstance3D)
 
 

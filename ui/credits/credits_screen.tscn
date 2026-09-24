@@ -1,0 +1,65 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://ui/credits/credits_screen.gd" id="1_50epp"]
+[ext_resource type="Texture2D" path="res://assets/ui/marble_gold/options_window_header_gold.png" id="2_xdnh8"]
+
+[node name="Credits" type="Control" unique_id=1238550814]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_50epp")
+
+[node name="Dim" type="ColorRect" parent="." unique_id=1474730074]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.02, 0.03, 0.05, 0.82)
+
+[node name="Panel" type="PanelContainer" parent="." unique_id=2025300551]
+custom_minimum_size = Vector2(860, 0)
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Rows" type="VBoxContainer" parent="Panel" unique_id=270314455]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="Panel/Rows" unique_id=536561324]
+layout_mode = 2
+theme_type_variation = &"Subtitle"
+text = "CREDITS"
+horizontal_alignment = 1
+
+[node name="TitleStrip" type="TextureRect" parent="Panel/Rows" unique_id=1920430191]
+custom_minimum_size = Vector2(0, 14)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("2_xdnh8")
+expand_mode = 1
+
+[node name="Scroll" type="ScrollContainer" parent="Panel/Rows" unique_id=124618807]
+custom_minimum_size = Vector2(0, 330)
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="Text" type="RichTextLabel" parent="Panel/Rows/Scroll" unique_id=1217318032]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+theme_override_font_sizes/normal_font_size = 18
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+
+[node name="BackButton" type="Button" parent="Panel/Rows" unique_id=2104615738]
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+theme_type_variation = &"TitleButton"
+text = "BACK"

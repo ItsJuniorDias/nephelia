@@ -161,6 +161,10 @@ serve para qualquer "estrada" (Wi-Fi local agora, Game Center depois, servidor p
 ## Marco 4: publicação
 - [ ] Nome definitivo (checar marca no INPI e nas lojas), ícone, tela de abertura
 - [ ] Modelo de negócio (pago, gratuito com cosméticos, etc.)
+- [x] Nome (Nephelia), modelo (pago), aparelhos (iPhone e iPad), versão 1.0 (usuário, 2026-09-23)
+- [x] Créditos no jogo (Opções > CREDITS), prints da loja, textos e política de privacidade (`store/`)
+- [ ] Licença do Marble and Gold UI Kit confirmada com a autora; repositório privado (usuário)
+- [ ] App Store Connect: contrato de apps pagos, criar o app, subir o build (Xcode), revisão
 - [ ] TestFlight (iOS) com testadores
 - [ ] Android: JDK/SDK, exportar, teste interno no Google Play (US$ 25)
 - [ ] PC/Steam: modo de controle para PC (desligar emulação de toque, telas de toque e Steam Deck),

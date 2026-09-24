@@ -1,6 +1,7 @@
 class_name OptionsMenu
 extends Control
-## Tela de opções (sensibilidade do olhar, tamanho dos botões de toque, volume e música).
+## Tela de opções (sensibilidade do olhar, tamanho dos botões de toque, volume e música) e o
+## botão dos créditos (CreditsScreen, por cima).
 ##
 ## Serve tanto no menu inicial quanto na pausa: aparece por cima, mexe direto no autoload
 ## `Settings` (que salva sozinho) e some ao voltar.
@@ -15,7 +16,9 @@ signal closed
 @onready var volume_value: Label = $Panel/Rows/Volume/Value
 @onready var music_slider: HSlider = $Panel/Rows/Music/Slider
 @onready var music_value: Label = $Panel/Rows/Music/Value
+@onready var credits_button: Button = $Panel/Rows/CreditsButton
 @onready var back_button: Button = $Panel/Rows/BackButton
+@onready var credits: CreditsScreen = $Credits
 
 
 func _ready() -> void:
@@ -28,6 +31,8 @@ func _ready() -> void:
 	volume_slider.value_changed.connect(_on_slider_changed.bind(&"volume"))
 	music_slider.value_changed.connect(_on_slider_changed.bind(&"music_volume"))
 	back_button.pressed.connect(_on_back)
+	credits_button.pressed.connect(credits.open)
+	credits.closed.connect(func() -> void: credits_button.grab_focus())
 	_refresh_labels()
 
 
@@ -42,6 +47,7 @@ func _on_slider_changed(value: float, option: StringName) -> void:
 
 
 func _on_back() -> void:
+	credits.visible = false
 	visible = false
 	closed.emit()
 

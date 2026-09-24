@@ -25,6 +25,7 @@ func _run() -> void:
 	await _test_lobby_host_and_leave()
 	await _test_lobby_shows_why_match_ended()
 	await _test_lobby_finds_games()
+	await _test_credits()
 
 	print("RESULT: ", "ALL PASSED" if _failures == 0 else "%d FAILED" % _failures)
 	quit(0 if _failures == 0 else 1)
@@ -215,4 +216,22 @@ func _test_lobby_finds_games() -> void:
 			and not menu.lobby.searching_label.visible, "botões=%s" % [buttons.map(func(b: Button) -> String: return b.text)])
 	beacon.stop()
 	Net.roster = saved_roster
+	await _close(menu)
+
+
+# Créditos (pelas Opções): autores, a textura CC-BY (crédito obrigatório) e as licenças do Godot.
+func _test_credits() -> void:
+	var menu: MainMenu = await _open_menu()
+	var options: OptionsMenu = menu.options_menu
+	options.open()
+	options.credits_button.pressed.emit()
+	await _physics(2)
+	var credits: CreditsScreen = options.credits
+	var text: String = credits.text.get_parsed_text()
+	var opened: bool = credits.visible and "JulioVII" in text and "CC BY" in text and "Quaternius" in text \
+			and "Version 1.0" in text and "Godot Engine" in text and "Permission is hereby granted" in text
+	credits.back_button.pressed.emit()
+	await _physics(2)
+	_check("M10 the credits list the authors, the CC-BY texture and the engine licenses", opened
+			and not credits.visible and options.visible, "%d caracteres" % text.length())
 	await _close(menu)

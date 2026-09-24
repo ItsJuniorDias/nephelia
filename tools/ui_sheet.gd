@@ -21,6 +21,18 @@ func _run() -> void:
 	(menu.get_node("OptionsMenu") as OptionsMenu).open()
 	await _frames(6)
 	_shot("2_opcoes")
+	var credits: CreditsScreen = menu.get_node("OptionsMenu/Credits")
+	credits.open()
+	await _frames(6)
+	_shot("2b_creditos")
+	credits.scroll.scroll_vertical = 100000
+	await _frames(6)
+	_shot("2c_creditos_fim")
+	credits.visible = false
+	menu.lobby.open()
+	await _frames(6)
+	_shot("2d_multiplayer")
+	menu.lobby.visible = false
 	menu.queue_free()
 	await _frames(2)
 

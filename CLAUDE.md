@@ -379,6 +379,31 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   entra: a sala aparece sozinha). iPhone: o preset iOS tem `NSLocalNetworkUsageDescription`
   (`additional_plist_content`); sem ele o iOS bloqueia a rede local calado (a primeira procura de
   salas pede a permissão ao jogador).
+- Publicação (App Store, decidido 2026-09-23: jogo PAGO, iPhone e iPad, nome Nephelia, versão
+  1.0 build 1): créditos no jogo em Opções > CREDITS (`ui/credits/credits_screen.gd`, lista igual ao
+  `CREDITS.md` + licenças do Godot via `Engine.get_license_text()`/`get_copyright_info()`; a textura
+  CC-BY do JulioVII EXIGE esse crédito). Preset iOS: `short_version` 1.0, `version` 1,
+  `ITSAppUsesNonExemptEncryption` falso no `additional_plist_content`. Textos da loja, notas do
+  revisor e questionários em `store/app_store_listing.md`; política de privacidade em
+  `store/privacy_policy.html` (o usuário publica num link público e troca CONTACT_EMAIL). Prints da
+  loja: `tools/store_screenshots.gd` (SubViewport do tamanho exato: 2868 x 1320 iPhone 6,9" e
+  2752 x 2064 iPad 13", com o 2D na escala do jogo por `size_2d_override`), saída em
+  `~/Downloads/nephelia_assets/app_store/screenshots/`. O formato do iPad (4:3) foi conferido com
+  `tools/ui_sheet.gd --resolution 1024x768`: menus e HUD se ajustam. O App Store Connect pediu a
+  caixa de iPhone **6,5"** (2778 x 1284, aparelho `iphone65` na ferramenta), não a de 6,9".
+  Vídeo de prévia (App Preview): `tools/app_preview.gd` grava 4 cenas de jogo de verdade (tarde,
+  trilho no pôr do sol, espingarda, noite) com o jogador pilotado pelos CONTROLES DE TOQUE (joystick
+  e botões apertados de verdade, mira suave, caça o bot vivo mais perto), bots fáceis sem trilho,
+  vida nunca abaixo de 30 e música muda; quadros de uma SubViewport do tamanho exato (1920 x 886
+  iPhone, 1600 x 1200 iPad; o Movie Maker só grava no tamanho da janela do projeto) e som do
+  Movie Maker (`game.avi`). `tools/make_app_preview.py` monta o .mp4 com o ffmpeg (Homebrew):
+  H.264 High 4.0, 30 fps, ~10 Mbps, AAC 256k, som cortado igual aos trechos e ADIANTADO 2 quadros
+  (o `get_image()` devolve o quadro anterior), música contínua por cima. Saída em
+  `~/Downloads/nephelia_assets/app_store/preview/`. A Apple só aceita gravação do próprio app na
+  prévia (regra 2.3.4): vídeo gerado por IA (ex.: Seedance) só serve para trailer fora da loja.
+  Página de suporte: `store/support.html` (o usuário publica suporte e política no Notion).
+- O `ViewModel` troca os materiais dos braços e da arma por foscos (`_prepare_meshes`): o clarão do
+  tiro fica de fora (senão vira um quadrado preto; achado nos prints da loja; teste C40).
 - Godot 4.7 tem classes nativas `VirtualJoystick` e `Logger`: não usar esses nomes em `class_name`.
   Usamos nosso `TouchJoystick` (não o nativo) porque o `TouchControls` distribui os dedos
   centralmente (joystick flutuante na esquerda, olhar no resto da tela, botões).
@@ -467,6 +492,15 @@ Atualizar esta seção ao fim de cada sessão.
   - Multiplayer (pedido do usuário, 2026-09-23), etapa 1 feita: rede com anfitrião-servidor
     (Wi-Fi local; a sala aparece sozinha e começa sozinha quando alguém entra), previsão,
     compensação do atraso, bots completando vagas e etiquetas de nome (gente x bot).
-    39 + 8 + 20 + 11 + 9 + 7 + 20 testes passando (a suíte nova é `test_net`). Próximo: testar Mac + iPhone na mesma Wi-Fi; depois o Game Center (o usuário
+    39 + 8 + 20 + 11 + 9 + 7 + 20 testes passando (a suíte nova é `test_net`).
+  - Publicação na App Store começada (2026-09-23): créditos no jogo, versão 1.0, prints e textos
+    da loja, vídeos de prévia (iPhone e iPad), páginas de suporte e privacidade. O app já existe no
+    App Store Connect (Apple ID 6815422218) com textos, prints e vídeos. 40 + 8 + 20 + 11 + 10 + 7
+    + 20 testes. PENDENTE: o editor sobrescreveu o `export_presets.cfg` numa exportação (perdeu o
+    `additional_plist_content`, `short_version` e `version`, e o destino ficou dentro do projeto):
+    refazer com o Godot FECHADO antes do build da loja. Falta (usuário): licença do Marble and Gold
+    UI Kit (autora iuliana-u), repositório privado, publicar suporte e política (Notion) e colar os
+    links, contrato de apps pagos (banco e impostos), preço, classificação etária, Archive e upload
+    no Xcode (build de release), TestFlight, enviar para revisão. Próximo: testar Mac + iPhone na mesma Wi-Fi; depois o Game Center (o usuário
     confirma se tem o Apple Developer pago e aprova baixar o GodotApplePlugins).
   - Próximo: seguir o polish; depois Tarefa 11 (desempenho no iPhone) ou o que o usuário pedir.
