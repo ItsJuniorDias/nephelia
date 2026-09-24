@@ -426,6 +426,18 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   `~/Downloads/nephelia_assets/app_store/preview/`. A Apple só aceita gravação do próprio app na
   prévia (regra 2.3.4): vídeo gerado por IA (ex.: Seedance) só serve para trailer fora da loja.
   Página de suporte: `store/support.html` (o usuário publica suporte e política no Notion).
+  Build da loja (2026-09-24, funcionou): o preset iOS exporta SÓ o projeto do Xcode
+  (`export_project_only`) para `~/Builds/nephelia_ios/` (FORA do projeto: exportar dentro fez o
+  Godot importar as imagens do .xcarchive). Identidade de assinatura "Apple Development" também na
+  Release: com "Apple Distribution" + assinatura automática o Archive falha ("conflicting
+  provisioning settings"); o Mac só tem certificados de desenvolvimento e o Organizer do Xcode assina
+  para a loja na hora de distribuir. Textos de câmera/microfone/fotos preenchidos ("does not use"):
+  vazios dão "Missing purpose string" no envio. Passos: `Godot --headless --path . --export-release
+  "iOS" ~/Builds/nephelia_ios/Nephelia.ipa`, depois `xcodebuild -project Nephelia.xcodeproj -scheme
+  Nephelia -sdk iphoneos -configuration Release -destination generic/platform=ios archive
+  -allowProvisioningUpdates -archivePath ~/Builds/nephelia_ios/Nephelia.xcarchive`, `open` no
+  .xcarchive e o usuário faz Distribute App > App Store Connect. Subir o `version` a cada envio.
+  EXPORTAR PELO EDITOR REGRAVA O `export_presets.cfg` com o que está na memória dele.
 - O `ViewModel` troca os materiais dos braços e da arma por foscos (`_prepare_meshes`): o clarão do
   tiro fica de fora (senão vira um quadrado preto; achado nos prints da loja; teste C40).
 - Godot 4.7 tem classes nativas `VirtualJoystick` e `Logger`: não usar esses nomes em `class_name`.
@@ -520,9 +532,8 @@ Atualizar esta seção ao fim de cada sessão.
   - Publicação na App Store começada (2026-09-23): créditos no jogo, versão 1.0, prints e textos
     da loja, vídeos de prévia (iPhone e iPad), páginas de suporte e privacidade. O app já existe no
     App Store Connect (Apple ID 6815422218) com textos, prints e vídeos. 40 + 8 + 20 + 11 + 10 + 7
-    + 20 testes. PENDENTE: o editor sobrescreveu o `export_presets.cfg` numa exportação (perdeu o
-    `additional_plist_content`, `short_version` e `version`, e o destino ficou dentro do projeto):
-    refazer com o Godot FECHADO antes do build da loja. Falta (usuário): licença do Marble and Gold
+    + 20 testes. Preset iOS corrigido e build 1.0 (1) arquivado em 2026-09-24 (ver "Build da loja").
+    Falta (usuário): upload pelo Organizer, licença do Marble and Gold
     UI Kit (autora iuliana-u), repositório privado, publicar suporte e política (Notion) e colar os
     links, contrato de apps pagos (banco e impostos), preço, classificação etária, Archive e upload
     no Xcode (build de release), TestFlight, enviar para revisão. Próximo: testar Mac + iPhone na mesma Wi-Fi; depois o Game Center (o usuário
