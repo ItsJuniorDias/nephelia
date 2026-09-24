@@ -173,7 +173,7 @@ func _test_lobby_host_and_leave() -> void:
 	menu.multiplayer_button.pressed.emit()
 	await _physics(2)
 	var lobby: Lobby = menu.lobby
-	# Sem o endereço do matchmaker (jogo sem servidor online ainda), PLAY ONLINE não aparece.
+	# PLAY ONLINE só aparece com o endereço do matchmaker (`OnlineMatchmaker.SERVICE_URL`).
 	var opened: bool = lobby.is_open() and lobby.host_button.visible and lobby.rooms_title.visible \
 			and lobby.online_button.visible == OnlineMatchmaker.is_available()
 	lobby.name_edit.text = "Tester"

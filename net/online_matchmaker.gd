@@ -11,9 +11,9 @@ extends Node
 signal found(host: String, port: int)
 signal failed(reason: String)
 
-## Endereço do matchmaker no ar (vazio = o botão PLAY ONLINE não aparece). Preencher quando o
-## servidor estiver na nuvem (ex.: "http://<ip-da-oracle>:8080").
-const SERVICE_URL := ""
+## Endereço do matchmaker no ar (vazio = o botão PLAY ONLINE não aparece). Hoje no Render
+## (Virginia, EUA), partidas por WebSocket.
+const SERVICE_URL := "https://nephelia-server.onrender.com"
 ## Espera no máximo isto pela resposta (abrir uma partida nova leva alguns segundos).
 const TIMEOUT_SECONDS: float = 40.0
 

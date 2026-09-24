@@ -55,15 +55,19 @@ func send(peer: int, bytes: PackedByteArray, _reliable: bool) -> void:
 	if not is_open():
 		return
 	# Só para conexões abertas: quem está saindo (conexão fechando) não recebe mais nada (mandar
-	# para ela enche o log de erros do Godot).
-	if peer == 0 and is_host:
+	# para ela enche o log de erros do Godot). `peer` 0 = todos (no cliente, "todos" é o anfitrião).
+	if peer != 0:
+		_send_to(peer, bytes)
+	elif is_host:
 		for target: int in _peers:
 			_send_to(target, bytes)
-		return
-	_send_to(peer, bytes)
+	else:
+		_send_to(HOST_ID, bytes)
 
 
 func _send_to(peer: int, bytes: PackedByteArray) -> void:
+	if not _peers.has(peer):
+		return
 	var socket: WebSocketPeer = _peer.get_peer(peer)
 	if socket == null or socket.get_ready_state() != WebSocketPeer.STATE_OPEN:
 		return

@@ -21,6 +21,7 @@ func _run() -> void:
 	_test_snapshot_roundtrip()
 	_test_malformed_packets()
 	await _test_enet_connection()
+	await _test_websocket_connection()
 	await _test_simulated_network()
 	await _test_room_waits_for_start()
 	await _test_find_room_on_wifi()
@@ -162,6 +163,33 @@ func _test_enet_connection() -> void:
 	_check("N6 the client notices when the host leaves", noticed and not client.is_open(), "%s" % [client_log])
 	client.close()
 
+
+
+# A estrada do WebSocket (partida online): mensagens nos dois sentidos, e "para todos" (0) saindo do
+# cliente chega ao anfitrião (é assim que vai o aviso de saída, LEAVE).
+func _test_websocket_connection() -> void:
+	var host := WebSocketTransport.new()
+	host.bind_address = "127.0.0.1"
+	var client := WebSocketTransport.new()
+	var host_packets: Array = []
+	var client_packets: Array = []
+	host.packet_received.connect(func(peer: int, bytes: PackedByteArray) -> void:
+		host_packets.append([peer, NetMessage.type_of(bytes)]))
+	client.packet_received.connect(func(peer: int, bytes: PackedByteArray) -> void:
+		client_packets.append([peer, NetMessage.type_of(bytes)]))
+	var opened: bool = host.host(TEST_PORT + 9, 4) == OK and client.join("127.0.0.1", TEST_PORT + 9) == OK
+	var linked: bool = await _wait_until(func() -> bool:
+		return client.is_open() and host.get_peers().size() == 1, [host, client])
+	client.send(0, NetMessage.pack(NetMessage.Type.LEAVE), true)
+	host.send(0, NetMessage.pack(NetMessage.Type.SCORE, [[1, 2, 3]]), false)
+	var delivered: bool = await _wait_until(func() -> bool:
+		return not host_packets.is_empty() and not client_packets.is_empty(), [host, client])
+	_check("N24 WebSocket: messages arrive both ways and the client's goodbye reaches the host",
+			opened and linked and delivered and host_packets[0] == [client.local_id, NetMessage.Type.LEAVE]
+			and client_packets[0] == [NetTransport.HOST_ID, NetMessage.Type.SCORE],
+			"anfitrião=%s cliente=%s" % [host_packets, client_packets])
+	client.close()
+	host.close()
 
 func _test_simulated_network() -> void:
 	var host := EnetTransport.new()

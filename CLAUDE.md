@@ -438,10 +438,17 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   volta a esperar quando o último sai) e escreve na saída `NEPHELIA {"event":"ready"|"status"|"bye"}`.
   O ArenaSetup não cria céu, som nem sons de meme no servidor. Cliente: botão PLAY ONLINE na tela
   MULTIPLAYER (`net/online_matchmaker.gd`: HTTPRequest ao matchmaker, mensagens de erro por código;
-  some enquanto `OnlineMatchmaker.SERVICE_URL` está vazio; `-- --matchmaker=<url>` liga em teste),
+  `OnlineMatchmaker.SERVICE_URL` = https://nephelia-server.onrender.com desde 2026-09-24 (vazio = o
+  botão some); `-- --matchmaker=<url>` troca o endereço em teste),
   depois `Net.join_online` + NetLobby (o servidor manda START na hora). Testes N21 (servidor dedicado
-  num processo), N22 (ponta a ponta com o Node, ENet) e N23 (ponta a ponta por WebSocket, como no
-  Render); N22/N23 pulam se o Node ou o `../nephelia-server` faltarem. Servidor dedicado com
+  num processo), N22 (ponta a ponta com o Node, ENet), N23 (ponta a ponta por WebSocket, como no
+  Render) e N24 (estrada do WebSocket: "para todos" do cliente = anfitrião, por onde vai o LEAVE);
+  N22/N23 pulam se o Node ou o `../nephelia-server` faltarem. Testado contra o Render do Mac
+  (2026-09-24): partida em 0,4-0,8 s, arena em ~2 s, ida e volta de ~250 ms (Brasil -> Virginia,
+  ~15 comandos sem resposta). A plataforma do Render sonda as portas abertas da máquina com pedidos
+  HTTP simples, 1 por segundo, e o servidor da partida reclama de cada um ("Not enough response
+  headers, got: 3"): é ruído, não jogador; o matchmaker junta linhas repetidas (1 por minuto, com
+  `repeated`). Servidor dedicado com
   `--transport=websocket --bind=127.0.0.1`. No Render: `game/nephelia_server.pck` no repositório do
   backend (preset "Linux Server" = servidor dedicado, visuais trocados por marcadores: nenhuma arte
   paga no repositório público) e o Godot oficial Linux baixado no build (`scripts/install_godot.sh`).
