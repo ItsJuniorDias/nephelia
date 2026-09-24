@@ -10,7 +10,8 @@ extends Object
 enum Mode { OFFLINE, HOST, CLIENT }
 
 ## Jogadores humanos por partida (o anfitrião conta). Bots completam até `MIN_CHARACTERS`.
-const MAX_PLAYERS: int = 6
+## Pedido do usuário (2026-09-24): até 4 pessoas.
+const MAX_PLAYERS: int = 4
 const MIN_CHARACTERS: int = 4
 ## Porta em que o anfitrião responde a quem procura salas no Wi-Fi (LanBeacon / LanScanner).
 const DISCOVERY_PORT: int = 24682
@@ -27,6 +28,8 @@ static var beacon: LanBeacon
 static var room_id: int = 0
 ## Anfitrião: a partida já está rolando (quem acha a sala vê "playing" e entra no meio).
 static var match_running: bool = false
+## Servidor dedicado (partida online): hospeda sem jogador daqui (ver DedicatedServer).
+static var dedicated: bool = false
 
 
 static func is_online() -> bool:
@@ -69,6 +72,53 @@ static func host_lan(player_name: String, port: int = NetMessage.PORT,
 	return OK
 
 
+## Servidor dedicado: hospeda a partida sem jogador neste aparelho (todas as vagas são de fora) e
+## sem responder a quem procura salas no Wi-Fi. `websocket` = conexão por WebSocket (servidor no
+## Render, atrás do matchmaker), escutando em `bind_address`; senão ENet (UDP).
+static func host_dedicated(port: int, websocket: bool = false, bind_address: String = "*") -> Error:
+	stop()
+	var server: NetTransport
+	if websocket:
+		var socket := WebSocketTransport.new()
+		socket.bind_address = bind_address
+		server = socket
+	else:
+		server = EnetTransport.new()
+	var err: Error = server.host(port, MAX_PLAYERS)
+	if err != OK:
+		return err
+	transport = server
+	mode = Mode.HOST
+	dedicated = true
+	roster = {}
+	last_error = ""
+	room_id = randi() & 0x7fffffff
+	match_running = true
+	return OK
+
+
+## Humanos que já ocupam vaga na partida hospedada aqui (o anfitrião conta, se não é dedicado).
+static func host_seats() -> int:
+	return 0 if dedicated else 1
+
+
+## Entra numa partida online (servidor dedicado) no endereço que o matchmaker indicou: uma URL
+## "wss://..." (servidor no Render, por WebSocket) ou endereço e porta (ENet).
+static func join_online(address: String, port: int) -> Error:
+	if not (address.begins_with("ws://") or address.begins_with("wss://")):
+		return join_lan(address, port)
+	stop()
+	var socket := WebSocketTransport.new()
+	var err: Error = socket.join(address, port)
+	if err != OK:
+		return err
+	transport = socket
+	mode = Mode.CLIENT
+	roster = {}
+	last_error = ""
+	return OK
+
+
 ## Entra na sala de outro aparelho pelo endereço dele (ex.: "192.168.0.12").
 static func join_lan(address: String, port: int = NetMessage.PORT) -> Error:
 	stop()
@@ -97,6 +147,7 @@ static func stop(reason: String = "") -> void:
 		beacon.stop()
 		beacon = null
 	match_running = false
+	dedicated = false
 	if transport != null:
 		if transport.is_open():
 			transport.send(0, NetMessage.pack(NetMessage.Type.LEAVE), true)

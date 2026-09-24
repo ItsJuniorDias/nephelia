@@ -119,8 +119,8 @@ func _build_credits() -> Control:
 	return root
 
 
-# Sala do multiplayer: nome, hospedar, salas achadas no Wi-Fi e lista de quem está (a partida
-# começa sozinha quando alguém entra). O script (ui/lobby/lobby.gd) mostra e esconde as partes.
+# Sala do multiplayer: nome, jogar online, hospedar, salas achadas no Wi-Fi, lista de quem está e o
+# START do anfitrião. O script (ui/lobby/lobby.gd) mostra e esconde as partes.
 func _build_lobby() -> Control:
 	var root := Control.new()
 	root.name = "Lobby"
@@ -153,6 +153,11 @@ func _build_lobby() -> Control:
 	name_row.add_child(name_label)
 	name_row.add_child(_text_field("NameEdit", "Player"))
 
+	# Partida online (servidores na nuvem): some enquanto o endereço do matchmaker não existe.
+	var online := _button("PlayOnlineButton", "PLAY ONLINE")
+	online.visible = false
+	rows.add_child(online)
+
 	rows.add_child(_button("HostButton", "HOST GAME"))
 
 	# Salas achadas sozinhas no Wi-Fi (sem digitar endereço): um botão por sala, montado no script.
@@ -183,6 +188,12 @@ func _build_lobby() -> Control:
 	players.name = "Players"
 	players.add_theme_constant_override(&"separation", 6)
 	rows.add_child(players)
+
+	# O anfitrião começa a partida quando todo mundo entrou.
+	var start := _button("StartButton", "START")
+	start.theme_type_variation = &"TitleButton"
+	start.visible = false
+	rows.add_child(start)
 
 	var status := Label.new()
 	status.name = "Status"

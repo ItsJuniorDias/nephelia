@@ -4,10 +4,11 @@ extends Node
 ## Sem tela (a tela é `ui/lobby/`), para os testes usarem igual.
 ##
 ## Anfitrião: aceita (ou recusa) quem manda HELLO, mantém `Net.roster` e manda a lista a todos.
-## A partida começa SOZINHA (pedido do usuário, 2026-09-23): assim que alguém entra, conta
-## `auto_start_delay` segundos (dá tempo de mais um amigo entrar junto) e manda todo mundo para a
-## arena (`start_match()`). Quem chega depois entra no meio da partida (NetHost), no lugar de um
-## bot. Cliente: manda HELLO ao conectar, recebe a lista e espera o START. Os pacotes são lidos
+## A partida começa quando o anfitrião aperta START (`start_match()`; pedido do usuário,
+## 2026-09-24: com até 4 pessoas, a sala espera todo mundo entrar). Quem chega depois entra no meio
+## da partida (NetHost), no lugar de um bot. Com `auto_start_delay` >= 0 a sala começa sozinha
+## esse tanto de segundos depois que alguém entra (era o jeito até 2026-09-24; hoje só os testes
+## usam). Cliente: manda HELLO ao conectar, recebe a lista e espera o START. Os pacotes são lidos
 ## aqui (`_process`) enquanto a sala está aberta.
 
 signal roster_changed
@@ -20,8 +21,9 @@ signal failed(reason: String)
 ## Anfitrião: segundos até a partida começar sozinha (-1 = parou: todo mundo saiu).
 signal countdown_changed(seconds_left: int)
 
-## Anfitrião: a partida começa este tanto de segundos depois que o primeiro amigo entra.
-var auto_start_delay: float = 3.0
+## Anfitrião: a partida começa sozinha este tanto de segundos depois que o primeiro amigo entra
+## (-1 = só pelo botão START).
+var auto_start_delay: float = -1.0
 
 var _hello_sent: bool = false
 var _started: bool = false
@@ -47,7 +49,7 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	Net.poll()
-	if Net.is_host() and not _started:
+	if Net.is_host() and not _started and auto_start_delay >= 0.0:
 		_count_down(delta)
 
 

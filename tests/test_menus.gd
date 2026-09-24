@@ -165,31 +165,33 @@ func _test_difficulty_reaches_bots() -> void:
 	await _close(arena)
 
 
-# Sala do multiplayer: hospedar mostra o endereço e a lista; sozinho não dá para começar; sair
-# fecha a sala e volta ao começo.
+# Sala do multiplayer: hospedar mostra a lista e o botão START (até 4 pessoas); sair fecha a sala
+# e volta ao começo.
 func _test_lobby_host_and_leave() -> void:
 	var menu: MainMenu = await _open_menu()
 	var saved_name: String = Settings.player_name
 	menu.multiplayer_button.pressed.emit()
 	await _physics(2)
 	var lobby: Lobby = menu.lobby
-	var opened: bool = lobby.is_open() and lobby.host_button.visible and lobby.rooms_title.visible
+	# Sem o endereço do matchmaker (jogo sem servidor online ainda), PLAY ONLINE não aparece.
+	var opened: bool = lobby.is_open() and lobby.host_button.visible and lobby.rooms_title.visible \
+			and lobby.online_button.visible == OnlineMatchmaker.is_available()
 	lobby.name_edit.text = "Tester"
 	lobby.name_edit.text_changed.emit("Tester")
 	lobby.host_button.pressed.emit()
 	await _physics(3)
-	# Sem botão de começar: o anfitrião espera alguém entrar (aí começa sozinho).
+	# O anfitrião espera os amigos e começa pelo START (pedido do usuário, 2026-09-24).
 	var hosting: bool = Net.is_host() and not lobby.host_button.visible and lobby.info_label.visible \
-			and lobby.info_label.text.begins_with("Waiting for a friend") \
-			and lobby.get_node_or_null(^"Panel/Rows/StartButton") == null \
+			and lobby.info_label.text.begins_with("Waiting for friends") \
+			and lobby.start_button.visible and lobby.start_button.text == "START  (1/4)" \
 			and lobby.get_player_lines().size() >= 1 and lobby.get_player_lines()[0].begins_with("Tester")
 	lobby.back_button.pressed.emit()
 	await _physics(2)
 	var left: bool = not Net.is_online() and lobby.host_button.visible and lobby.is_open()
 	lobby.back_button.pressed.emit()
 	await _physics(2)
-	_check("M7 the lobby hosts a room, waits for a friend and leaves it", opened and hosting and left
-			and not lobby.is_open(), "sala=%s" % [lobby.get_player_lines()])
+	_check("M7 the lobby hosts a room (up to 4, START button) and leaves it", opened and hosting and left
+			and not lobby.is_open() and not lobby.start_button.visible, "sala=%s" % [lobby.get_player_lines()])
 	Settings.set_option(&"player_name", saved_name)
 	await _close(menu)
 
@@ -219,7 +221,7 @@ func _test_lobby_finds_games() -> void:
 		await process_frame
 	var buttons: Array[Button] = menu.lobby.get_room_buttons()
 	_check("M9 the lobby finds a game on the Wi-Fi by itself (no address to type)", listening
-			and buttons.size() == 1 and buttons[0].text == "JOIN ANA'S GAME  (1/6)"
+			and buttons.size() == 1 and buttons[0].text == "JOIN ANA'S GAME  (1/4)"
 			and not menu.lobby.searching_label.visible, "botões=%s" % [buttons.map(func(b: Button) -> String: return b.text)])
 	beacon.stop()
 	Net.roster = saved_roster

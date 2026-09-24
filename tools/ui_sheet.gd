@@ -32,6 +32,12 @@ func _run() -> void:
 	menu.lobby.open()
 	await _frames(6)
 	_shot("2d_multiplayer")
+	# Hospedando: lista da sala e o botão START (até 4 pessoas).
+	menu.lobby.host_button.pressed.emit()
+	await _frames(6)
+	_shot("2e_multiplayer_sala")
+	menu.lobby.back_button.pressed.emit()
+	await _frames(2)
 	menu.lobby.visible = false
 	menu.queue_free()
 	await _frames(2)

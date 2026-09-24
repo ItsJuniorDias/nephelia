@@ -14,8 +14,9 @@ extends Node
 
 const SHADER: Shader = preload("res://levels/sky/sky_cycle.gdshader")
 ## Material das salas atrás das janelas (um só para a cidade toda, ver CityKit): o parâmetro
-## `night` faz as salas acesas brilharem, junto com os postes.
-const WINDOWS: ShaderMaterial = preload("res://assets/materials/city/MI_FakeInterior.tres")
+## `night` faz as salas acesas brilharem, junto com os postes. Tipo geral `Material`: no pacote do
+## servidor dedicado (sem arte) ele vira um marcador vazio, e o tipo exato não compilaria.
+const WINDOWS: Material = preload("res://assets/materials/city/MI_FakeInterior.tres")
 ## Grupo dos globos dos postes (o tools/build_skyplaza.gd põe cada globo nele).
 const LAMP_GROUP: StringName = &"lamp_globes"
 ## Nuvens em volta da cidade (nó no grupo, girado em volta do centro da arena, o dia todo).
@@ -227,7 +228,9 @@ func _apply(progress: float) -> void:
 	for lamp: OmniLight3D in lamp_lights:
 		lamp.light_energy = LAMP_ENERGY * lamps
 		lamp.visible = lamps > 0.02
-	WINDOWS.set_shader_parameter(&"night", lamps)
+	var windows := WINDOWS as ShaderMaterial
+	if windows != null:
+		windows.set_shader_parameter(&"night", lamps)
 
 
 # Direção PARA o astro: `azimuth` no plano do chão, subindo `elevation` graus.

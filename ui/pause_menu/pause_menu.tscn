@@ -5,24 +5,24 @@
 [ext_resource type="PackedScene" path="res://ui/options_menu/options_menu.tscn" id="3_uraes"]
 [ext_resource type="Script" path="res://ui/options_menu/options_menu.gd" id="4_ihaig"]
 
-[node name="PauseMenu" type="CanvasLayer" unique_id=252754110]
+[node name="PauseMenu" type="CanvasLayer" unique_id=1128059001]
 layer = 50
 script = ExtResource("1_b4b0p")
 
-[node name="Screen" type="Control" parent="." unique_id=779670419]
+[node name="Screen" type="Control" parent="." unique_id=609791137]
 visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 
-[node name="Dim" type="ColorRect" parent="Screen" unique_id=8821635]
+[node name="Dim" type="ColorRect" parent="Screen" unique_id=2036920302]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 color = Color(0.02, 0.03, 0.05, 0.82)
 
-[node name="Frame" type="PanelContainer" parent="Screen" unique_id=995686311]
+[node name="Frame" type="PanelContainer" parent="Screen" unique_id=266659911]
 custom_minimum_size = Vector2(560, 0)
 layout_mode = 0
 anchor_left = 0.5
@@ -32,42 +32,42 @@ anchor_bottom = 0.5
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Rows" type="VBoxContainer" parent="Screen/Frame" unique_id=531426089]
+[node name="Rows" type="VBoxContainer" parent="Screen/Frame" unique_id=1441821684]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="Title" type="Label" parent="Screen/Frame/Rows" unique_id=1761603991]
+[node name="Title" type="Label" parent="Screen/Frame/Rows" unique_id=567382956]
 layout_mode = 2
 theme_type_variation = &"Subtitle"
 text = "PAUSED"
 horizontal_alignment = 1
 
-[node name="TitleStrip" type="TextureRect" parent="Screen/Frame/Rows" unique_id=1894341173]
+[node name="TitleStrip" type="TextureRect" parent="Screen/Frame/Rows" unique_id=1676235529]
 custom_minimum_size = Vector2(0, 14)
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("2_c3jo5")
 expand_mode = 1
 
-[node name="ResumeButton" type="Button" parent="Screen/Frame/Rows" unique_id=1707386382]
+[node name="ResumeButton" type="Button" parent="Screen/Frame/Rows" unique_id=1102745683]
 custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
 theme_type_variation = &"TitleButton"
 text = "RESUME"
 
-[node name="OptionsButton" type="Button" parent="Screen/Frame/Rows" unique_id=1948664844]
+[node name="OptionsButton" type="Button" parent="Screen/Frame/Rows" unique_id=2109953120]
 custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
 theme_type_variation = &"TitleButton"
 text = "OPTIONS"
 
-[node name="MenuButton" type="Button" parent="Screen/Frame/Rows" unique_id=923685777]
+[node name="MenuButton" type="Button" parent="Screen/Frame/Rows" unique_id=1719449541]
 custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
 theme_type_variation = &"TitleButton"
 text = "MAIN MENU"
 
-[node name="OptionsMenu" type="Control" parent="Screen" unique_id=1245491490 instance=ExtResource("3_uraes")]
+[node name="OptionsMenu" type="Control" parent="Screen" unique_id=1716508915 instance=ExtResource("3_uraes")]
 visible = false
 layout_mode = 1
 anchors_preset = 15

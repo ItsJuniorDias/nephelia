@@ -8,6 +8,11 @@ extends NetGame
 ## Jogadores entram pela sala (menu) ou no meio da partida (mandam HELLO aqui). Bots completam as
 ## vagas até `Net.MIN_CHARACTERS`: quem entra toma a vaga de um bot, quem sai devolve.
 ##
+## Servidor dedicado (`Net.dedicated`, partida online): não há jogador daqui (o personagem da cena
+## sai). Sem ninguém, a partida fica esperando com o jogo pausado (não gasta processador); o
+## primeiro que carregar a arena começa a partida; no fim ela recomeça sozinha depois de
+## `RESTART_DELAY`; quando o último sai, volta a esperar do zero.
+##
 ## Compensação do atraso: guarda onde cada personagem estava nos últimos passos e, no tiro de um
 ## jogador de fora, volta os alvos para onde ELE os via (`_rewind`), como nos jogos de tiro de PC.
 
@@ -28,6 +33,8 @@ const MAX_REWIND_TICKS: float = 18.0
 const CATCH_UP_QUEUE: int = 1
 ## Passos extras por passo de física, no máximo.
 const MAX_CATCH_UP_STEPS: int = 2
+## Servidor dedicado: segundos entre o fim de uma partida e o começo da próxima (o placar aparece).
+const RESTART_DELAY: float = 12.0
 
 enum MatchState { WAITING, RUNNING, FINISHED }
 
@@ -43,6 +50,10 @@ var _history: Dictionary[int, Dictionary] = {}
 var _respawn_ticks: Dictionary[Character, int] = {}
 ## Posições de verdade guardadas durante um tiro compensado.
 var _rewound: Dictionary[Character, Vector3] = {}
+## Servidor dedicado: segundos até recomeçar depois do fim (-1 = sem recomeço marcado).
+var _restart_timer: float = -1.0
+## Já pode receber jogadores (a arena e este nó estão prontos).
+var is_setup: bool = false
 
 
 func _setup() -> void:
@@ -65,7 +76,11 @@ func _setup() -> void:
 	var scene_bots: Array[Character] = []
 	for node: Node in get_tree().get_nodes_in_group(&"characters"):
 		var character := node as Character
-		if character.controller is HumanController and local_character == null:
+		if character.controller is HumanController and Net.dedicated:
+			# Servidor dedicado: ninguém joga aqui (o personagem e a tela dele saem).
+			character.remove_from_group(&"characters")
+			character.queue_free()
+		elif character.controller is HumanController and local_character == null:
 			local_character = character
 		elif character.controller is BotController:
 			scene_bots.append(character)
@@ -82,6 +97,9 @@ func _setup() -> void:
 	# Espera quem veio da sala carregar a arena (o relógio não anda até lá).
 	deathmatch.waiting = not players.is_empty()
 	_wait_timer = READY_TIMEOUT
+	if Net.dedicated:
+		_wait_for_players()
+	is_setup = true
 
 
 func _physics_process(delta: float) -> void:
@@ -93,10 +111,17 @@ func _physics_process(delta: float) -> void:
 	# Comandos que chegaram entram agora, antes de os personagens andarem (prioridade baixa).
 	super._physics_process(delta)
 	_catch_up(delta)
-	if deathmatch != null and deathmatch.waiting:
+	if deathmatch != null and deathmatch.waiting and not (Net.dedicated and players.is_empty()):
 		_wait_timer -= delta
 		if _wait_timer <= 0.0:
 			_start_match()
+	if _restart_timer >= 0.0:
+		_restart_timer -= delta
+		if _restart_timer < 0.0:
+			if players.is_empty():
+				_wait_for_players()
+			else:
+				_start_match()
 
 
 # Comandos acumulados (a rede entregou vários de uma vez): passos extras até a fila voltar a um.
@@ -141,6 +166,9 @@ func _watch(character: Character) -> void:
 
 
 func _add_player(peer: int, player_name: String) -> Character:
+	# Servidor dedicado vazio fica pausado: quem chega acorda a partida.
+	if Net.dedicated and get_tree().paused and not deathmatch.is_finished:
+		get_tree().paused = false
 	var remote := RemoteController.new()
 	remote.peer = peer
 	var color: Color = HUMAN_COLORS[(players.size() + 1) % HUMAN_COLORS.size()]
@@ -165,12 +193,24 @@ func _remove_player(peer: int) -> void:
 		_broadcast(NetMessage.Type.CHARACTER_REMOVED, [character.net_id])
 		remove_character(character)
 	_balance_bots()
+	if Net.dedicated and players.is_empty():
+		_wait_for_players()
+		return
 	_check_all_ready()
+
+
+# Servidor dedicado sem ninguém: partida nova esperando, com o jogo pausado.
+func _wait_for_players() -> void:
+	_restart_timer = -1.0
+	deathmatch.restart()
+	deathmatch.waiting = true
+	_wait_timer = READY_TIMEOUT
+	get_tree().paused = true
 
 
 # Bots completam as vagas: sai um quando entra jogador, volta um quando jogador sai.
 func _balance_bots() -> void:
-	var wanted: int = maxi(Net.MIN_CHARACTERS - 1 - players.size(), 0)
+	var wanted: int = maxi(Net.MIN_CHARACTERS - Net.host_seats() - players.size(), 0)
 	var bots: Array[Character] = []
 	for id: int in characters:
 		var character: Character = character_of(id)
@@ -248,7 +288,7 @@ func _on_packet(peer: int, bytes: PackedByteArray) -> void:
 
 # Alguém entrou no meio da partida: ganha um personagem (no lugar de um bot) e carrega a arena.
 func _on_hello(peer: int, data: Array) -> void:
-	var problem: String = Net.check_hello(data, players.size() + 1)
+	var problem: String = Net.check_hello(data, players.size() + Net.host_seats())
 	if not problem.is_empty():
 		transport.send(peer, NetMessage.pack(NetMessage.Type.REJECT, [problem]), true)
 		return
@@ -423,3 +463,6 @@ func _send_match_state() -> void:
 func _on_match_finished() -> void:
 	_send_score()
 	_send_match_state()
+	# Servidor dedicado: ninguém aperta "jogar de novo"; a próxima começa sozinha.
+	if Net.dedicated:
+		_restart_timer = RESTART_DELAY

@@ -386,12 +386,13 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   Protocolo PRÓPRIO (`NetMessage`: comandos binários 60/s; `NetSnapshot`: foto do estado 30/s;
   eventos confiáveis em `var_to_bytes` sem objetos), sem RPC do Godot. `NetLobby` = sala sem tela
   (HELLO/ROSTER/START), usada pela tela `ui/lobby/` (montada no `make_menus.gd`) e pelos testes.
-  Pedidos do usuário (2026-09-23): SEM botão de começar (quando alguém entra, a sala conta
-  `auto_start_delay` = 3 s e começa; quem chega depois entra no meio, no lugar de um bot) e SEM
-  digitar endereço: o anfitrião responde na porta `Net.DISCOVERY_PORT` (`LanBeacon`, ligado por
+  Pedidos do usuário: até 4 PESSOAS por partida (`Net.MAX_PLAYERS`, 2026-09-24) e o anfitrião
+  começa pelo botão START quando todo mundo entrou (2026-09-24; de 2026-09-23 até então a sala
+  começava sozinha quando alguém entrava: `NetLobby.auto_start_delay`, hoje -1 e só usado nos
+  testes); quem chega depois entra no meio, no lugar de um bot. SEM digitar endereço: o anfitrião responde na porta `Net.DISCOVERY_PORT` (`LanBeacon`, ligado por
   `Net.host_lan` e lido por `Net.poll`) e a sala procura com `LanScanner`, que pergunta endereço por
   endereço na rede x.x.x.1-254 (broadcast no iPhone exigiria a permissão de multicast da Apple;
-  unicast só precisa da permissão de rede local). A tela mostra "JOIN <NOME>'S GAME (1/6)".
+  unicast só precisa da permissão de rede local). A tela mostra "JOIN <NOME>'S GAME (1/4)".
   Na arena o `ArenaSetup` cria `NetHost` ou `NetClient` (`net/net_game.gd` em comum: personagens por
   `net_id`, trilhos e itens por índice, lê pacotes com prioridade -100 e `PROCESS_MODE_ALWAYS`).
   Anfitrião: `RemoteController` (fila de comandos numerados; se o comando atrasa, o personagem
@@ -421,6 +422,37 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   entra: a sala aparece sozinha). iPhone: o preset iOS tem `NSLocalNetworkUsageDescription`
   (`additional_plist_content`); sem ele o iOS bloqueia a rede local calado (a primeira procura de
   salas pede a permissão ao jogador).
+- **Online** (2026-09-24; decisões do usuário: hospedagem no RENDER (ele já paga o Starter de
+  US$ 7; não quer Oracle), sem contas por enquanto, jogo cruzado Steam/Mac/iPhone/Android). O Render
+  não aceita UDP e não tem região no Brasil (Virginia é a mais perto, ~120-150 ms): a partida online
+  vai por WebSocket (`net/websocket_transport.gd`, `wss://<serviço>/play/<partida>`, repassado pelo
+  matchmaker para o servidor da partida na mesma máquina; Nagle desligado); o Wi-Fi local continua
+  ENet (UDP). O backend também tem o modo `enet` (VPS com UDP), se um dia mudar. Backend em Node.js +
+  TypeScript no repositório SEPARADO `~/nephelia-server` (github.com/ItsJuniorDias/nephelia-server;
+  matchmaker: `POST /v1/matchmake`, enche a partida mais cheia com vaga, abre e fecha partidas,
+  README com o passo a passo da Oracle). A partida online NÃO roda no Node: é o próprio jogo sem tela
+  (servidor dedicado), aberto pelo matchmaker com `-- --server --port=N --match-id=X`: o
+  `MainMenu._ready` vê `DedicatedServer.requested()` e liga `net/dedicated_server.gd`, que chama
+  `Net.host_dedicated` (NetHost com `Net.dedicated`: o personagem da cena sai, bots completam até 4
+  com `Net.host_seats()` = 0, vazio fica pausado esperando, recomeça sozinho 12 s depois do fim e
+  volta a esperar quando o último sai) e escreve na saída `NEPHELIA {"event":"ready"|"status"|"bye"}`.
+  O ArenaSetup não cria céu, som nem sons de meme no servidor. Cliente: botão PLAY ONLINE na tela
+  MULTIPLAYER (`net/online_matchmaker.gd`: HTTPRequest ao matchmaker, mensagens de erro por código;
+  some enquanto `OnlineMatchmaker.SERVICE_URL` está vazio; `-- --matchmaker=<url>` liga em teste),
+  depois `Net.join_online` + NetLobby (o servidor manda START na hora). Testes N21 (servidor dedicado
+  num processo), N22 (ponta a ponta com o Node, ENet) e N23 (ponta a ponta por WebSocket, como no
+  Render); N22/N23 pulam se o Node ou o `../nephelia-server` faltarem. Servidor dedicado com
+  `--transport=websocket --bind=127.0.0.1`. No Render: `game/nephelia_server.pck` no repositório do
+  backend (preset "Linux Server" = servidor dedicado, visuais trocados por marcadores: nenhuma arte
+  paga no repositório público) e o Godot oficial Linux baixado no build (`scripts/install_godot.sh`).
+  O Godot "editor" oficial rodando um .pck tem a marca "debug" (já solta as linhas na hora).
+  Node.js 24 LTS no Mac em `/opt/homebrew/opt/node@24/bin` (keg-only). Preset "Linux Server"
+  (`export_filter="customized"`, `res://` = "strip", tests/tools removidos): exportar com o editor
+  FECHADO por `Godot --headless --path . --export-pack "Linux Server"
+  ../nephelia-server/game/nephelia_server.pck` (8 MB) e fazer commit no backend A CADA mudança de
+  rede/partida (o servidor tem que ter o mesmo código dos jogadores). No pacote sem arte os
+  materiais, malhas e texturas viram marcadores vazios: constante com tipo exato de visual
+  (ex.: `const X: ShaderMaterial = preload(...)`) não compila lá; usar o tipo geral (`Material`).
 - Publicação (App Store, decidido 2026-09-23: jogo PAGO, iPhone e iPad, nome Nephelia, versão
   1.0 build 1): créditos no jogo em Opções > CREDITS (`ui/credits/credits_screen.gd`, lista igual ao
   `CREDITS.md` + licenças do Godot via `Engine.get_license_text()`/`get_copyright_info()`; a textura

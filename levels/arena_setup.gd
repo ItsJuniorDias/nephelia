@@ -11,10 +11,12 @@ extends Node
 func _ready() -> void:
 	# Os bots ficam prontos depois deste nó (a ordem da cena manda): espera o fim do quadro.
 	_apply.call_deferred()
-	add_child(ArenaAmbience.new())
-	add_child(MemeSounds.new())
-	# Céu da tarde à noite conforme a partida passa (e os postes acendem).
-	add_child(SkyCycle.new())
+	# Servidor dedicado: sem tela e sem som (só a partida).
+	if not Net.dedicated:
+		add_child(ArenaAmbience.new())
+		add_child(MemeSounds.new())
+		# Céu da tarde à noite conforme a partida passa (e os postes acendem).
+		add_child(SkyCycle.new())
 	# Multiplayer: quem hospeda decide tudo; quem entrou manda comandos e mostra o que chega.
 	var net_game: NetGame = null
 	if Net.is_host():

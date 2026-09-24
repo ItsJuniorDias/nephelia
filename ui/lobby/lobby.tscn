@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://ui/lobby/lobby.gd" id="1_rdn6r"]
 [ext_resource type="Texture2D" path="res://assets/ui/marble_gold/options_window_header_gold.png" id="2_8l8ni"]
 
-[node name="Lobby" type="Control" unique_id=406658390]
+[node name="Lobby" type="Control" unique_id=1043146213]
 visible = false
 layout_mode = 3
 anchors_preset = 0
@@ -11,13 +11,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource("1_rdn6r")
 
-[node name="Dim" type="ColorRect" parent="." unique_id=1119193830]
+[node name="Dim" type="ColorRect" parent="." unique_id=341420437]
 layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 color = Color(0.02, 0.03, 0.05, 0.82)
 
-[node name="Panel" type="PanelContainer" parent="." unique_id=761931139]
+[node name="Panel" type="PanelContainer" parent="." unique_id=329877552]
 custom_minimum_size = Vector2(760, 0)
 layout_mode = 0
 anchor_left = 0.5
@@ -27,76 +27,90 @@ anchor_bottom = 0.5
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Rows" type="VBoxContainer" parent="Panel" unique_id=784526895]
+[node name="Rows" type="VBoxContainer" parent="Panel" unique_id=956581967]
 layout_mode = 2
 theme_override_constants/separation = 14
 
-[node name="Title" type="Label" parent="Panel/Rows" unique_id=8067097]
+[node name="Title" type="Label" parent="Panel/Rows" unique_id=1220056530]
 layout_mode = 2
 theme_type_variation = &"Subtitle"
 text = "MULTIPLAYER"
 horizontal_alignment = 1
 
-[node name="TitleStrip" type="TextureRect" parent="Panel/Rows" unique_id=1150501034]
+[node name="TitleStrip" type="TextureRect" parent="Panel/Rows" unique_id=1932344283]
 custom_minimum_size = Vector2(0, 14)
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("2_8l8ni")
 expand_mode = 1
 
-[node name="NameRow" type="HBoxContainer" parent="Panel/Rows" unique_id=2081650516]
+[node name="NameRow" type="HBoxContainer" parent="Panel/Rows" unique_id=418761854]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="Label" type="Label" parent="Panel/Rows/NameRow" unique_id=699143192]
+[node name="Label" type="Label" parent="Panel/Rows/NameRow" unique_id=1944382774]
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 text = "YOUR NAME"
 
-[node name="NameEdit" type="LineEdit" parent="Panel/Rows/NameRow" unique_id=670476824]
+[node name="NameEdit" type="LineEdit" parent="Panel/Rows/NameRow" unique_id=16566760]
 custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
 placeholder_text = "Player"
 
-[node name="HostButton" type="Button" parent="Panel/Rows" unique_id=1102246007]
+[node name="PlayOnlineButton" type="Button" parent="Panel/Rows" unique_id=366755227]
+visible = false
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+theme_type_variation = &"TitleButton"
+text = "PLAY ONLINE"
+
+[node name="HostButton" type="Button" parent="Panel/Rows" unique_id=14297972]
 custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
 theme_type_variation = &"TitleButton"
 text = "HOST GAME"
 
-[node name="RoomsTitle" type="Label" parent="Panel/Rows" unique_id=1102565303]
+[node name="RoomsTitle" type="Label" parent="Panel/Rows" unique_id=336876497]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.88, 0.72, 0.42, 1)
 text = "GAMES ON THIS WI-FI"
 horizontal_alignment = 1
 
-[node name="Rooms" type="VBoxContainer" parent="Panel/Rows" unique_id=1763286390]
+[node name="Rooms" type="VBoxContainer" parent="Panel/Rows" unique_id=143409906]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Searching" type="Label" parent="Panel/Rows" unique_id=1653697524]
+[node name="Searching" type="Label" parent="Panel/Rows" unique_id=157025421]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.94, 0.87, 0.7, 0.6)
 text = "Searching..."
 horizontal_alignment = 1
 
-[node name="Info" type="Label" parent="Panel/Rows" unique_id=1762249023]
+[node name="Info" type="Label" parent="Panel/Rows" unique_id=345194958]
 layout_mode = 2
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="Players" type="VBoxContainer" parent="Panel/Rows" unique_id=1482678215]
+[node name="Players" type="VBoxContainer" parent="Panel/Rows" unique_id=924525877]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="Status" type="Label" parent="Panel/Rows" unique_id=1858616633]
+[node name="StartButton" type="Button" parent="Panel/Rows" unique_id=89453747]
+visible = false
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+theme_type_variation = &"TitleButton"
+text = "START"
+
+[node name="Status" type="Label" parent="Panel/Rows" unique_id=1937377438]
 layout_mode = 2
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="BackButton" type="Button" parent="Panel/Rows" unique_id=72004737]
+[node name="BackButton" type="Button" parent="Panel/Rows" unique_id=238903060]
 custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
 theme_type_variation = &"TitleButton"

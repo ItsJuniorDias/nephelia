@@ -1,9 +1,12 @@
 class_name Lobby
 extends Control
 ## Sala do multiplayer no menu (Wi-Fi local): escolher o nome, hospedar ou entrar numa sala achada
-## no mesmo Wi-Fi (LanScanner: ninguém digita endereço) e ver quem está na sala. Não tem botão de
-## começar: assim que alguém entra, a partida começa sozinha depois de uma contagem curta
-## (`NetLobby`, que cuida da conversa).
+## no mesmo Wi-Fi (LanScanner: ninguém digita endereço) e ver quem está na sala (até 4 pessoas).
+## O anfitrião começa a partida pelo botão START quando todo mundo entrou (`NetLobby`, que cuida
+## da conversa); quem chegar depois entra no meio.
+##
+## PLAY ONLINE (quando existe o matchmaker na nuvem, ver OnlineMatchmaker): pede uma partida, entra
+## no servidor dedicado que ele indicar e vai direto para a arena (quem começa é o servidor).
 ##
 ## A tela é montada por `tools/make_menus.gd`. Quando uma partida em rede acaba mal (o anfitrião
 ## saiu), o menu inicial abre esta tela com o motivo (`Net.last_error`).
@@ -19,14 +22,19 @@ const ROOM_BUTTON_HEIGHT: float = 64.0
 
 var _room: NetLobby
 var _scanner := LanScanner.new()
+var _matchmaker := OnlineMatchmaker.new()
+## Esperando o matchmaker responder (PLAY ONLINE).
+var _finding_match: bool = false
 
 @onready var name_edit: LineEdit = $Panel/Rows/NameRow/NameEdit
+@onready var online_button: Button = $Panel/Rows/PlayOnlineButton
 @onready var host_button: Button = $Panel/Rows/HostButton
 @onready var rooms_title: Label = $Panel/Rows/RoomsTitle
 @onready var rooms_box: VBoxContainer = $Panel/Rows/Rooms
 @onready var searching_label: Label = $Panel/Rows/Searching
 @onready var info_label: Label = $Panel/Rows/Info
 @onready var players_box: VBoxContainer = $Panel/Rows/Players
+@onready var start_button: Button = $Panel/Rows/StartButton
 @onready var status_label: Label = $Panel/Rows/Status
 @onready var back_button: Button = $Panel/Rows/BackButton
 
@@ -37,6 +45,12 @@ func _ready() -> void:
 	name_edit.text = Settings.player_name
 	name_edit.text_changed.connect(func(_text: String) -> void: _save_name())
 	host_button.pressed.connect(_on_host)
+	online_button.pressed.connect(_on_play_online)
+	start_button.pressed.connect(_on_start)
+	_matchmaker.name = "OnlineMatchmaker"
+	add_child(_matchmaker)
+	_matchmaker.found.connect(_on_online_found)
+	_matchmaker.failed.connect(_on_online_failed)
 	_scanner.rooms_changed.connect(_refresh_rooms)
 	back_button.pressed.connect(_on_back)
 	Sounds.wire_buttons(self)
@@ -48,7 +62,7 @@ func open(message: String = "") -> void:
 	_show_status(message, not message.is_empty())
 	_update_search()
 	_refresh()
-	host_button.grab_focus()
+	(online_button if online_button.visible else host_button).grab_focus()
 
 
 func _process(_delta: float) -> void:
@@ -102,7 +116,48 @@ func _join_room(room: Dictionary) -> void:
 	_open_room()
 
 
+# PLAY ONLINE: pede uma partida ao matchmaker (a resposta chega em _on_online_found/_failed).
+func _on_play_online() -> void:
+	_save_name()
+	_finding_match = true
+	_show_status("Finding a match...")
+	_matchmaker.request_match(Settings.player_name)
+	_update_search()
+	_refresh()
+	back_button.grab_focus()
+
+
+func _on_online_found(address: String, port: int) -> void:
+	_finding_match = false
+	if Net.join_online(address, port) != OK:
+		_on_online_failed("Could not reach the match.")
+		return
+	_show_status("Joining the match...")
+	MemeSounds.play_joining(self)
+	_open_room()
+
+
+func _on_online_failed(reason: String) -> void:
+	_finding_match = false
+	_show_status(reason, true)
+	_update_search()
+	_refresh()
+
+
+# Anfitrião: todo mundo entrou, começa (os bots completam as vagas).
+func _on_start() -> void:
+	if _room != null:
+		_room.start_match()
+
+
 func _on_back() -> void:
+	if _finding_match:
+		_matchmaker.cancel()
+		_finding_match = false
+		_show_status("")
+		_update_search()
+		_refresh()
+		return
 	if Net.is_online():
 		# Sai da sala (o anfitrião saindo fecha a sala de todos).
 		_close_room()
@@ -129,7 +184,7 @@ func _open_room() -> void:
 	_room.countdown_changed.connect(_refresh.unbind(1))
 	_update_search()
 	_refresh()
-	back_button.grab_focus()
+	(start_button if Net.is_host() else back_button).grab_focus()
 
 
 func _close_room() -> void:
@@ -169,19 +224,25 @@ func _refresh() -> void:
 	var online: bool = Net.is_online()
 	var hosting: bool = Net.is_host()
 	var in_room: bool = hosting or (Net.is_client() and Net.roster.has(Net.local_id()))
-	name_edit.editable = not online
-	host_button.visible = not online
-	rooms_title.visible = not online
-	rooms_box.visible = not online
-	searching_label.visible = not online and _scanner.rooms.is_empty()
+	var busy: bool = online or _finding_match
+	name_edit.editable = not busy
+	online_button.visible = not busy and OnlineMatchmaker.is_available()
+	host_button.visible = not busy
+	rooms_title.visible = not busy
+	rooms_box.visible = not busy
+	searching_label.visible = not busy and _scanner.rooms.is_empty()
 	info_label.visible = in_room
 	var countdown: int = _room.seconds_to_start() if _room != null else -1
 	if hosting and countdown >= 0:
 		info_label.text = "Starting in %d..." % maxi(countdown, 1)
+	elif hosting and Net.roster.size() >= Net.MAX_PLAYERS:
+		info_label.text = "Everyone is in! Tap START."
 	elif hosting:
-		info_label.text = "Waiting for a friend to join.\nOn the same Wi-Fi, they open MULTIPLAYER and tap your game."
+		info_label.text = "Waiting for friends (up to %d players).\nOn the same Wi-Fi, they open MULTIPLAYER and tap your game.\nTap START when everyone is in." % Net.MAX_PLAYERS
 	elif in_room:
-		info_label.text = "You are in! The match starts in a moment..."
+		info_label.text = "You are in! Waiting for the host to start..."
+	start_button.visible = hosting
+	start_button.text = "START  (%d/%d)" % [Net.roster.size(), Net.MAX_PLAYERS]
 	for child: Node in players_box.get_children():
 		players_box.remove_child(child)
 		child.queue_free()
@@ -203,13 +264,13 @@ func _refresh() -> void:
 			bots.text = "+ %d bot%s to fill the arena" % [free_slots, "" if free_slots == 1 else "s"]
 			bots.add_theme_color_override(&"font_color", NameTag.BOT_COLOR)
 			players_box.add_child(bots)
-	back_button.text = "LEAVE ROOM" if online else "BACK"
+	back_button.text = "LEAVE ROOM" if online else ("CANCEL" if _finding_match else "BACK")
 
 
 # Procura salas só com a tela aberta e fora de uma sala (no iPhone, a primeira procura pede a
 # permissão de rede local).
 func _update_search() -> void:
-	if visible and not Net.is_online():
+	if visible and not Net.is_online() and not _finding_match:
 		if not _scanner.is_running():
 			_scanner.start()
 	else:

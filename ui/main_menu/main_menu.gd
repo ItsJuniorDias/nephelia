@@ -17,6 +17,10 @@ const ARENA := "res://levels/skyplaza/skyplaza.tscn"
 
 
 func _ready() -> void:
+	# Aberto como servidor dedicado (partida online, sem tela): vai direto para a partida.
+	if DedicatedServer.requested():
+		DedicatedServer.boot(get_tree())
+		return
 	# No menu o dedo/mouse precisa aparecer (na partida o mouse é capturado).
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	play_button.pressed.connect(start_match)

@@ -22,10 +22,13 @@ func _run() -> void:
 	_test_malformed_packets()
 	await _test_enet_connection()
 	await _test_simulated_network()
-	await _test_room_starts_by_itself()
+	await _test_room_waits_for_start()
 	await _test_find_room_on_wifi()
 	await _test_match_over_network()
 	await _test_join_running_match()
+	await _test_dedicated_server()
+	await _test_online_through_matchmaker(false)
+	await _test_online_through_matchmaker(true)
 
 	print("RESULT: ", "ALL PASSED" if _failures == 0 else "%d FAILED" % _failures)
 	quit(0 if _failures == 0 else 1)
@@ -190,12 +193,12 @@ func _test_simulated_network() -> void:
 	host.close()
 
 
-# A sala começa a partida sozinha: alguém entra, conta alguns segundos e manda todos para a arena.
-func _test_room_starts_by_itself() -> void:
+# A sala espera o anfitrião apertar START (mesmo com gente dentro) e aí manda todos para a arena.
+# A contagem automática (`auto_start_delay`) ainda funciona, para os testes que a usam.
+func _test_room_waits_for_start() -> void:
 	var port: int = TEST_PORT + 3
 	Net.host_lan("Tester", port)
 	var room := NetLobby.new()
-	room.auto_start_delay = 0.4
 	var seen: Array[int] = []
 	var starting: Array[bool] = [false]
 	room.countdown_changed.connect(func(seconds: int) -> void: seen.append(seconds))
@@ -211,12 +214,15 @@ func _test_room_starts_by_itself() -> void:
 	friend.connected.connect(func() -> void:
 		friend.send(NetTransport.HOST_ID, NetMessage.pack(NetMessage.Type.HELLO, [NetMessage.VERSION, "Friend"]), true))
 	friend.join("127.0.0.1", port)
-	var started_at: int = Time.get_ticks_msec()
-	await _wait_until(func() -> bool: return got_start[0], [friend], 4000)
-	var took: int = Time.get_ticks_msec() - started_at
-	_check("N17 the room starts the match by itself when a friend joins", waited_alone and starting[0]
-			and got_start[0] and not seen.is_empty() and seen[0] == 1 and took >= 350,
-			"contagem=%s em %d ms" % [seen, took])
+	# Com o amigo dentro, a sala continua esperando o START.
+	await _wait_until(func() -> bool: return Net.roster.size() == 2 and got_start[0], [friend], 1500)
+	var friend_in: bool = Net.roster.size() == 2
+	var waited_with_friend: bool = not got_start[0] and not starting[0] and seen.is_empty()
+	room.start_match()
+	await _wait_until(func() -> bool: return got_start[0], [friend], 2000)
+	_check("N17 the room waits for the host's START (friend inside) and then starts for everyone",
+			waited_alone and friend_in and waited_with_friend and starting[0] and got_start[0],
+			"amigo=%s esperou=%s contagem=%s" % [friend_in, waited_with_friend, seen])
 	friend.close()
 	room.queue_free()
 	Net.stop()
@@ -492,3 +498,123 @@ func _test_join_running_match() -> void:
 			and int(report.get("characters_with_client", -1)) == 4, "vê=%s relatório=%s" % [puppets,
 			{"joined_mid_match": report.get("joined_mid_match"), "with_client": report.get("characters_with_client"),
 			"problem": report.get("problem")}])
+
+
+# Servidor dedicado (partida online): o jogo sem tela e sem jogador, aberto como outro processo.
+# Um cliente entra, joga com os 3 bots (ninguém no lugar do anfitrião) e sai.
+func _test_dedicated_server() -> void:
+	var port: int = TEST_PORT + 6
+	var pid: int = OS.create_process(OS.get_executable_path(), ["--headless", "--path",
+			ProjectSettings.globalize_path("res://"), "--", "--server", "--port=%d" % port, "--match-id=n21"])
+	Settings.player_name = "Online"
+	var joined: Dictionary = await _join_and_enter("127.0.0.1", port)
+	var client: NetClient = joined.get("client")
+	var level: Node = joined.get("level")
+	var others: Array[String] = []
+	var running: bool = false
+	if client != null:
+		running = await _wait_frames_until(func() -> bool:
+			return client.has_world and not (level.get_node("Deathmatch") as Deathmatch).waiting, 20000)
+		await _physics(10)
+		for id: int in client.characters:
+			var character: Character = client.character_of(id)
+			if character != null and character != client.local:
+				others.append(("BOT " if character.is_bot else "") + character.display_name)
+	await _leave_network(level if level != null else Node.new(), pid)
+	others.sort()
+	_check("N21 a dedicated server (no host player) runs the match: 1 player + 3 bots", running
+			and others == ["BOT Hazel", "BOT Mabel", "BOT Otis"], "vê=%s" % [others])
+
+
+# Online de ponta a ponta: o matchmaker (projeto nephelia-server, Node.js) abre um servidor
+# dedicado, o jogo pede a partida pelo HTTP (OnlineMatchmaker) e entra nela. Com `websocket`, como
+# no Render: a resposta é "ws://.../play/<partida>" e a conexão passa pelo matchmaker. Pula se o
+# Node ou o projeto do servidor não estão nesta máquina.
+func _test_online_through_matchmaker(websocket: bool) -> void:
+	var test_name: String = "N23 PLAY ONLINE over WebSocket (Render): the connection goes through the matchmaker" \
+			if websocket else "N22 PLAY ONLINE: the matchmaker opens a dedicated server and the game joins it"
+	var node_bin: String = "/opt/homebrew/opt/node@24/bin/node"
+	var server_dir: String = ProjectSettings.globalize_path("res://").path_join("../nephelia-server").simplify_path()
+	if not FileAccess.file_exists(node_bin) or not FileAccess.file_exists(server_dir.path_join("src/main.ts")):
+		print("SKIP  %s (Node.js or nephelia-server not found)" % test_name)
+		return
+	var http_port: int = TEST_PORT + (61 if websocket else 60)
+	var match_port: int = TEST_PORT + (8 if websocket else 7)
+	var args: PackedStringArray = ["--disable-warning=ExperimentalWarning",
+			server_dir.path_join("src/main.ts"), "--httpPort=%d" % http_port, "--httpHost=127.0.0.1",
+			"--publicHost=127.0.0.1", "--godotBin=" + OS.get_executable_path(),
+			"--godotArgs=--headless --path " + ProjectSettings.globalize_path("res://"),
+			"--matchPortFirst=%d" % match_port, "--matchPortLast=%d" % match_port, "--warmMatches=0"]
+	if websocket:
+		args.append_array(["--transport=websocket", "--publicUrl=ws://127.0.0.1:%d" % http_port])
+	var backend: int = OS.create_process(node_bin, args)
+	var matchmaker := OnlineMatchmaker.new()
+	root.add_child(matchmaker)
+	var answer: Array = []
+	matchmaker.found.connect(func(address: String, port: int) -> void: answer.assign(["found", address, port]))
+	matchmaker.failed.connect(func(reason: String) -> void: answer.assign(["failed", reason]))
+	# O Node leva um instante para abrir a porta HTTP: tenta de novo se não respondeu.
+	var url: String = "http://127.0.0.1:%d" % http_port
+	for attempt: int in 20:
+		answer.clear()
+		matchmaker.request_match_at(url, "Surfer")
+		await _wait_frames_until(func() -> bool: return not answer.is_empty(), 45000)
+		if not answer.is_empty() and answer[0] == "found":
+			break
+		await _wait_frames_until(func() -> bool: return false, 500)
+	matchmaker.queue_free()
+	var expected_address: String = "ws://127.0.0.1:%d/play/m1" % http_port if websocket else "127.0.0.1"
+	var found: bool = not answer.is_empty() and answer[0] == "found" and answer[1] == expected_address \
+			and answer[2] == (0 if websocket else match_port)
+	var others: int = -1
+	var level: Node = null
+	if found:
+		Settings.player_name = "Surfer"
+		var joined: Dictionary = await _join_and_enter(answer[1], answer[2])
+		var client: NetClient = joined.get("client")
+		level = joined.get("level")
+		if client != null and await _wait_frames_until(func() -> bool: return client.has_world, 20000):
+			await _physics(10)
+			others = client.characters.size() - 1
+	# Sair e desligar o matchmaker (ele fecha a partida que abriu).
+	Net.stop()
+	if level != null:
+		level.queue_free()
+		current_scene = null
+	OS.kill(backend)
+	await _wait_frames_until(func() -> bool: return false, 1500)
+	_kill_stray_servers(match_port)
+	_check(test_name, found and others == 3, "resposta=%s outros=%d" % [answer, others])
+
+
+# Entra no servidor (endereço e porta, ou URL ws://), tentando até ele abrir, espera o START e
+# carrega a arena. Devolve {"level": Node, "client": NetClient} (vazio se não deu).
+func _join_and_enter(address: String, port: int) -> Dictionary:
+	var starting: Array[bool] = [false]
+	for attempt: int in 40:
+		Net.join_online(address, port)
+		var lobby := NetLobby.new()
+		root.add_child(lobby)
+		lobby.match_starting.connect(func() -> void: starting[0] = true)
+		await _wait_frames_until(func() -> bool: return starting[0] or Net.transport == null, 3000)
+		lobby.queue_free()
+		if starting[0]:
+			break
+		Net.stop()
+		await _wait_frames_until(func() -> bool: return false, 500)
+	if not starting[0]:
+		return {}
+	var level: Node = (load(ARENA) as PackedScene).instantiate()
+	root.add_child(level)
+	current_scene = level
+	await physics_frame
+	return {"level": level, "client": level.find_child("NetClient", true, false) as NetClient}
+
+
+# Servidores de partida que o matchmaker abriu e não chegaram a fechar (garantia do teste).
+func _kill_stray_servers(port: int) -> void:
+	var output: Array = []
+	OS.execute("pgrep", ["-f", "--port=%d" % port], output)
+	for line: String in str(output[0] if not output.is_empty() else "").split("\n", false):
+		if line.strip_edges().is_valid_int():
+			OS.kill(line.strip_edges().to_int())
