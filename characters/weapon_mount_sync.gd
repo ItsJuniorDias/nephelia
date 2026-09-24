@@ -1,9 +1,9 @@
 class_name WeaponMountSync
 extends SkeletonModifier3D
-## Atualiza o WeaponMount DENTRO da etapa do esqueleto: depois das animações e do giro das pernas
-## (LegsYawModifier) e antes das mãos irem até a arma (WeaponGripModifier). Atualizado no
-## `_process`, o suporte lia o peito de um quadro antes e sem o giro do quadril: correndo, a mão
-## esquerda ficava até 10 cm longe da telha.
+## Atualiza o WeaponMount DENTRO da etapa do esqueleto: depois das animações e do tronco
+## destorcido (TorsoFacingModifier) e antes das mãos irem até a arma (WeaponGripModifier).
+## Atualizado no `_process`, o suporte lia o peito de um quadro antes: correndo, a mão esquerda
+## ficava até 10 cm longe da telha.
 
 var mount: WeaponMount
 

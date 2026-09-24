@@ -126,15 +126,25 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   `MeshInstance3D.new()` é VAZIO. A cabeça, o cabelo e o chapéu (Wardrobe) ficaram assim até
   2026-09-23: presos na pose de descanso, sem seguir animação nenhuma. Parado não aparecia; correndo,
   o corpo balançava e a cabeça ficava no ar (o usuário viu no vídeo do bot). Teste C3 confere.
-- Pernas: `characters/legs_yaw_modifier.gd` (LegsYawModifier, primeiro modificador do esqueleto) vira
-  o quadril até 70° para o lado da caminhada e destorce `spine_01` na mesma medida (tronco na mira);
-  de costas a corrida toca ao contrário (`locomotion_speed` = -1 na árvore). O Character passa o
-  ângulo da caminhada em `update_motion`. As animações do UAL grátis só têm corrida para a frente.
+- Pernas (2026-09-23, Universal Animation Library **Pro**, comprada pelo usuário, CC0): mistura 2D
+  (`AnimationNodeBlendSpace2D`, `sync` ligado) com parado no meio, andar para a frente e as 8
+  corridas num círculo (`CharacterModel.JOG_DIRECTIONS`; ponto = direção x velocidade, x =
+  esquerda, y = frente). O Character passa o ângulo da caminhada em `update_motion`. As corridas
+  giram o quadril (28° a 45°) e o inclinam (20° para a frente, 9° para trás de costas):
+  `characters/torso_facing_modifier.gd` (TorsoFacingModifier, PRIMEIRO modificador do esqueleto)
+  devolve o `spine_01` à pose do quadril PARADO (média da animação "Idle", onde a mira do revólver
+  foi calibrada), a cada quadro: o tronco fica firme na mira (uma média que deixasse passar o
+  balanço da passada deixou o tronco até 42° fora). Desligado na morte. Teste C4 (8 direções).
+  O pacote Pro fica FORA do projeto (`~/Downloads/nephelia_assets/quaternius/`): o
+  `tools/extract_bot_animations.gd` lê o glTF cru de lá (nomes com "_Loop") e só as corridas novas
+  entram na biblioteca; o que as duas versões têm é idêntico (conferido osso a osso). O Pro também
+  traz mortes, reações a tiro, esquiva, virada de 90°, comemoração etc. (120 animações), ainda não
+  usadas.
 - Vídeo de conferência: `tools/motion_video.gd` grava um bot andando em todas as direções
-  (`--write-movie`, ver o cabeçalho). Não há ffmpeg: para mostrar ao usuário, juntar os quadros
-  num GIF (quadros crus pelo Godot + codificador GIF em Python puro).
+  (`--write-movie`, ver o cabeçalho). Para mostrar ao usuário, juntar os quadros num .mp4 com o
+  ffmpeg (Homebrew, `/opt/homebrew/bin/ffmpeg`; o usuário instalou em 2026-09-23).
 - Modelo dos personagens: `characters/character_model.tscn` (corpo montado pelo Wardrobe + arma na
-  mão direita) com árvore de animação montada em código: pernas por velocidade, tronco em pose de
+  mão direita) com árvore de animação montada em código: pernas por direção e velocidade, tronco em pose de
   mira (filtrado a partir de `spine_01`), tiro/levar tiro por cima, transição vida/morte. Animações
   extraídas do UAL para `assets/animations/quaternius_ual/character_animations.res` com
   `tools/extract_bot_animations.gd`. O modelo olha para +Z: dentro do Character ele é girado 180°.
@@ -245,7 +255,7 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   (`butt` na ficha) fica em `WeaponCatalog.SHOULDER_POCKET`, bem dentro do ombro direito, 8° para
   dentro. O `WeaponMount` acompanha o peito (`spine_03`, comparado à pose de mira parada
   `CHEST_NEUTRAL`) e gira em volta do ombro só o que falta para a mira; ele se atualiza DENTRO da
-  etapa do esqueleto (`characters/weapon_mount_sync.gd`, depois do LegsYaw e antes das mãos): no
+  etapa do esqueleto (`characters/weapon_mount_sync.gd`, depois do TorsoFacing e antes das mãos): no
   `_process` lia o peito atrasado e a mão esquerda ficava até 10 cm longe correndo. O braço esquerdo
   trabalha perto do limite: coronha mais para a frente = mão sem alcance (teste I9 varre -85° a +85°,
   no ar e correndo).
@@ -503,4 +513,8 @@ Atualizar esta seção ao fim de cada sessão.
     links, contrato de apps pagos (banco e impostos), preço, classificação etária, Archive e upload
     no Xcode (build de release), TestFlight, enviar para revisão. Próximo: testar Mac + iPhone na mesma Wi-Fi; depois o Game Center (o usuário
     confirma se tem o Apple Developer pago e aprova baixar o GodotApplePlugins).
+  - Assets pagos (2026-09-23): o usuário comprou o Universal Animation Library Pro; personagens
+    correm nas 8 direções com o tronco firme na mira (aprovado com vídeo). Ordem recomendada do
+    resto: Downtown City MegaKit Source (janelas com "sala dentro"), Impact VFX e Muzzle Flash VFX
+    (Binbun), roupas (só se servirem para 1900).
   - Próximo: seguir o polish; depois Tarefa 11 (desempenho no iPhone) ou o que o usuário pedir.

@@ -468,28 +468,40 @@ func _test_parts_follow_skeleton() -> void:
 
 
 func _test_legs_turn_to_walk() -> void:
-	# Andando de lado, o quadril vira para o lado da caminhada (as pernas não "patinam") e o tronco
-	# continua na mira; de costas, a corrida toca ao contrário com as pernas para a frente.
+	# As pernas tocam a corrida da direção em que ele anda (8 direções da Universal Animation Library
+	# Pro) e o tronco continua na pose de mira: as corridas giram e inclinam o quadril, e o
+	# TorsoFacingModifier devolve o tronco à pose calibrada com as pernas paradas.
 	# O bot fica parado (física desligada), mas com o modelo animando.
 	var bot: Character = _bots[0]
 	bot.process_mode = Node.PROCESS_MODE_INHERIT
 	bot.set_physics_process(false)
 	var model: CharacterModel = bot.model
-	var results: Array[String] = []
+	var torso: TorsoFacingModifier = model.get_torso_modifier()
+	for i in 45:
+		model.update_motion(0.0, 0.0, false, 0.0)
+		await process_frame
+	var standing: Quaternion = torso.torso_rotation
+	var results: Array[String] = ["parado"]
 	var ok: bool = true
-	for case: Array in [[90.0, 1.0, false], [-90.0, -1.0, false], [180.0, 0.0, true], [0.0, 0.0, false]]:
-		for i in 45:
-			model.update_motion(5.0, 0.0, false, deg_to_rad(case[0]))
+	for angle: float in [0.0, 90.0, -90.0, 180.0, 45.0, 135.0, -135.0, -45.0]:
+		var worst: float = 0.0
+		for i in 60:
+			model.update_motion(5.0, 0.0, false, deg_to_rad(angle))
 			await process_frame
-		var yaw: float = rad_to_deg(model.get_legs_yaw())
-		var side_ok: bool = absf(yaw) < 10.0 if case[1] == 0.0 else yaw * case[1] > 50.0
-		var torso_ok: bool = model.get_legs_modifier().torso_error < 0.01
-		ok = ok and side_ok and torso_ok and model.is_backpedaling() == case[2]
-		results.append("%d°: legs=%.0f° back=%s torso_err=%.3f" % [case[0], yaw, model.is_backpedaling(), model.get_legs_modifier().torso_error])
+			if i >= 30:
+				worst = maxf(worst, rad_to_deg(standing.angle_to(torso.torso_rotation)))
+		var blend: Vector2 = model.get_legs_blend()
+		var expected: Vector2 = Vector2(sin(deg_to_rad(angle)), cos(deg_to_rad(angle))) * 5.0
+		var hips: float = rad_to_deg(torso.hips_yaw)
+		# De lado o quadril gira de verdade (prova de que a corrida de lado está tocando).
+		var hips_ok: bool = absf(hips) > 20.0 if absf(angle) == 90.0 else true
+		ok = ok and blend.distance_to(expected) < 0.3 and worst < 3.0 and hips_ok
+		results.append("%d°: legs=(%.1f, %.1f) hips=%.0f° torso_off<=%.1f°" % [angle, blend.x, blend.y, hips, worst])
 	model.update_motion(0.0, 0.0, false, 0.0)
 	bot.set_physics_process(true)
 	bot.process_mode = Node.PROCESS_MODE_DISABLED
-	_check("C4 hips turn toward the walk (strafe/backpedal) while the torso keeps aiming", ok, ", ".join(results))
+	_check("C4 legs run toward the walk direction (8 directions) while the torso keeps the aim pose", ok,
+			", ".join(results))
 
 
 func _test_first_person_sleeves() -> void:

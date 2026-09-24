@@ -5,12 +5,13 @@ extends Node3D
 ## Animation Library). Só visual: o Character conta o que está acontecendo e o modelo anima.
 ##
 ## Árvore de animação (montada por código em _build_tree):
-##   pernas: parado / andar / correr conforme a velocidade; no ar (pulo, trilho), pose de pulo
+##   pernas: parado / andar / correr nas 8 direções (Universal Animation Library Pro) conforme a
+##     velocidade e a direção em que anda; no ar (pulo, trilho), pose de pulo
 ##   tronco e braços: pose de mirar a pistola, inclinada conforme o olhar (cima/baixo)
 ##   por cima: tiro e "levou tiro" (só no tronco); morte troca tudo pela queda.
 ## Pendurado no trilho, o RailGripModifier levanta o braço esquerdo até o trilho.
-## Andando de lado ou de costas, o LegsYawModifier vira o quadril para onde ele vai (e a corrida
-## toca ao contrário de costas): as pernas não "patinam" e o tronco continua na mira.
+## As corridas giram e inclinam o quadril; o TorsoFacingModifier devolve o tronco à pose de mira
+## calibrada com as pernas paradas, e ele continua na mira em qualquer direção.
 
 const ANIMATIONS: AnimationLibrary = preload("res://assets/animations/quaternius_ual/character_animations.res")
 ## Deste osso para cima o corpo segue a pose de mira (as pernas continuam andando).
@@ -35,16 +36,13 @@ const PROTECTION_ENERGY: float = 0.45
 ## Rapidez (por segundo) das trocas de pose: pernas de pulo e braço no trilho.
 const AIR_BLEND_SPEED: float = 6.0
 const GRIP_BLEND_SPEED: float = 8.0
-## Quanto o quadril pode girar para o lado da caminhada (mais que isso torceria demais a cintura).
-const LEGS_MAX_YAW: float = deg_to_rad(70.0)
-## Rapidez com que o quadril acompanha a direção (por segundo).
-const LEGS_TURN_SPEED: float = 10.0
-## Abaixo disso (m/s) as pernas voltam para a frente.
-const LEGS_MIN_SPEED: float = 0.8
-## Andar "de costas" começa passando deste ângulo e acaba abaixo do outro (sem ficar trocando
-## a cada passo quando anda bem de lado).
-const BACKPEDAL_ENTER: float = deg_to_rad(110.0)
-const BACKPEDAL_LEAVE: float = deg_to_rad(70.0)
+## Rapidez com que as pernas trocam de direção de corrida (por segundo).
+const LEGS_BLEND_SPEED: float = 12.0
+## Corridas da mistura das pernas: [animação, direção em graus (0 = frente, +90 = esquerda)].
+const JOG_DIRECTIONS: Array = [
+	[&"Jog_Fwd", 0.0], [&"Jog_Fwd_L", 45.0], [&"Jog_Left", 90.0], [&"Jog_Bwd_L", 135.0],
+	[&"Jog_Bwd", 180.0], [&"Jog_Bwd_R", -135.0], [&"Jog_Right", -90.0], [&"Jog_Fwd_R", -45.0],
+]
 
 ## Cor de identificação do personagem (tinge o tecido da roupa).
 @export var tint: Color = Color.WHITE:
@@ -64,11 +62,10 @@ var _airborne: bool = false
 var _hanging: bool = false
 var _air_amount: float = 0.0
 var _grip: RailGripModifier
-var _legs: LegsYawModifier
-var _speed: float = 0.0
-var _move_angle: float = 0.0
-var _backpedal: bool = false
-var _locomotion_scale: float = 1.0
+var _torso: TorsoFacingModifier
+## Ponto da mistura das pernas: para onde e quão rápido anda (x = esquerda, y = frente; m/s).
+var _legs_goal: Vector2 = Vector2.ZERO
+var _legs_blend: Vector2 = Vector2.ZERO
 ## Arma na mão (revólver): a pose de mira usa a calibração do revólver.
 var _pistol_aim: bool = true
 
@@ -101,14 +98,15 @@ func _ready() -> void:
 	_grip.influence = 0.0
 	_grip.active = false
 	skeleton.add_child(_grip)
-	# O quadril gira ANTES das pegadas da arma e do trilho (os braços vão para onde o tronco está).
-	_legs = LegsYawModifier.new()
-	_legs.name = "LegsYaw"
-	_legs.active = false
-	skeleton.add_child(_legs)
+	# O tronco é destorcido ANTES das pegadas da arma e do trilho (os braços vão para onde o
+	# tronco está).
+	_torso = TorsoFacingModifier.new()
+	_torso.name = "TorsoFacing"
+	_torso.reference = TorsoFacingModifier.average_hips(skeleton, ANIMATIONS.get_animation(&"Idle"))
+	skeleton.add_child(_torso)
 	for child: Node in skeleton.get_children():
-		if child is SkeletonModifier3D and child != _legs:
-			skeleton.move_child(_legs, child.get_index())
+		if child is SkeletonModifier3D and child != _torso:
+			skeleton.move_child(_torso, child.get_index())
 			break
 
 
@@ -139,9 +137,7 @@ func _process(delta: float) -> void:
 ## à frente dele (radianos em volta do eixo vertical: 0 = frente, +90° = esquerda, 180° = costas).
 func update_motion(speed: float, aim_pitch: float, airborne: bool = false, move_angle: float = 0.0) -> void:
 	_airborne = airborne
-	_speed = speed
-	_move_angle = move_angle
-	_tree.set(&"parameters/locomotion/blend_position", speed)
+	_legs_goal = Vector2(sin(move_angle), cos(move_angle)) * minf(speed, JOG_SPEED)
 	_tree.set(&"parameters/aim/blend_position", _aim_blend(aim_pitch))
 	# A arma longa fica apoiada no corpo: é ela que sobe e desce com a mira (e os braços vão junto).
 	mount.aim_pitch = aim_pitch
@@ -161,18 +157,13 @@ func _aim_blend(aim_pitch: float) -> float:
 	return clampf(above / (PISTOL_AIM_UP if above > 0.0 else PISTOL_AIM_DOWN), -1.0, 1.0)
 
 
-## Quanto o quadril está virado para o lado da caminhada agora (radianos).
-func get_legs_yaw() -> float:
-	return _legs.yaw
+## Ponto atual da mistura das pernas (x = esquerda, y = frente; m/s).
+func get_legs_blend() -> Vector2:
+	return _legs_blend
 
 
-## Andando de costas (corrida tocada ao contrário).
-func is_backpedaling() -> bool:
-	return _backpedal
-
-
-func get_legs_modifier() -> LegsYawModifier:
-	return _legs
+func get_torso_modifier() -> TorsoFacingModifier:
+	return _torso
 
 
 func is_hanging_pose() -> bool:
@@ -190,10 +181,13 @@ func play_hit() -> void:
 
 func play_death() -> void:
 	_tree.set(&"parameters/life/transition_request", "dead")
+	# Caindo, o corpo inteiro segue a animação (sem destorcer a cintura).
+	_torso.active = false
 
 
 func reset_alive() -> void:
 	_tree.set(&"parameters/life/transition_request", "alive")
+	_torso.active = true
 
 
 ## Brilho azulado enquanto o personagem está com proteção de nascimento.
@@ -253,23 +247,15 @@ func _update_pose_blends(delta: float) -> void:
 		_grip.active = _grip.influence > 0.0
 
 
-# Quadril virado para onde ele anda (de costas: para a frente, com a corrida ao contrário).
+# As pernas vão aos poucos para a corrida da direção em que ele anda (sem trocar de pose de
+# repente quando a direção vira).
 func _update_legs(delta: float) -> void:
-	var target: float = 0.0
-	if _speed >= LEGS_MIN_SPEED and not _airborne and not _hanging:
-		_backpedal = absf(_move_angle) > (BACKPEDAL_LEAVE if _backpedal else BACKPEDAL_ENTER)
-		var angle: float = wrapf(_move_angle + PI, -PI, PI) if _backpedal else _move_angle
-		target = clampf(angle, -LEGS_MAX_YAW, LEGS_MAX_YAW)
-	else:
-		_backpedal = false
-	_legs.yaw = lerp_angle(_legs.yaw, target, 1.0 - exp(-LEGS_TURN_SPEED * delta))
-	if absf(_legs.yaw) < 0.001 and is_zero_approx(target):
-		_legs.yaw = 0.0
-	_legs.active = _legs.yaw != 0.0
-	var scale: float = -1.0 if _backpedal else 1.0
-	if scale != _locomotion_scale:
-		_locomotion_scale = scale
-		_tree.set(&"parameters/locomotion_speed/scale", scale)
+	if _legs_blend == _legs_goal:
+		return
+	_legs_blend = _legs_blend.lerp(_legs_goal, 1.0 - exp(-LEGS_BLEND_SPEED * delta))
+	if _legs_blend.distance_to(_legs_goal) < 0.01:
+		_legs_blend = _legs_goal
+	_tree.set(&"parameters/locomotion/blend_position", _legs_blend)
 
 
 func _apply_tint() -> void:
@@ -286,12 +272,18 @@ func _apply_tint() -> void:
 
 
 func _build_tree() -> void:
-	var locomotion := AnimationNodeBlendSpace1D.new()
-	locomotion.min_space = 0.0
-	locomotion.max_space = JOG_SPEED
-	locomotion.add_blend_point(_clip(&"Idle"), 0.0, -1, &"idle")
-	locomotion.add_blend_point(_clip(&"Walk"), WALK_SPEED, -1, &"walk")
-	locomotion.add_blend_point(_clip(&"Jog_Fwd"), JOG_SPEED, -1, &"jog")
+	# Pernas: parado no meio, andar para a frente e as 8 corridas num círculo em volta (as corridas
+	# têm a mesma duração: com `sync` os passos ficam no mesmo ritmo quando duas se misturam).
+	var locomotion := AnimationNodeBlendSpace2D.new()
+	locomotion.min_space = Vector2(-JOG_SPEED, -JOG_SPEED)
+	locomotion.max_space = Vector2(JOG_SPEED, JOG_SPEED)
+	locomotion.sync = true
+	locomotion.add_blend_point(_clip(&"Idle"), Vector2.ZERO, -1, &"idle")
+	locomotion.add_blend_point(_clip(&"Walk"), Vector2(0.0, WALK_SPEED), -1, &"walk")
+	for jog: Array in JOG_DIRECTIONS:
+		var angle: float = deg_to_rad(jog[1])
+		locomotion.add_blend_point(_clip(jog[0]), Vector2(sin(angle), cos(angle)) * JOG_SPEED, -1,
+				StringName(String(jog[0]).to_lower()))
 
 	var aim := AnimationNodeBlendSpace1D.new()
 	aim.min_space = -1.0
@@ -317,8 +309,6 @@ func _build_tree() -> void:
 
 	var blend_tree := AnimationNodeBlendTree.new()
 	blend_tree.add_node(&"locomotion", locomotion)
-	# De costas a corrida toca ao contrário (escala -1).
-	blend_tree.add_node(&"locomotion_speed", AnimationNodeTimeScale.new())
 	blend_tree.add_node(&"air_clip", _clip(&"Jump"))
 	blend_tree.add_node(&"air", AnimationNodeBlend2.new())
 	blend_tree.add_node(&"aim", aim)
@@ -329,8 +319,7 @@ func _build_tree() -> void:
 	blend_tree.add_node(&"hit", hit)
 	blend_tree.add_node(&"death_clip", _clip(&"Death01"))
 	blend_tree.add_node(&"life", life)
-	blend_tree.connect_node(&"locomotion_speed", 0, &"locomotion")
-	blend_tree.connect_node(&"air", 0, &"locomotion_speed")
+	blend_tree.connect_node(&"air", 0, &"locomotion")
 	blend_tree.connect_node(&"air", 1, &"air_clip")
 	blend_tree.connect_node(&"upper", 0, &"air")
 	blend_tree.connect_node(&"upper", 1, &"aim")

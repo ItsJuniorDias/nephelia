@@ -1,7 +1,7 @@
 extends SceneTree
 ## Ferramenta de conferência: grava um bot andando em todas as direções (para frente, de lado, de
 ## costas e na diagonal) mirando na câmera, como um inimigo visto pelo jogador. Serve para ver as
-## pernas (LegsYawModifier) e o corpo em movimento, quadro a quadro.
+## pernas (corridas nas 8 direções + TorsoFacingModifier) e o corpo em movimento, quadro a quadro.
 ##   Godot --path . -s res://tools/motion_video.gd --resolution 640x480 --write-movie <pasta>/f.png --fixed-fps 30 [-- <arma>]
 ## <arma> (opcional): "repeater" ou "shotgun" para ver as armas longas (padrão: revólver).
 ## Os quadros saem em <pasta>/f00000000.png... Cada fase dura FASE segundos (ver PHASES).
