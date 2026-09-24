@@ -186,13 +186,28 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   sobre um mar de nuvens e dá para cair atravessando. O "chão" do céu é claro (acima das nuvens),
   senão a base das plataformas fica preta.
 - Prédios: `tools/city_kit.gd` (CityKit, só ferramenta) monta fachadas com as peças modulares do
-  Downtown City MegaKit (parede de 2 m x 3 m de altura, face de fora para +Z) e junta cada prédio
-  numa malha só, com uma superfície por material e LOD automático. Estilos: "brick" (casa de
-  tijolo), "shop" (vitrine de ferro) e "civic" (pedra clara); telhado "mansard" (ardósia com
-  lucarnas) ou "flat" (cornija). Os lados que não dão para a área de jogo usam peças simples
-  (janela cara = até 1100 triângulos). Materiais compartilhados em `assets/materials/city/*.tres`,
-  com cor de vértice desligada (senão as peças sem cor ficam pretas), vidro opaco escuro (o
-  "interior falso" do pacote é só um plano branco) e sem as faces internas.
+  Downtown City MegaKit [Source] (comprado pelo usuário em 2026-09-24, CC0; peças de 2 ou 4 m de
+  largura, 3 ou 4 m de altura, face de fora para +Z; quantos módulos a peça ocupa sai da largura
+  dela) e junta cada prédio numa malha só, com uma superfície por material e LOD automático.
+  Estilos (`STYLES`, cada um com altura de andar, peças do térreo/andares/topo, porta, cantos,
+  cornija e faixa): "brick", "brick_bay" (janelas salientes), "shop", "civic", "bank" (mármore,
+  andares de 4 m), "hotel" (tijolo branco com janelas salientes) e "tenement" (tijolo gasto);
+  telhado "mansard" ou "flat". Enfeites por prédio: `band` (faixa de 1 m em cima do térreo, onde vão
+  os letreiros), `awnings` (toldos), `signs` (letreiros e placas de pendurar, com `scale`) e
+  `fire_escape`. Letreiros com telefone moderno (Kowalski's Deli, May's Salon) ficam de fora.
+  Nada sai das faces norte/sul de fora dos prédios da praça (os trilhos passam perto).
+- Materiais da cidade (2026-09-24): o `tools/city_import_script.gd` (script de importação de todas
+  as peças de `assets/models/city/downtown/`) troca os materiais do glTF pelos do projeto em
+  `assets/materials/city/`: o shader do pacote (`M_BaseMaterial.gdshader`: desgaste nas quinas pelo
+  2º UV, sujeira pela cor do vértice; o z do relevo é CALCULADO, porque a compressão de celular só
+  guarda x e y e as paredes ficavam granuladas) e a sala atrás da janela
+  (`fake_interior.gdshader`, nosso, baseado no do pacote: sorteio por JANELA na cor do vértice, que
+  o CityKit grava por pedaço solto da superfície; `night` faz as salas acesas brilharem em luz
+  quente, e o SkyCycle muda junto com os postes; sem transparência). O CityKit mantém cor de vértice
+  e 2º UV e tira o vidro das peças que têm sala. Texturas em `assets/materials/city/textures/`
+  (1024 px, VRAM). Tijolo gasto clareado (`color_tint`) para combinar com a luz quente.
+  Conferir com `tools/city_sheet.gd` (fotos de pontos fixos, tarde e noite) e
+  `tools/city_flythrough.gd` (sobrevoo em vídeo).
 - Trilhos aéreos: `rails/skyline_rail.gd` (SkylineRail, um Path3D; grupo `skyline_rails`; tubo CSG e
   postes montados ao carregar). Os da Sky Plaza saem do `tools/build_skyplaza.gd` em
   `skyplaza_rails.tscn`; as pontas ficam ~7 m para dentro da borda das ilhas. O Character engata
@@ -204,11 +219,14 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   animação "Jump" (também usada ao pular/cair). Bots: pegam o trilho se o destino está a mais de
   22 m; não se guiam no ar; só soltam se o pouso previsto (com a freada no ar) é navmesh ligada ao
   destino (topo de muro tem navmesh "ilhada"); ao pousar pedem caminho novo.
-- Peças usadas: `assets/models/city/downtown/` (84 peças modulares) e
+- Peças usadas: `assets/models/city/downtown/` (141 peças da versão Source) e
   `assets/models/nature/stylized/` (texturas limitadas a 1024 px no .import). Os prédios prontos do
-  pacote (18 a 45 mil triângulos) ficaram de fora por desempenho: a arena usa fachadas montadas.
-  Arena inteira hoje: ~286 mil triângulos e 267 superfícies com 4 personagens (medir no iPhone);
-  com roupa cada personagem tem ~21 a 24 mil triângulos e 10 a 13 superfícies (antes 14 mil e 3).
+  pacote (18 a 45 mil triângulos) só aparecem no HORIZONTE: 7 ilhas flutuantes sem colisão nem
+  sombra (`skyplaza_skyline.tscn`, `SKYLINE` no build), com `lod_bias` baixo. Portais de pedra
+  (Prop_EntranceArch, escala 1,6, vão de 2,85 m) nas pontas das pontes, com colisão só nas colunas.
+  Triângulos por quadro (medidos no Mac, com sombras, sem personagens): 440 a 690 mil (antes 330 a
+  520 mil); chamadas de desenho quase iguais (146 a 335). Medir no iPhone (Tarefa 11).
+  Com roupa cada personagem tem ~21 a 24 mil triângulos e 10 a 13 superfícies (antes 14 mil e 3).
 - Exportação (preset iOS, `exclude_filter`): `tests/*`, `tools/*`,
   `assets/animations/quaternius_ual/*.glb` (7,6 MB, só serve para extrair animações),
   `assets/models/weapons/lowpoly_wild_west/*` (FBX de origem; o jogo usa a malha assada) e os
@@ -542,6 +560,10 @@ Atualizar esta seção ao fim de cada sessão.
     correm nas 8 direções com o tronco firme na mira (aprovado com vídeo). Ordem recomendada do
     resto: Downtown City MegaKit Source (janelas com "sala dentro"), Impact VFX e Muzzle Flash VFX
     (Binbun), roupas (só se servirem para 1900).
+  - Cidade com o Downtown City MegaKit [Source] (2026-09-24, aprovado com vídeo): janelas com sala
+    que acendem à noite, desgaste nos materiais, prédios de estilos diferentes (banco, hotel, pub,
+    cortiço, padaria, Jade Garden, Carmine's), letreiros, toldos, escadas de incêndio, portais nas
+    pontes e ilhas no horizonte. Vai na versão 1.1 (a 1.0 já foi arquivada antes disso).
   - Sons de meme (2026-09-24, aprovado com vídeo): 19 sons (15 sintetizados + 4 trechos CC0 do
     Freesound) ligados aos momentos da partida, opção FUNNY SOUNDS nas Opções.
   - Próximo: seguir o polish; depois Tarefa 11 (desempenho no iPhone) ou o que o usuário pedir.

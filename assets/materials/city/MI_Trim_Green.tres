@@ -1,18 +1,21 @@
-[gd_resource type="StandardMaterial3D" format=3]
+[gd_resource type="ShaderMaterial" load_steps=7 format=3]
 
-[ext_resource type="Texture2D" path="res://assets/models/city/downtown/T_Trim_BaseColor.png" id="1_kwxl6"]
-[ext_resource type="Texture2D" path="res://assets/models/city/downtown/T_Trim_ORM.png" id="2_287ix"]
-[ext_resource type="Texture2D" path="res://assets/models/city/downtown/T_Trim_Normal.png" id="3_1h86g"]
+[ext_resource type="Shader" path="res://assets/materials/city/M_BaseMaterial.gdshader" id="1_32ydk"]
+[ext_resource type="Texture2D" path="res://assets/materials/city/textures/T_Trim_BaseColor.png" id="2_1lby7"]
+[ext_resource type="Texture2D" path="res://assets/materials/city/textures/T_Trim_Normal.png" id="3_4k568"]
+[ext_resource type="Texture2D" path="res://assets/materials/city/textures/T_CornerDamage_Normal.png" id="4_hro7j"]
+[ext_resource type="Texture2D" path="res://assets/materials/city/textures/T_Trim_ORM.png" id="4_on3m8"]
+[ext_resource type="Texture2D" path="res://assets/materials/city/textures/T_Noise_Drips.png" id="6_duj7y"]
 
 [resource]
-resource_name = "MI_Trim_Green"
-cull_mode = 2
-albedo_texture = ExtResource("1_kwxl6")
-metallic = 1.0
-metallic_texture = ExtResource("2_287ix")
-metallic_texture_channel = 2
-roughness_texture = ExtResource("2_287ix")
-roughness_texture_channel = 1
-normal_enabled = true
-normal_texture = ExtResource("3_1h86g")
-metadata/_gltf_primary_texture_coord = 0
+render_priority = 0
+shader = ExtResource("1_32ydk")
+shader_parameter/albedo = ExtResource("2_1lby7")
+shader_parameter/base_normal = ExtResource("3_4k568")
+shader_parameter/detail_normal = ExtResource("4_hro7j")
+shader_parameter/orm = ExtResource("4_on3m8")
+shader_parameter/wear_texture = ExtResource("6_duj7y")
+shader_parameter/color_tint = Color(0.4117647, 0.44313726, 0.3882353, 1)
+shader_parameter/wear_color = Color(0.292, 0.292, 0.292, 1)
+shader_parameter/use_detail_normal = true
+shader_parameter/detail_normal_intensity = 1.0

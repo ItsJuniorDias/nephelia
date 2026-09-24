@@ -41,11 +41,30 @@ const WEST := {"center": Vector3(-44, 1, 0), "size": Vector2(28, 32)}
 const EAST := {"center": Vector3(44, -1, 0), "size": Vector2(28, 32)}
 ## Meia largura dos braços da cruz da praça (os prédios começam aqui).
 const ARM_HALF: float = 10.0
+## Portal das pontes (Prop_EntranceArch): escala, e as colunas dele (centro x, largura) para a
+## colisão. Com 1,6 o vão fica com 2,85 m (a ponte tem 3,2 m entre os guarda-corpos).
+const ARCH_SCALE: float = 1.6
+const ARCH_PILLAR_X: float = 1.265
+const ARCH_PILLAR_WIDTH: float = 0.75
+## Ilhas do horizonte (só enfeite, longe da área de jogo): [centro, tamanho (x, z), prédios
+## ([peça, posição relativa, giro em graus])]. Prédios prontos do Downtown City MegaKit.
+## Viés de LOD dos prédios do horizonte (menor = mais simples).
+const SKYLINE_LOD_BIAS: float = 0.15
+const SKYLINE: Array = [
+	[Vector3(-12, -6, -128), Vector2(46, 30), [["Building_Large_3", Vector3(-10, 0, 0), 0.0], ["Building_Medium_2", Vector3(13, 0, 2), 90.0]]],
+	[Vector3(104, 3, -88), Vector2(26, 24), [["Building_Medium_1", Vector3(0, 0, 0), 215.0]]],
+	[Vector3(138, -9, 22), Vector2(34, 40), [["Building_Large_2", Vector3(0, 0, -8), 270.0], ["Building_Small_2", Vector3(2, 0, 12), 250.0]]],
+	[Vector3(58, 9, 132), Vector2(22, 24), [["Building_Small_1", Vector3(0, 0, 0), 160.0]]],
+	[Vector3(-78, -3, 122), Vector2(40, 26), [["Building_Medium_1", Vector3(-9, 0, 0), 30.0], ["Building_Small_2", Vector3(10, 0, 1), 0.0]]],
+	[Vector3(-142, 5, 18), Vector2(30, 34), [["Building_Large_3", Vector3(0, 0, 0), 90.0]]],
+	[Vector3(-102, -11, -92), Vector2(38, 26), [["Building_Medium_2", Vector3(-8, 0, 0), 135.0], ["Building_Small_1", Vector3(10, 0, 2), 120.0]]],
+]
 
 var _geometry: Node3D
 var _decor: Node3D
 var _rails: Node3D
 var _clouds: Node3D
+var _skyline: Node3D
 var _kit := CityKit.new()
 var _items: Node3D
 var _shape_cache: Dictionary = {}
@@ -74,6 +93,11 @@ func _run() -> void:
 	# Das bordas da praça (x = ±22) até as bordas dos quarteirões laterais (x = ±30).
 	_build_bridge("BridgeWest", Vector3(-22.0, 0.0, 0.0), Vector3(-30.0, 1.0, 0.0))
 	_build_bridge("BridgeEast", Vector3(22.0, 0.0, 0.0), Vector3(30.0, -1.0, 0.0))
+	# Portais de pedra nas pontas das pontes (marcam as entradas de cada quarteirão).
+	_bridge_arch("ArchPlazaWest", Vector3(-21.2, 0.0, 0.0))
+	_bridge_arch("ArchPlazaEast", Vector3(21.2, 0.0, 0.0))
+	_bridge_arch("ArchWest", Vector3(-30.8, 1.0, 0.0))
+	_bridge_arch("ArchEast", Vector3(30.8, -1.0, 0.0))
 	_build_plaza()
 	_build_west_quarter()
 	_build_east_quarter()
@@ -82,6 +106,7 @@ func _run() -> void:
 	_build_rails()
 	_build_items()
 	_build_clouds()
+	_build_skyline()
 
 	_geometry.set_meta(FloorSurfaces.META, _surfaces)
 	_geometry.add_to_group(FloorSurfaces.GROUP, true)
@@ -90,6 +115,7 @@ func _run() -> void:
 	_save(_rails, OUT_DIR + "skyplaza_rails.tscn")
 	_save(_items, OUT_DIR + "skyplaza_items.tscn")
 	_save(_clouds, OUT_DIR + "skyplaza_clouds.tscn")
+	_save(_skyline, OUT_DIR + "skyplaza_skyline.tscn")
 	print("city pieces: ", _kit.piece_count)
 	quit()
 
@@ -111,24 +137,31 @@ func _build_plaza() -> void:
 			var offset: Vector3 = (Vector3.RIGHT if along_x else Vector3.BACK) * sidewalk * (arm - 1.5)
 			_floor(city, "sidewalk", middle + offset, Vector2(3.0, edge - arm) if along_x else Vector2(edge - arm, 3.0))
 
-	# Prédios dos 4 cantos (12 x 12 m). Lados detalhados = os que dão para a cruz.
-	# Lados: 0 = +Z (sul), 1 = +X (leste), 2 = -Z (norte), 3 = -X (oeste).
+	# Prédios dos 4 cantos (12 x 12 m), cada um de um jeito: banco de mármore, hotel de tijolo
+	# branco, pub de tijolo e cortiço com escada de incêndio. Lados detalhados = os que dão para a
+	# cruz. Lados: 0 = +Z (sul), 1 = +X (leste), 2 = -Z (norte), 3 = -X (oeste). Nada sai das
+	# faces norte e sul de fora: os trilhos passam ali perto.
 	var corner: float = arm + 6.0
-	_building(city, "PlazaSE", Vector3(corner, 0, corner), 0.0, {"width": 6, "depth": 6, "floors": 3,
-			"style": "civic", "roof": "mansard", "detailed": [false, false, true, true], "door_side": 3})
+	_building(city, "PlazaSE", Vector3(corner, 0, corner), 0.0, {"width": 6, "depth": 6, "floors": 4,
+			"style": "hotel", "roof": "mansard", "detailed": [false, false, true, true], "door_side": 3})
 	_building(city, "PlazaSW", Vector3(-corner, 0, corner), 0.0, {"width": 6, "depth": 6, "floors": 3,
-			"style": "brick", "roof": "mansard", "detailed": [false, true, true, false], "door_side": 1})
+			"style": "brick", "roof": "mansard", "detailed": [false, true, true, false], "door_side": 1,
+			"band": true, "awnings": {"side": 1, "piece": "Prop_Awning_Pub"}})
 	_building(city, "PlazaNE", Vector3(corner, 0, -corner), 0.0, {"width": 6, "depth": 6, "floors": 3,
-			"style": "shop", "roof": "flat", "detailed": [true, false, false, true], "door_side": 0})
-	_building(city, "PlazaNW", Vector3(-corner, 0, -corner), 0.0, {"width": 6, "depth": 6, "floors": 2,
-			"style": "brick", "roof": "mansard", "detailed": [true, true, false, false], "door_side": 0})
+			"style": "bank", "roof": "flat", "detailed": [true, false, false, true], "door_side": 0,
+			"band": true, "signs": [{"side": 0, "piece": "Prop_Sign_Bank", "u": 0.25, "y": 4.25, "scale": 0.8}]})
+	_building(city, "PlazaNW", Vector3(-corner, 0, -corner), 0.0, {"width": 6, "depth": 6, "floors": 4,
+			"style": "tenement", "roof": "flat", "detailed": [true, true, false, true], "door_side": 0,
+			"band": true, "signs": [{"side": 0, "piece": "Prop_Sign_Hannigan", "u": 0.0, "y": 3.0},
+				{"side": 1, "piece": "Prop_Sign_HW_Side_L", "u": -3.0, "y": 3.9}],
+			"fire_escape": {"side": 3, "u": 0.0}})
 
-	# Anel de 4 muros de concreto (2 blocos lado a lado, 2 de altura) a 7 m do centro.
+	# Anel de 4 muros de mármore (2 blocos lado a lado, 2 de altura) a 7 m do centro.
 	for side: Vector3 in [Vector3(7, 0, 0), Vector3(-7, 0, 0), Vector3(0, 0, 7), Vector3(0, 0, -7)]:
 		var along: Vector3 = Vector3(0, 0, 1) if side.x != 0.0 else Vector3(1, 0, 0)
 		for offset: float in [-1.0, 1.0]:
 			for level: int in 2:
-				_place(city, CITY + "Entrance_Concrete_2x2.gltf", side + along * offset + Vector3.UP * level, 0.0, "box")
+				_place(city, CITY + "Entrance_Marble_2x2.gltf", side + along * offset + Vector3.UP * level, 0.0, "box")
 	# Jardineira central com a árvore-marco; jardineiras com arbustos nas quinas da praça.
 	_place(city, CITY + "Prop_Planter_Single.gltf", Vector3.ZERO, 0.0, "box")
 	_tree(Vector3(0, 0.55, 0), NATURE + "CommonTree_3.gltf", 0.0)
@@ -165,10 +198,13 @@ func _build_west_quarter() -> void:
 	var quarter := _group(_geometry, "WestQuarter")
 	# Fileira de casas na borda de fora (x de -58 a -48), de frente para o leste (+X).
 	var row_x: float = c.x - half.x + 5.0
+	# Casas variadas: tijolo com janelas salientes, hotel branco e um cortiço com escada de
+	# incêndio no lado sul (sobre o céu).
 	var houses: Array = [
-		[-11.0, {"width": 5, "depth": 5, "floors": 3, "style": "brick", "roof": "mansard"}],
-		[0.0, {"width": 6, "depth": 5, "floors": 4, "style": "civic", "roof": "flat"}],
-		[11.0, {"width": 5, "depth": 5, "floors": 3, "style": "brick", "roof": "mansard"}],
+		[-11.0, {"width": 5, "depth": 5, "floors": 3, "style": "brick_bay", "roof": "mansard"}],
+		[0.0, {"width": 6, "depth": 5, "floors": 4, "style": "hotel", "roof": "flat"}],
+		[11.0, {"width": 5, "depth": 5, "floors": 3, "style": "tenement", "roof": "flat",
+				"fire_escape": {"side": 3, "u": 0.0}}],
 	]
 	for i in houses.size():
 		var spec: Dictionary = houses[i][1]
@@ -221,10 +257,17 @@ func _build_east_quarter() -> void:
 	var quarter := _group(_geometry, "EastQuarter")
 	# Lojas na borda de fora (x de 48 a 58), de frente para o oeste (-X).
 	var row_x: float = c.x + half.x - 5.0
+	# Padaria, restaurante chinês e pizzaria: letreiros na faixa em cima do térreo, toldos e placas
+	# de pendurar.
 	var shops: Array = [
-		[-11.0, {"width": 5, "depth": 5, "floors": 2, "style": "shop", "roof": "flat"}],
-		[0.0, {"width": 6, "depth": 5, "floors": 3, "style": "shop", "roof": "mansard"}],
-		[11.0, {"width": 5, "depth": 5, "floors": 2, "style": "civic", "roof": "flat"}],
+		[-11.0, {"width": 5, "depth": 5, "floors": 2, "style": "shop", "roof": "flat", "band": true,
+				"signs": [{"side": 0, "piece": "Prop_Sign_Bakery", "u": 0.0, "y": 3.5}]}],
+		[0.0, {"width": 6, "depth": 5, "floors": 3, "style": "shop", "roof": "mansard", "band": true,
+				"signs": [{"side": 0, "piece": "Prop_Sign_JadeGarden", "u": 0.0, "y": 3.5},
+					{"side": 0, "piece": "Prop_Sign_JadeGarden_Vertical", "u": 5.4, "y": 6.5}]}],
+		[11.0, {"width": 5, "depth": 5, "floors": 3, "style": "brick", "roof": "flat", "band": true,
+				"awnings": {"side": 0, "piece": "Prop_Awning_Carmines"},
+				"signs": [{"side": 0, "piece": "Prop_Sign_Carmines_Side", "u": -4.6, "y": 5.0}]}],
 	]
 	for i in shops.size():
 		var spec: Dictionary = shops[i][1]
@@ -586,6 +629,84 @@ func _build_bridge(bridge_name: String, from: Vector3, to: Vector3) -> void:
 			var t: float = (i + 0.5) / segments
 			var at: Vector3 = from.lerp(to, t) + side * offset
 			_place(_geometry, CITY + "Trim_Wall_Guard.gltf", at, rad_to_deg(atan2(forward.x, forward.z)) + 90.0, "railing")
+
+
+# Portal de pedra atravessado na ponta de uma ponte (a passagem vai ao longo de X), com colisão
+# só nas duas colunas.
+func _bridge_arch(arch_name: String, at: Vector3) -> void:
+	var arch: Node3D = _place(_geometry, CITY + "Prop_EntranceArch.gltf", at, 90.0, "none", ARCH_SCALE)
+	arch.name = arch_name
+	for side: float in [-1.0, 1.0]:
+		var body := StaticBody3D.new()
+		body.name = "Pillar"
+		var shape := CollisionShape3D.new()
+		var box := BoxShape3D.new()
+		box.size = Vector3(1.5, 4.44, ARCH_PILLAR_WIDTH)
+		shape.shape = box
+		body.add_child(shape)
+		# No espaço do portal (escala e giro dele): coluna em x = ±ARCH_PILLAR_X.
+		body.position = Vector3(side * ARCH_PILLAR_X, 2.22, 0.25)
+		arch.add_child(body)
+		body.owner = _geometry
+		shape.owner = _geometry
+
+
+# Horizonte: ilhas flutuantes com prédios altos ao longe (a cidade continua além da arena). Só
+# enfeite: sem colisão, sem sombra, fora da navmesh; prédios juntados pelo CityKit (com LOD).
+func _build_skyline() -> void:
+	_skyline = Node3D.new()
+	_skyline.name = "SkyPlazaSkyline"
+	root.add_child(_skyline)
+	for i in SKYLINE.size():
+		var island: Array = SKYLINE[i]
+		var center: Vector3 = island[0]
+		var size: Vector2 = island[1]
+		var base := MeshInstance3D.new()
+		base.name = "Island%d" % (i + 1)
+		base.mesh = _island_mesh(size)
+		base.position = center
+		base.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		_skyline.add_child(base)
+		base.owner = _skyline
+		for building: Array in island[2]:
+			_kit.piece(building[0], Transform3D(Basis(Vector3.UP, deg_to_rad(building[2])), building[1]))
+		var city := MeshInstance3D.new()
+		city.name = "Buildings%d" % (i + 1)
+		city.mesh = _kit.commit(MESH_DIR + "skyline_%d.res" % (i + 1))
+		city.position = center
+		city.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		# Longe e grande na tela: o LOD automático ainda escolheria detalhe demais (100 mil
+		# triângulos a mais só no horizonte). Viés baixo = versão simplificada.
+		city.lod_bias = SKYLINE_LOD_BIAS
+		_skyline.add_child(city)
+		city.owner = _skyline
+
+
+# Laje de pedra com a base em pirâmide de rocha (como os quarteirões, mas numa malha só).
+func _island_mesh(size: Vector2) -> Mesh:
+	var slab := BoxMesh.new()
+	slab.size = Vector3(size.x, 1.5, size.y)
+	var depth: float = minf(size.x, size.y) * 0.7
+	var cone := CylinderMesh.new()
+	cone.top_radius = 0.5 * sqrt(2.0) * minf(size.x, size.y) * 0.97
+	cone.bottom_radius = 0.0
+	cone.height = depth
+	cone.radial_segments = 4
+	cone.rings = 1
+	var stretch := Vector3(size.x / minf(size.x, size.y), 1.0, size.y / minf(size.x, size.y))
+	var mesh := ArrayMesh.new()
+	var tool := SurfaceTool.new()
+	tool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	tool.append_from(slab, 0, Transform3D(Basis(), Vector3(0, -0.75, 0)))
+	tool.commit(mesh)
+	tool = SurfaceTool.new()
+	tool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	tool.append_from(cone, 0, Transform3D(Basis.from_scale(stretch) * Basis(Vector3.UP, PI * 0.25), Vector3(0, -1.5 - depth * 0.5, 0)))
+	tool.generate_normals()
+	tool.commit(mesh)
+	mesh.surface_set_material(0, _materials["foundation"])
+	mesh.surface_set_material(1, _materials["rock"])
+	return mesh
 
 
 func _tree(at: Vector3, path: String, rotation_degrees: float) -> void:

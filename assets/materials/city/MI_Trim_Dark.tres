@@ -1,18 +1,22 @@
-[gd_resource type="StandardMaterial3D" format=3]
+[gd_resource type="ShaderMaterial" load_steps=7 format=3]
 
-[ext_resource type="Texture2D" path="res://assets/models/city/downtown/T_Trim_BaseColor.png" id="1_ydee7"]
-[ext_resource type="Texture2D" path="res://assets/models/city/downtown/T_Trim_ORM.png" id="2_detbk"]
-[ext_resource type="Texture2D" path="res://assets/models/city/downtown/T_Trim_Normal.png" id="3_macdk"]
+[ext_resource type="Shader" path="res://assets/materials/city/M_BaseMaterial.gdshader" id="1_urohn"]
+[ext_resource type="Texture2D" path="res://assets/materials/city/textures/T_Trim_BaseColor.png" id="2_tvb50"]
+[ext_resource type="Texture2D" path="res://assets/materials/city/textures/T_Trim_Normal.png" id="3_6cgad"]
+[ext_resource type="Texture2D" path="res://assets/materials/city/textures/T_CornerDamage_Normal.png" id="4_hr0v7"]
+[ext_resource type="Texture2D" path="res://assets/materials/city/textures/T_Trim_ORM.png" id="4_pynbh"]
+[ext_resource type="Texture2D" path="res://assets/materials/city/textures/T_Noise_Drips.png" id="6_ovxrv"]
 
 [resource]
-resource_name = "MI_Trim_Dark"
-cull_mode = 2
-albedo_texture = ExtResource("1_ydee7")
-metallic = 1.0
-metallic_texture = ExtResource("2_detbk")
-metallic_texture_channel = 2
-roughness_texture = ExtResource("2_detbk")
-roughness_texture_channel = 1
-normal_enabled = true
-normal_texture = ExtResource("3_macdk")
-metadata/_gltf_primary_texture_coord = 0
+render_priority = 0
+shader = ExtResource("1_urohn")
+shader_parameter/albedo = ExtResource("2_tvb50")
+shader_parameter/base_normal = ExtResource("3_6cgad")
+shader_parameter/detail_normal = ExtResource("4_hr0v7")
+shader_parameter/orm = ExtResource("4_pynbh")
+shader_parameter/wear_texture = ExtResource("6_ovxrv")
+shader_parameter/color_tint = Color(0.47058824, 0.45882353, 0.4117647, 1)
+shader_parameter/wear_color = Color(0.50534403, 0.5053441, 0.50534403, 1)
+shader_parameter/use_wear_color = true
+shader_parameter/use_detail_normal = true
+shader_parameter/detail_normal_intensity = 1.0

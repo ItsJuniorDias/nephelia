@@ -17,6 +17,7 @@
 [ext_resource type="PackedScene" path="res://levels/skyplaza/skyplaza_rails.tscn" id="15_rails"]
 [ext_resource type="PackedScene" path="res://levels/skyplaza/skyplaza_items.tscn" id="16_items"]
 [ext_resource type="PackedScene" path="res://levels/skyplaza/skyplaza_clouds.tscn" id="17_clouds"]
+[ext_resource type="PackedScene" path="res://levels/skyplaza/skyplaza_skyline.tscn" id="30_skyline"]
 [ext_resource type="Resource" path="res://characters/looks/hazel.tres" id="20_look_hazel"]
 [ext_resource type="Resource" path="res://characters/looks/otis.tres" id="21_look_otis"]
 [ext_resource type="Resource" path="res://characters/looks/mabel.tres" id="22_look_mabel"]
@@ -80,6 +81,8 @@ directional_shadow_max_distance = 70.0
 [node name="Items" parent="." instance=ExtResource("16_items")]
 
 [node name="Clouds" parent="." groups=["drifting_clouds"] instance=ExtResource("17_clouds")]
+
+[node name="Skyline" parent="." instance=ExtResource("30_skyline")]
 
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
 navigation_mesh = ExtResource("13_navmesh")

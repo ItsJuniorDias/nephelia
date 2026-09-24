@@ -2,7 +2,8 @@ class_name SkyCycle
 extends Node
 ## Do fim de tarde à noite durante a partida: o céu (sky_cycle.gdshader) passa pela tarde dourada,
 ## pelo pôr do sol, pelo crepúsculo e pela noite estrelada com a lua e uma nebulosa; a luz do sol esfria, some e
-## vira o luar; a névoa muda de cor; os postes acendem (globo brilhando + luz no chão). As nuvens
+## vira o luar; a névoa muda de cor; os postes acendem (globo brilhando + luz no chão) e as salas
+## acesas atrás das janelas dos prédios começam a brilhar (`WINDOWS`). As nuvens
 ## giram devagar em volta da cidade e, à noite, as estrelas e a nebulosa giram com o céu.
 ##
 ## Segue o relógio da partida (Deathmatch): começo = tarde, fim = noite; "Play Again" volta à
@@ -12,6 +13,9 @@ extends Node
 ## atualizado aos poucos, e as luzes dos postes longe da câmera se apagam sozinhas.
 
 const SHADER: Shader = preload("res://levels/sky/sky_cycle.gdshader")
+## Material das salas atrás das janelas (um só para a cidade toda, ver CityKit): o parâmetro
+## `night` faz as salas acesas brilharem, junto com os postes.
+const WINDOWS: ShaderMaterial = preload("res://assets/materials/city/MI_FakeInterior.tres")
 ## Grupo dos globos dos postes (o tools/build_skyplaza.gd põe cada globo nele).
 const LAMP_GROUP: StringName = &"lamp_globes"
 ## Nuvens em volta da cidade (nó no grupo, girado em volta do centro da arena, o dia todo).
@@ -223,6 +227,7 @@ func _apply(progress: float) -> void:
 	for lamp: OmniLight3D in lamp_lights:
 		lamp.light_energy = LAMP_ENERGY * lamps
 		lamp.visible = lamps > 0.02
+	WINDOWS.set_shader_parameter(&"night", lamps)
 
 
 # Direção PARA o astro: `azimuth` no plano do chão, subindo `elevation` graus.

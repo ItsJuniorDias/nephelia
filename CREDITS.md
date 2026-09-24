@@ -8,6 +8,7 @@ ficam fora do projeto, em `~/Downloads/nephelia_assets/`.
 | Asset | Autor | Licença | Link |
 |---|---|---|---|
 | Downtown City MegaKit [Standard] | Quaternius | CC0 1.0 | https://quaternius.itch.io/downtown-city-megakit |
+| Downtown City MegaKit [Source] (peças novas, materiais com desgaste, salas atrás das janelas, prédios do horizonte; comprado) | Quaternius | CC0 1.0 | https://quaternius.itch.io/downtown-city-megakit |
 | Stylized Nature MegaKit [Standard] | Quaternius | CC0 1.0 | https://quaternius.itch.io/stylized-nature-megakit |
 | Universal Base Characters [Standard] | Quaternius | CC0 1.0 | https://quaternius.itch.io/universal-base-characters |
 | Universal Animation Library [Standard] | Quaternius | CC0 1.0 | https://quaternius.itch.io/universal-animation-library |

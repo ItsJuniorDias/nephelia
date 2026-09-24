@@ -1,0 +1,25 @@
+[gd_resource type="ShaderMaterial" load_steps=6 format=3]
+
+[ext_resource type="Shader" path="res://assets/materials/city/fake_interior.gdshader" id="1_shader"]
+[ext_resource type="Texture2D" path="res://assets/materials/city/textures/T_Lit_interior_1.png" id="2_lit1"]
+[ext_resource type="Texture2D" path="res://assets/materials/city/textures/T_Lit_interior_2.png" id="3_lit2"]
+[ext_resource type="Texture2D" path="res://assets/materials/city/textures/T_Dark_interior.png" id="4_dark"]
+[ext_resource type="Texture2D" path="res://assets/materials/city/textures/T_Curtains.png" id="5_curtains"]
+
+[resource]
+resource_name = "MI_FakeInterior"
+render_priority = 0
+shader = ExtResource("1_shader")
+shader_parameter/lit_interior_1 = ExtResource("2_lit1")
+shader_parameter/lit_interior_2 = ExtResource("3_lit2")
+shader_parameter/dark_interior = ExtResource("4_dark")
+shader_parameter/curtain_texture = ExtResource("5_curtains")
+shader_parameter/depth = 0.6
+shader_parameter/percentage_lit = 0.45
+shader_parameter/percentage_variations = 0.5
+shader_parameter/light_intensity = 1.0
+shader_parameter/night = 0.0
+shader_parameter/night_glow = 2.4
+shader_parameter/night_tint = Color(1, 0.72, 0.42, 1)
+shader_parameter/glass_tint = Color(0.23, 0.23, 0.23, 1)
+shader_parameter/glass_mix = 0.22
