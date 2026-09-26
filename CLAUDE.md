@@ -495,6 +495,20 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   -allowProvisioningUpdates -archivePath ~/Builds/nephelia_ios/Nephelia.xcarchive`, `open` no
   .xcarchive e o usuário faz Distribute App > App Store Connect. Subir o `version` a cada envio.
   EXPORTAR PELO EDITOR REGRAVA O `export_presets.cfg` com o que está na memória dele.
+- Android (2026-09-24/26): preset "Android" (APK de depuração, arm64-v8a, SDK alvo 36, pacote
+  `com.alexandrejunior.nephelia`, mesmo `exclude_filter` do iOS, saída
+  `~/Builds/nephelia_android/Nephelia.apk`). **Permissões INTERNET, ACCESS_NETWORK_STATE e
+  ACCESS_WIFI_STATE ligadas**: o preset criado pelo editor vem com TODAS desligadas, e sem a
+  INTERNET o Android bloqueia qualquer conexão calado (o 1º APK do usuário não jogava nem online
+  nem no Wi-Fi com o iPhone). Conferir com `~/Library/Android/sdk/build-tools/35.0.1/aapt2 dump
+  permissions <apk>`. Ferramentas: OpenJDK 17 do Homebrew (`/opt/homebrew/opt/openjdk@17/libexec/
+  openjdk.jdk/Contents/Home`, no Editor Settings), Android SDK em `~/Library/Android/sdk`
+  (platform-tools, build-tools 35.0.1, android-35), modelos só do Android extraídos do .tpz oficial.
+  Exportar com o editor fechado: `Godot --headless --path . --export-debug "Android"
+  ~/Builds/nephelia_android/Nephelia.apk` (o modo release pede a chave de lançamento, ainda não criada).
+- Versão da rede (`NetMessage.VERSION`, hoje 2): subir quando o protocolo OU A ARENA mudar, junto
+  com o `protocolVersion` do backend (N22/N23 falham se ficarem diferentes). Versões diferentes não
+  se veem no Wi-Fi e o online pede para atualizar. Jogar junto exige o MESMO build nos dois aparelhos.
 - O `ViewModel` troca os materiais dos braços e da arma por foscos (`_prepare_meshes`): o clarão do
   tiro fica de fora (senão vira um quadrado preto; achado nos prints da loja; teste C40).
 - Godot 4.7 tem classes nativas `VirtualJoystick` e `Logger`: não usar esses nomes em `class_name`.

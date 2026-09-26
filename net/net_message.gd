@@ -7,8 +7,11 @@ extends RefCounted
 ## Os eventos (morte, item, placar...) são raros: vão como uma lista do Godot (`var_to_bytes`,
 ## sem objetos, então um pacote malicioso não cria nada no aparelho).
 
-## Sobe quando o protocolo muda: aparelhos com versões diferentes não jogam juntos.
-const VERSION: int = 1
+## Sobe quando o protocolo OU A ARENA muda (itens e trilhos vão por índice, e a previsão depende
+## do mesmo mapa): aparelhos com versões diferentes não jogam juntos. O matchmaker
+## (`nephelia-server`, `protocolVersion` no config.ts) tem que subir junto.
+## 2 = cidade nova do Downtown City MegaKit (2026-09-24).
+const VERSION: int = 2
 ## Porta padrão do Wi-Fi local.
 const PORT: int = 24680
 ## Comandos repetidos em cada pacote de entrada (se um pacote se perde, o próximo cobre).
