@@ -506,6 +506,16 @@ ao longo de várias sessões; o usuário testa e dá feedback.
   (platform-tools, build-tools 35.0.1, android-35), modelos só do Android extraídos do .tpz oficial.
   Exportar com o editor fechado: `Godot --headless --path . --export-debug "Android"
   ~/Builds/nephelia_android/Nephelia.apk` (o modo release pede a chave de lançamento, ainda não criada).
+- Teste iPhone x Android sem aparelhos (2026-09-26): emulador Android (AVD `nephelia_android`, Pixel 7,
+  Android 15 arm64, 4 GB; `~/Library/Android/sdk/emulator/emulator -avd nephelia_android -gpu host`).
+  No emulador o Vulkan não apresenta na tela ("Couldn't present to Vulkan queue", tela preta): para
+  testar, exportar um APK À PARTE com `command_line/extra_args="--rendering-driver opengl3
+  --rendering-method gl_compatibility"` (não salvar no preset) e dirigir com `adb shell input tap`
+  (tela 2400 x 1080) e `adb exec-out screencap -p`. O simulador de iPhone NÃO roda o jogo: o modelo
+  oficial do Godot 4.7.2 só traz o simulador x86_64 e o runtime do iOS 27 é só arm64 (o "iPhone" do
+  teste é o jogo no Mac, mesmo código de rede). Resultado: online (Render) e Wi-Fi (Mac hospeda,
+  Android acha "JOIN IPHONE'S GAME" pelo 10.0.2.2 e entra) funcionaram; a 1ª tentativa no Wi-Fi deu
+  "Could not reach the host" uma vez (emulador atrás de NAT; observar nos aparelhos de verdade).
 - Versão da rede (`NetMessage.VERSION`, hoje 2): subir quando o protocolo OU A ARENA mudar, junto
   com o `protocolVersion` do backend (N22/N23 falham se ficarem diferentes). Versões diferentes não
   se veem no Wi-Fi e o online pede para atualizar. Jogar junto exige o MESMO build nos dois aparelhos.
