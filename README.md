@@ -16,7 +16,9 @@
   <img alt="Steam planned" src="https://img.shields.io/badge/Steam-planned-1b2838?logo=steam&logoColor=white">
 </p>
 
-![Sunset firefight in the central square of Sky Plaza](docs/images/gameplay_sunset.jpg)
+<p align="center">
+  <img src="docs/images/gameplay.gif" alt="Gameplay: a firefight in the square, a ride on the sky rail, the shotgun and a night street">
+</p>
 
 ## The game
 
@@ -45,7 +47,8 @@ someone on the other side.
 - The game's text is English only.
 
 <p align="center">
-  <img src="docs/images/main_menu.jpg" width="720" alt="Main menu with the Art Deco monument">
+  <img src="docs/images/gameplay_sunset.jpg" width="49%" alt="Sunset firefight in the central square of Sky Plaza">
+  <img src="docs/images/main_menu.jpg" width="49%" alt="Main menu with the Art Deco monument">
 </p>
 
 ## Status
