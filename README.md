@@ -1,127 +1,131 @@
 <p align="center">
-  <img src="ui/icon/app_icon.png" width="140" alt="Ícone do Nephelia: revólveres cruzados, gancho e sol Art Déco">
+  <img src="ui/icon/app_icon.png" width="140" alt="Nephelia icon: crossed revolvers, a rail hook and an Art Deco sun">
 </p>
 
 <h1 align="center">Nephelia</h1>
 
 <p align="center">
   <b>Arena in the Clouds</b><br>
-  Tiro em primeira pessoa, rápido e frenético, para celular, numa cidade flutuante do começo do século XX.
+  A fast, frantic first-person shooter for mobile, set in a floating city from the early 1900s.
 </p>
 
 <p align="center">
   <img alt="Godot 4.7.2" src="https://img.shields.io/badge/Godot-4.7.2-478cbf?logo=godotengine&logoColor=white">
-  <img alt="GDScript" src="https://img.shields.io/badge/GDScript-tipagem%20est%C3%A1tica-355570">
-  <img alt="iOS e Android" src="https://img.shields.io/badge/plataformas-iOS%20%C2%B7%20Android-6b6b6b">
-  <img alt="Steam planejado" src="https://img.shields.io/badge/Steam-planejado-1b2838?logo=steam&logoColor=white">
+  <img alt="GDScript" src="https://img.shields.io/badge/GDScript-static%20typing-355570">
+  <img alt="iOS and Android" src="https://img.shields.io/badge/platforms-iOS%20%C2%B7%20Android-6b6b6b">
+  <img alt="Steam planned" src="https://img.shields.io/badge/Steam-planned-1b2838?logo=steam&logoColor=white">
 </p>
 
-![Tiroteio no pôr do sol, na praça central da Sky Plaza](docs/images/gameplay_sunset.jpg)
+![Sunset firefight in the central square of Sky Plaza](docs/images/gameplay_sunset.jpg)
 
-## O jogo
+## The game
 
-Partidas curtas de todos contra todos sobre três quarteirões de cidade que flutuam acima de um mar
-de nuvens. Quem cai da ilha, morre. Quem fica, atira, pega o gancho e desce pelos trilhos aéreos
-para cair em cima de alguém do outro lado.
+Short free-for-all matches on three city blocks floating above a sea of clouds. Fall off the
+island and you die. Stay on it and you shoot, grab the hook and ride the sky rails to drop on
+someone on the other side.
 
-- **Partidas rápidas:** 5 minutos ou 15 abates. Sempre há 4 personagens na arena: os bots
-  completam as vagas, e quem entra toma o lugar de um bot.
-- **Sky Plaza:** uma praça central e dois bairros, um de casas com parque e um de lojas, com
-  banco, hotel, pub, padaria e cortiços de tijolo. Pontes ligam os três quarteirões, e outras
-  ilhas aparecem no horizonte.
-- **Trilhos aéreos:** perto de um trilho aparece o botão do gancho. O personagem engata,
-  desliza pendurado e solta onde quiser.
-- **Armas:** o revólver está sempre na mão. A repetidora e a espingarda aparecem como itens na
-  arena, junto com frascos de tônico que devolvem vida.
-- **Bots** em três dificuldades. Eles enxergam, perseguem, desviam da borda, buscam vida e armas
-  e usam os trilhos, com os mesmos comandos do jogador (sem trapaça).
-- **Da tarde à noite:** a luz segue o relógio da partida, do sol dourado ao pôr do sol e à noite
-  estrelada. Postes e janelas acendem.
-- **Multiplayer até 4 pessoas:** no mesmo Wi-Fi (a sala aparece sozinha, sem digitar endereço)
-  ou online pelo botão **PLAY ONLINE**, com iPhone, Android e computador na mesma partida.
-- **FUNNY SOUNDS:** sons de meme feitos pelo projeto para os momentos da partida. Dá para
-  desligar nas opções.
-- O texto do jogo é só em inglês.
+- **Quick matches:** 5 minutes or 15 kills. There are always 4 characters in the arena: bots
+  fill the empty slots, and anyone who joins takes a bot's place.
+- **Sky Plaza:** a central square and two neighborhoods, one with houses and a park and one with
+  shops, plus a bank, a hotel, a pub, a bakery and brick tenements. Bridges link the three blocks,
+  and other islands float on the horizon.
+- **Sky rails:** a hook button shows up near a rail. Your character latches on, slides along
+  hanging from it and lets go wherever you want.
+- **Weapons:** the revolver is always in hand. The repeater rifle and the shotgun show up as
+  pickups in the arena, along with tonic bottles that restore health.
+- **Bots** with three difficulty levels. They see, chase, keep away from the edges, go after
+  health and weapons, and ride the rails, using the same commands as the player (no cheating).
+- **Afternoon to night:** the light follows the match clock, from golden sunlight to sunset to a
+  starry night. Street lamps and windows light up.
+- **Multiplayer for up to 4 people:** on the same Wi-Fi (rooms show up on their own, no address to
+  type) or online with the **PLAY ONLINE** button, with iPhone, Android and computer players in the
+  same match.
+- **FUNNY SOUNDS:** meme sounds made for the project, played at key moments of the match. They can
+  be turned off in the options.
+- The game's text is English only.
 
 <p align="center">
-  <img src="docs/images/main_menu.jpg" width="720" alt="Menu inicial com o monumento Art Déco">
+  <img src="docs/images/main_menu.jpg" width="720" alt="Main menu with the Art Deco monument">
 </p>
 
-## Situação
+## Status
 
-| Plataforma | Situação |
+| Platform | Status |
 |---|---|
-| iPhone e iPad | Versão 1.0 arquivada para a App Store (jogo pago). A 1.1 traz a cidade nova, as corridas em 8 direções, os sons de meme e o online. |
-| Android | APK de teste (preset "Android"). Google Play depois. |
-| Mac | Desenvolvimento e testes. |
-| Steam (Windows, Mac, Linux) | Planejado. Falta o modo de controle de PC. |
+| iPhone and iPad | Version 1.0 archived for the App Store (paid game). Version 1.1 brings the new city, 8-direction running, the meme sounds and online play. |
+| Android | Test APK ("Android" preset). Google Play later. |
+| Mac | Development and testing. |
+| Steam (Windows, Mac, Linux) | Planned. A PC control mode is still missing. |
 
-O plano completo, com o que já foi feito e o que falta, está no [PLANO.md](PLANO.md).
+The full plan, with what is done and what is left, is in [PLANO.md](PLANO.md) (in Portuguese).
 
-## Controles
+## Controls
 
-| Ação | Toque | Teclado e mouse | Controle |
+| Action | Touch | Keyboard and mouse | Gamepad |
 |---|---|---|---|
-| Andar | Joystick à esquerda (aparece onde o dedo toca) | `W` `A` `S` `D` ou setas | Analógico esquerdo |
-| Olhar | Arrastar no resto da tela | Mouse | Analógico direito |
-| Atirar | Botão da mira | Botão esquerdo do mouse | Gatilho direito |
-| Pular | Botão de seta dupla | `Espaço` | `A` |
-| Recarregar | Botão de recarga | `R` | `X` |
-| Gancho do trilho | Botão da mão (só aparece com um trilho ao alcance) | `E` | `Y` |
-| Pausa | Botão de pausa | `Esc` | `Start` |
+| Move | Joystick on the left (appears where your finger lands) | `W` `A` `S` `D` or arrow keys | Left stick |
+| Look | Drag anywhere else on the screen | Mouse | Right stick |
+| Shoot | Crosshair button | Left mouse button | Right trigger |
+| Jump | Double-arrow button | `Space` | `A` |
+| Reload | Reload button | `R` | `X` |
+| Rail hook | Hand button (only shows up with a rail in reach) | `E` | `Y` |
+| Pause | Pause button | `Esc` | `Start` |
 
-No toque e no controle a mira dá uma pequena ajuda. Todo comando passa pelo Input Map do Godot,
-nunca por tecla fixa.
+With touch and gamepad, aiming gets a little assistance. Every command goes through Godot's Input
+Map, never a hard-coded key.
 
-## Rodando o projeto
+## Running the project
 
-1. Instale o **Godot 4.7.2** (versão padrão, sem .NET).
-2. Abra o `project.godot` e aperte **F5**. O jogo começa no menu.
+1. Install **Godot 4.7.2** (standard version, not .NET).
+2. Open `project.godot` and press **F5**. The game starts at the main menu.
 
-No Mac o projeto vem com *Emulate Touch From Mouse* ligado, para testar os controles de toque
-com o mouse. Para testar o multiplayer numa máquina só, use **Debug → Customize Run Instances**
-com 2 janelas: uma hospeda e a outra entra (a sala aparece sozinha).
+On the Mac the project ships with *Emulate Touch From Mouse* turned on, so you can test the touch
+controls with the mouse. To test multiplayer on a single machine, use **Debug → Customize Run
+Instances** with 2 windows: one hosts and the other joins (the room shows up on its own).
 
-Tecnologia: Godot 4.7.2, GDScript com tipagem estática, física Jolt e renderizador Mobile.
+Tech: Godot 4.7.2, statically typed GDScript, Jolt physics and the Mobile renderer.
 
-## Testes
+## Tests
 
-São 7 suítes de testes automáticos sem tela (121 testes). Saída 0 = tudo passou.
+There are 7 headless test suites (121 tests). Exit code 0 means everything passed.
 
 ```bash
 GODOT=~/Downloads/Godot.app/Contents/MacOS/Godot
 for suite in test_controls test_bots test_arena test_items test_menus test_audio test_net; do
-  "$GODOT" --headless --path . -s "res://tests/$suite.gd" || echo "FALHOU: $suite"
+  "$GODOT" --headless --path . -s "res://tests/$suite.gd" || echo "FAILED: $suite"
 done
 ```
 
-A suíte `test_net` abre outros processos do Godot para jogar em rede de verdade. Os testes
-ponta a ponta do online (N22 e N23) precisam do Node.js 24 e do repositório do servidor clonado
-ao lado deste (`../nephelia-server`); sem eles, esses dois testes são pulados.
+The `test_net` suite launches extra Godot processes to play over a real network. The end-to-end
+online tests (N22 and N23) need Node.js 24 and the server repository cloned next to this one
+(`../nephelia-server`); without them, those two tests are skipped.
 
-## Multiplayer e online
+## Multiplayer and online
 
-- **Mesmo Wi-Fi:** um aparelho hospeda e é o servidor da partida (ENet, UDP). Os outros acham a
-  sala sozinhos: o jogo pergunta endereço por endereço da rede local.
-- **Online:** o botão PLAY ONLINE pede uma partida ao matchmaker, que roda no Render. A partida
-  em si é o próprio jogo rodando sem tela (servidor dedicado), e a conexão vai por WebSocket.
-- **O mesmo nos dois modos:** protocolo próprio (comandos 60 vezes por segundo, foto do estado
-  30 vezes por segundo), previsão do próprio movimento, compensação do atraso nos tiros e bots
-  completando as vagas.
+- **Same Wi-Fi:** one device hosts and acts as the match server (ENet, UDP). The others find the
+  room on their own: the game asks every address on the local network.
+- **Online:** the PLAY ONLINE button asks the matchmaker, hosted on Render, for a match. The match
+  itself is the game running without a screen (a dedicated server), and the connection goes over
+  WebSocket.
+- **Shared by both modes:** a custom protocol (commands 60 times per second, state snapshots 30
+  times per second), prediction of your own movement, lag compensation for shots, and bots filling
+  the empty slots.
 
-O matchmaker fica num repositório separado:
+The matchmaker lives in a separate repository:
 [nephelia-server](https://github.com/ItsJuniorDias/nephelia-server) (Node.js + TypeScript).
 
-> **Versão da rede:** `NetMessage.VERSION` (em `net/net_message.gd`) sobe sempre que o protocolo
-> **ou a arena** mudar, junto com o `protocolVersion` do servidor. Aparelhos com versões
-> diferentes não jogam juntos: para jogar, os dois precisam do mesmo build.
+> **Network version:** `NetMessage.VERSION` (in `net/net_message.gd`) goes up whenever the
+> protocol **or the arena** changes, together with the server's `protocolVersion`. Devices on
+> different versions can't play together: both need the same build.
 
-## Exportando
+## Exporting
 
-Exporte com o editor **fechado**: exportar pelo editor regrava o `export_presets.cfg` com o que
-está na memória dele. Nos comandos, `$GODOT` é o executável do Godot (como na seção Testes).
+Export with the editor **closed**: exporting from the editor rewrites `export_presets.cfg` with
+whatever it has in memory. In the commands below, `$GODOT` is the Godot executable (as in the Tests
+section).
 
-**iOS** (Xcode e conta Apple Developer): o preset gera só o projeto do Xcode, fora da pasta do jogo.
+**iOS** (Xcode and an Apple Developer account): the preset only generates the Xcode project,
+outside the game folder.
 
 ```bash
 "$GODOT" --headless --path . --export-release "iOS" ~/Builds/nephelia_ios/Nephelia.ipa
@@ -132,92 +136,95 @@ xcodebuild -project Nephelia.xcodeproj -scheme Nephelia -sdk iphoneos -configura
 open Nephelia.xcarchive   # Distribute App > App Store Connect
 ```
 
-**Android** (OpenJDK 17 e Android SDK; caminhos em *Editor Settings → Export → Android*):
+**Android** (OpenJDK 17 and the Android SDK; set their paths in *Editor Settings → Export →
+Android*):
 
 ```bash
 "$GODOT" --headless --path . --export-debug "Android" ~/Builds/nephelia_android/Nephelia.apk
 ```
 
-O preset precisa das permissões **Internet**, **Access Network State** e **Access Wifi State**.
-Sem a de Internet, o Android bloqueia toda conexão sem avisar (nem o online nem o Wi-Fi
-funcionam).
+The preset needs the **Internet**, **Access Network State** and **Access Wifi State**
+permissions. Without the Internet permission, Android silently blocks every connection (neither
+online nor Wi-Fi play works).
 
-**Servidor das partidas online** (preset "Linux Server": o jogo sem arte, só a lógica):
+**Online match server** ("Linux Server" preset: the game without art, only the logic):
 
 ```bash
 "$GODOT" --headless --path . --export-pack "Linux Server" ../nephelia-server/game/nephelia_server.pck
 ```
 
-Depois faça commit no `nephelia-server`, a cada mudança de rede ou de partida: o servidor
-precisa ter o mesmo código dos jogadores.
+Then commit it in `nephelia-server` after every network or match change: the server must run the
+same code as the players.
 
-## Ferramentas
+## Tools
 
-Boa parte do conteúdo é gerada por scripts em `tools/` (rodar com `Godot --path . -s <script>`;
-cada um explica o uso no cabeçalho).
+Much of the content is generated by scripts in `tools/` (run them with
+`Godot --path . -s <script>`; each one explains its usage in its header).
 
-| Script | O que faz |
+| Script | What it does |
 |---|---|
-| `build_skyplaza.gd` | Monta a arena inteira em código: quarteirões, pontes, trilhos, itens, nuvens e horizonte |
-| `city_kit.gd` | Monta as fachadas dos prédios peça por peça (Downtown City MegaKit) |
-| `bake_navmesh.gd` | Calcula a malha de navegação dos bots (rodar de novo ao mudar o mapa) |
-| `bake_characters.gd`, `bake_weapons.gd` | Preparam o corpo dos personagens e as malhas das armas |
-| `extract_bot_animations.gd` | Extrai as animações usadas da Universal Animation Library |
-| `make_menus.gd`, `make_theme.gd` | Montam as telas e o tema da interface |
-| `prepare_sounds.py`, `make_meme_sounds.py` | Preparam os sons e sintetizam os sons de meme |
-| `store_screenshots.gd`, `app_preview.gd` | Prints e vídeo de prévia da App Store, no tamanho exato |
-| `*_sheet.gd` | Folhas de fotos para conferir personagens, poses, efeitos, céu, cidade e interface |
+| `build_skyplaza.gd` | Builds the whole arena in code: blocks, bridges, rails, pickups, clouds and skyline |
+| `city_kit.gd` | Assembles the building facades piece by piece (Downtown City MegaKit) |
+| `bake_navmesh.gd` | Bakes the bots' navigation mesh (run it again after changing the map) |
+| `bake_characters.gd`, `bake_weapons.gd` | Prepare the character bodies and the weapon meshes |
+| `extract_bot_animations.gd` | Extracts the animations the game uses from the Universal Animation Library |
+| `make_menus.gd`, `make_theme.gd` | Build the screens and the UI theme |
+| `prepare_sounds.py`, `make_meme_sounds.py` | Prepare the sounds and synthesize the meme sounds |
+| `store_screenshots.gd`, `app_preview.gd` | App Store screenshots and preview video, at the exact sizes |
+| `*_sheet.gd` | Photo sheets to review characters, poses, effects, sky, city and UI |
 
-## Estrutura de pastas
+## Folder structure
 
 ```
-assets/       arquivos de terceiros (modelos, texturas, sons, fontes, interface)
-audio/        sons do jogo e sons de meme
-autoload/     opções salvas no aparelho (Settings)
-bots/         controlador e dificuldades dos bots
-characters/   personagem, modelo, roupas, animações e efeitos
-items/        itens da arena (tônicos e armas)
-levels/       arena Sky Plaza, céu, navegação
-match/        juiz da partida e modo todos contra todos
-net/          multiplayer: Wi-Fi, online, servidor dedicado
-player/       controlador do jogador (toque, teclado e controle)
-rails/        trilhos aéreos
-store/        textos da App Store, política de privacidade e suporte
-tests/        testes automáticos
-tools/        geradores e ferramentas de conferência
-ui/           menus, HUD, sala, créditos, tema e ícone
-vfx/          efeitos visuais
-weapons/      armas, tiro e braços em primeira pessoa
-docs/         imagens deste README (ignorada pelo Godot)
+assets/       third-party files (models, textures, sounds, fonts, UI)
+audio/        game sounds and meme sounds
+autoload/     options saved on the device (Settings)
+bots/         bot controller and difficulty levels
+characters/   character, model, outfits, animations and effects
+items/        arena pickups (tonics and weapons)
+levels/       Sky Plaza arena, sky, navigation
+match/        match referee and free-for-all mode
+net/          multiplayer: Wi-Fi, online, dedicated server
+player/       player controller (touch, keyboard and gamepad)
+rails/        sky rails
+store/        App Store texts, privacy policy and support page
+tests/        automated tests
+tools/        generators and review tools
+ui/           menus, HUD, lobby, credits, theme and icon
+vfx/          visual effects
+weapons/      weapons, shooting and first-person arms
+docs/         images for this README (ignored by Godot)
 ```
 
-## Documentação
+## Documentation
 
-- [CLAUDE.md](CLAUDE.md): notas técnicas detalhadas (como cada sistema funciona e as armadilhas
-  já encontradas) e o estado do projeto.
-- [PLANO.md](PLANO.md): tarefas e roadmap.
-- [CREDITS.md](CREDITS.md): todos os assets de terceiros, com autor, licença e link.
-- [store/](store/): textos da loja, política de privacidade e página de suporte.
+The project notes are in Portuguese:
 
-## Créditos
+- [CLAUDE.md](CLAUDE.md): detailed technical notes (how each system works and the pitfalls found
+  along the way) and the project status.
+- [PLANO.md](PLANO.md): tasks and roadmap.
+- [CREDITS.md](CREDITS.md): every third-party asset, with author, license and link.
+- [store/](store/): store texts, privacy policy and support page.
 
-Feito por Alexandre de Paula Dias Junior.
+## Credits
 
-Assets de terceiros (lista completa no [CREDITS.md](CREDITS.md) e na tela de créditos do jogo):
+Made by Alexandre de Paula Dias Junior.
+
+Third-party assets (full list in [CREDITS.md](CREDITS.md) and on the in-game credits screen):
 
 - **Quaternius** (CC0): Downtown City MegaKit, Stylized Nature MegaKit, Universal Base
-  Characters, Universal Animation Library e Modular Character Outfits.
-- **Kenney** (CC0): controles de toque, partículas e sons de interface.
+  Characters, Universal Animation Library and Modular Character Outfits.
+- **Kenney** (CC0): touch controls, particles and UI sounds.
 - **LowPolyAssets** (CC0): Low Poly Wild West Guns.
-- **JulioVII** (CC-BY): textura da grama do parque.
-- **iuliana-u**: Marble and Gold UI Kit (pago).
-- **Fontes** Limelight e Josefin Sans (SIL OFL), do Google Fonts.
-- **Sons** CC0 do OpenGameArt e do Freesound.
-- **Música:** *Maple Leaf Rag*, de Scott Joplin, em gravações de domínio público.
-- O ícone do jogo foi gerado por IA (declarado no CREDITS.md).
+- **JulioVII** (CC-BY): the park's grass texture.
+- **iuliana-u**: Marble and Gold UI Kit (paid).
+- **Fonts:** Limelight and Josefin Sans (SIL OFL), from Google Fonts.
+- **Sounds:** CC0 sounds from OpenGameArt and Freesound.
+- **Music:** Scott Joplin's *Maple Leaf Rag*, in public domain recordings.
+- The game icon was generated with AI (declared in CREDITS.md).
 
-## Licença
+## License
 
-O código e o conteúdo próprio do Nephelia não têm licença de código aberto: todos os direitos
-reservados ao autor. Os assets de terceiros seguem as licenças listadas no
-[CREDITS.md](CREDITS.md). O Marble and Gold UI Kit é um asset pago, comprado para este jogo.
+Nephelia's code and original content are not under an open source license: all rights reserved
+by the author. Third-party assets follow the licenses listed in [CREDITS.md](CREDITS.md). The
+Marble and Gold UI Kit is a paid asset, purchased for this game.
